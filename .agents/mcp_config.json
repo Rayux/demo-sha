@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "openai": {
+      "command": "node",
+      "args": [
+        "/Users/ray/Desktop/shadowing/.agents/mcp-openai.mjs"
+      ]
+    }
+  }
+}
