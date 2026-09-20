@@ -531,6 +531,7 @@ const server = createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/api/chat") return askModel(req, res, "chat");
   if (req.method === "POST" && url.pathname === "/api/evaluate-speech") return evaluateSpeech(req, res);
   if (req.method === "GET" && url.pathname.startsWith("/audio/")) return serveFile(req, res, AUDIO, url.pathname.slice("/audio".length));
+  if (req.method === "GET" && url.pathname.startsWith("/transcripts/")) return serveFile(req, res, TRANSCRIPTS, url.pathname.slice("/transcripts".length));
   if (req.method === "GET") return serveFile(req, res, PUBLIC, url.pathname === "/" ? "/index.html" : url.pathname);
   json(res, 404, { error: "Not found" });
 });
