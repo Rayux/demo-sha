@@ -3,67 +3,71 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fff9ef" />
+    <meta name="theme-color" content="#f6f4ec" />
     <meta name="color-scheme" content="light" />
     <meta name="description" content="Turn the Japanese you love listening to into words you love saying. Listen, repeat, and build confidence with Shadowing." />
-    <title>Shadowing — Find your voice</title>
+    <title>Shadowing — The Listening Club</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#studio">Skip to practice</a>
     <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><symbol id="icon-sparkle" viewBox="0 0 24 24"><path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7Z"/></symbol></defs></svg>
     <header class="topbar">
-      <a class="brand" href="#" aria-label="Shadowing home">
-        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 10v4m4-8v12m4-15v18m4-15v12m4-8v4"/></svg></span>
-        <span>Shadowing<span class="brand-caption">A little practice. A lot more you.</span></span>
+      <a class="brand" href="#home" aria-label="Shadowing home">
+        <span class="brand-mark" aria-hidden="true">s<span>↗</span></span>
+        <span>shadowing<span class="brand-caption">THE LISTENING CLUB</span></span>
       </a>
+      <nav class="club-nav" aria-label="Main navigation"><a href="#collection">The collection <span>01</span></a><a href="#studio">Your studio <span>02</span></a></nav>
       <div class="topbar-actions">
-        <div id="model-indicator" class="model-indicator" title="AI Model Status">
-          <span id="ai-status" class="status-dot"><i></i> Checking AI</span>
-          <span class="status-separator" aria-hidden="true">·</span>
-          <span id="model-badge" class="model-badge">Connecting…</span>
-        </div>
         <div class="session-badge" title="Total recording attempts in this browser, across all visits">
-          <strong id="session-count">0</strong> <span>total recordings</span>
+          <span aria-hidden="true">✳</span> <strong id="session-count">0</strong> <span>takes & counting</span>
         </div>
         <button id="settings-button" class="quiet-button" type="button" aria-controls="settings">Settings</button>
       </div>
     </header>
 
-    <main class="app-shell">
-      <aside class="library-panel panel">
-        <div class="panel-heading">
-           <div><p class="eyebrow">Your next obsession</p><h2>Your playlist</h2></div>
-          <label class="upload-button" title="Choose an MP3, MP4, M4A, or WAV file"><input id="file-input" type="file" accept="audio/*,video/mp4" /><span aria-hidden="true">＋</span> Add</label>
+    <main id="home" class="app-shell">
+      <section class="club-hero" aria-labelledby="club-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> A space for Japanese, out loud.</p>
+          <h1 id="club-title">GOOD EARS.<br>BRAVE <span class="voice-word">VOICE.<svg viewBox="0 0 560 28" aria-hidden="true"><path d="M5 19Q230-4 551 11M42 26Q319 9 517 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></span></h1>
+          <div class="hero-bottom"><p>Borrow a line. Find your rhythm.<br>Sound a little more like <em>you.</em></p><a class="round-link" href="#collection" aria-label="Explore the audio collection">↘</a></div>
         </div>
-        <div id="source-name" class="source-empty">An anime scene. A podcast. That line you can’t stop replaying.</div>
-        <button id="scan-button" class="secondary-button wide" type="button" disabled>Make practice clips <span aria-hidden="true">→</span></button>
-        <p class="helper">Pick a file, then make bite-sized clips to practice.</p>
-        <div class="library-divider"><span>Ready to play</span><span id="library-count" class="count-badge">0</span></div>
-        <div id="library-list" class="library-list" aria-live="polite"></div>
-        <div class="privacy-note"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><p><strong>Local workspace.</strong> AI processes short clips for analysis and recordings for feedback.</p></div>
-      </aside>
+        <div class="hero-art" aria-hidden="true">
+          <span class="art-note">your next main-character moment ↴</span>
+          <div class="record-sleeve">
+            <div class="sleeve-top"><span>SHADOWING RECORDS</span><span>VOL. 001 ↗</span></div>
+            <span class="sleeve-japanese" lang="ja">声に<br>出そう。</span>
+            <div class="hero-record"><div class="record-label"><span>ON<br>REPEAT</span><i></i><small>33⅓ RPM</small></div></div>
+            <div class="sleeve-bottom"><span>LISTEN / REPEAT / BECOME</span><span>ステレオ</span></div>
+          </div>
+          <div class="smile-sticker"><svg viewBox="0 0 100 100"><path d="M32 29v14m36-14v14M25 60q25 33 50 0" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg><span>FEEL THE WORDS</span></div>
+          <div class="art-ticket"><span>ADMIT ONE</span><strong>Your voice belongs here.</strong><span>NO PERFECT JAPANESE REQUIRED</span></div>
+          <span class="art-star">✳</span>
+        </div>
+      </section>
 
-      <section class="practice-panel">
+      <div class="club-strip" aria-label="Listen, repeat, make it yours"><span>LESS SCROLLING</span><span aria-hidden="true">✳</span><span>MORE SPEAKING</span><span aria-hidden="true">✳</span><span lang="ja">聞いて、まねして、自分の声に。</span><span aria-hidden="true">✳</span><span>MAKE SOME NOISE</span><span aria-hidden="true">↗</span></div>
+
+      <section id="collection" class="library-panel" aria-labelledby="collection-title">
+        <div class="panel-heading">
+          <div><p class="eyebrow">01 / THE COLLECTION</p><h2 id="collection-title">Pick your <em>obsession.</em></h2></div>
+          <div class="collection-actions"><label class="upload-button" title="Choose an MP3, MP4, M4A, or WAV file"><input id="file-input" type="file" accept="audio/*,video/mp4" /><span aria-hidden="true">＋</span> Bring your own</label><div class="shelf-controls"><button id="shelf-back" class="icon-button" type="button" aria-label="Scroll collection left">←</button><button id="shelf-next" class="icon-button" type="button" aria-label="Scroll collection right">→</button></div></div>
+        </div>
+        <div class="collection-caption"><p>Anime rabbit holes. Podcast favorites. A voice worth borrowing.</p><span><strong id="library-count">0</strong> TRACKS / LOCAL LIBRARY</span></div>
+        <div id="library-list" class="library-list" aria-live="polite"></div>
+        <div class="source-bar"><span class="source-bar-label">ON THE TURNTABLE <span aria-hidden="true">↗</span></span><div id="source-name" class="source-empty">Nothing spinning yet. Choose a track above.</div><button id="scan-button" class="secondary-button" type="button" disabled>Make practice clips <span aria-hidden="true">→</span></button></div>
+      </section>
+
+      <section id="studio" class="practice-panel" aria-labelledby="studio-title" tabindex="-1">
         <div class="practice-heading">
-          <div><p class="eyebrow"><span class="eyebrow-dot"></span> Japanese, out loud.</p><h1>Less overthinking.<br><em>More speaking.</em></h1><p class="practice-subtitle">The voices you love. The confidence to join in.<br>Make a little progress, one replay at a time.</p></div>
-          <ol class="practice-flow" aria-label="Practice workflow"><li><span>01</span> Listen closely</li><li><span>02</span> Give it a go</li><li><span>03</span> Level up</li></ol>
+          <div><p class="eyebrow">02 / YOUR STUDIO</p><h2 id="studio-title">A little less shy.<br><em>A little more you.</em></h2></div>
+          <p class="studio-note">This is a practice space.<br>Not a perfect space. <span aria-hidden="true">✳</span></p>
         </div>
 
         <div id="empty-stage" class="empty-stage">
-          <div class="voice-art" aria-hidden="true">
-            <svg viewBox="0 0 340 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="172" cy="160" rx="116" ry="9" fill="#292722" opacity=".08"/>
-              <g transform="rotate(-9 121 86)"><rect x="45" y="32" width="147" height="105" rx="30" fill="#292722"/><path d="M64 121 61 151 97 129" fill="#292722"/><rect x="41" y="26" width="147" height="105" rx="30" fill="#ff795e" stroke="#292722" stroke-width="2.5"/><path d="m60 119-3 26 30-19" fill="#ff795e" stroke="#292722" stroke-width="2.5" stroke-linejoin="round"/><path d="M73 71v16m14-30v44m14-56v66m14-49v32m14-40v49m14-34v19m14-30v42" stroke="#292722" stroke-width="5" stroke-linecap="round"/></g>
-              <g transform="rotate(9 228 105)"><rect x="170" y="62" width="119" height="88" rx="28" fill="#292722"/><rect x="167" y="56" width="119" height="88" rx="28" fill="#d6d0fa" stroke="#292722" stroke-width="2.5"/><path d="m267 134 8 22-31-15" fill="#d6d0fa" stroke="#292722" stroke-width="2.5" stroke-linejoin="round"/><path d="M202 85v8m45-8v8m-39 16q17 20 34 0" stroke="#292722" stroke-width="4" stroke-linecap="round"/><ellipse cx="193" cy="104" rx="7" ry="4" fill="#b0a1e4"/><ellipse cx="255" cy="104" rx="7" ry="4" fill="#b0a1e4"/></g>
-              <path d="m254 17 4 11 12 4-12 4-4 11-4-11-12-4 12-4Z" fill="#f5ce54" stroke="#292722" stroke-width="2" stroke-linejoin="round"/><path d="m26 104 3 8 9 3-9 3-3 8-3-8-9-3 9-3Z" fill="#a9d8b8" stroke="#292722" stroke-width="2" stroke-linejoin="round"/><path d="m304 75 9-5m-13-10 3-10" stroke="#292722" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <p class="eyebrow">Big confidence starts small</p>
-          <h2>Your favorite line.<br>Your own voice.</h2>
-          <p>Bring something you love listening to.<br>We’ll help you turn it into speaking practice.</p>
-          <button id="empty-upload" class="primary-button" type="button">Let’s hear it <span aria-hidden="true">↗</span></button>
-          <span class="empty-formats">MP3 · M4A · WAV · MP4</span>
-          <div class="first-step-note"><span aria-hidden="true">↖</span> Or pick something from your playlist</div>
+          <div class="empty-intro"><span class="empty-doodle" aria-hidden="true">↳</span><p class="eyebrow">YOUR MIC IS WAITING</p><h3 id="empty-title">From “I get it”<br>to <em>“I can say it.”</em></h3><p id="empty-description">Choose a track from the collection, or bring a little audio of your own.</p><button id="empty-upload" class="primary-button" type="button">Bring your own audio <span aria-hidden="true">↗</span></button><span class="empty-formats">MP3 / M4A / WAV / MP4</span></div>
+          <ol class="practice-flow" aria-label="How shadowing works"><li><span class="step-number">01</span><div><h3>Steal the rhythm.</h3><p>Listen to a bite-sized clip. Catch the little pauses, the rise, the fall.</p></div><span class="step-art" aria-hidden="true">↝</span></li><li><span class="step-number">02</span><div><h3>Make some noise.</h3><p>Say it back. Record a take. Awkward is just the sound of getting started.</p></div><span class="step-art" aria-hidden="true">✳</span></li><li><span class="step-number">03</span><div><h3>Find your thing.</h3><p>Get a little feedback, try again, and hear yourself getting closer.</p></div><span class="step-art" aria-hidden="true">↗</span></li></ol>
         </div>
 
         <div id="study-stage" class="study-stage hidden">
@@ -91,7 +95,7 @@
           <!-- Unified Shadowing Deck: Playback & Recording Combined -->
           <div class="shadowing-deck wave-card">
             <div class="deck-heading">
-              <div><p class="eyebrow">01 / Catch the rhythm</p><h2>Listen. Repeat. Make it yours.</h2></div>
+              <div><p class="eyebrow">SIDE A / THE ORIGINAL</p><h3>Catch the rhythm.</h3></div>
               <div class="section-actions">
                 <span class="deck-shortcut"><kbd>P</kbd> to play</span>
                 <button class="collapse-button" data-collapse="deck-body" data-section-label="practice deck" type="button" aria-controls="deck-body" aria-expanded="true" aria-label="Collapse practice deck">
@@ -100,6 +104,7 @@
               </div>
             </div>
             <div id="deck-body">
+            <div class="deck-visual" aria-hidden="true"><div class="deck-disc"><span>SHADOWING<br><strong>REPEAT<br>AFTER ME.</strong><i></i>33⅓</span></div><div class="deck-visual-type">LISTEN<br><em>CLOSELY.</em><span>同じリズムで。</span></div></div>
             <div class="wave-topline">
               <span id="clip-label">CLIP 01</span>
               <span id="clip-time">0:00 — 0:08</span>
@@ -124,7 +129,7 @@
               </div>
 
               <div class="record-group">
-                <div class="record-prompt"><strong>Your turn</strong><span id="record-hint">Recording starts after the clip.</span></div>
+                <div class="record-prompt"><strong>SIDE B / YOUR VOICE</strong><span id="record-hint">Recording starts after the clip.</span></div>
                 <div class="record-actions">
                 <button id="record-button" class="record-button" type="button" aria-keyshortcuts="r"><span></span> Record attempt <kbd>R</kbd></button>
                 <button id="cancel-auto-record" class="quiet-button hidden" type="button">Cancel</button>
@@ -153,28 +158,10 @@
             </div>
           </div>
 
-          <section id="feedback-card" class="feedback-card panel">
-            <div class="sentence-heading">
-              <div><p class="eyebrow">02 / Every take is a step forward</p><h2>Your little level-up</h2></div>
-              <div class="section-actions">
-                <span id="feedback-status" class="subtle-badge">Ready for your first take</span>
-                <button class="collapse-button" data-collapse="feedback-body" data-section-label="speech feedback" type="button" aria-controls="feedback-body" aria-expanded="true" aria-label="Collapse speech feedback">
-                  <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                </button>
-              </div>
-            </div>
-            <div id="feedback-body">
-            <div id="feedback" class="feedback empty-feedback" aria-live="polite">
-              <div class="feedback-placeholder-metrics" aria-hidden="true"><div><span>Pronunciation</span><strong>—</strong></div><div><span>Rhythm</span><strong>—</strong></div><div><span>Intonation</span><strong>—</strong></div></div>
-              <div class="feedback-invitation"><span class="feedback-spark" aria-hidden="true"><svg class="ui-icon" fill="currentColor"><use href="#icon-sparkle"/></svg></span><p><strong>Small adjustments. Noticeable progress.</strong>Record a take to get personalised feedback and a clear next step.</p></div>
-            </div>
-            </div>
-          </section>
-
           <!-- Target Sentence Display with Furigana (Ruby) -->
           <section class="sentence-card panel">
             <div class="sentence-heading">
-              <div><p class="eyebrow">03 / Get to know the words</p><h2>Let’s break it down</h2></div>
+              <div><p class="eyebrow">THE LINER NOTES</p><h3>Between the lines.</h3></div>
               <div class="section-actions">
                 <span id="analysis-state" class="analysis-state">Local clip</span>
                 <button id="translation-toggle" class="quiet-button translation-toggle" type="button" aria-expanded="false" title="Toggle translation">
@@ -200,19 +187,42 @@
 
               <div class="sentence-actions">
                 <button id="analyze-button" class="primary-button" type="button"><svg class="ui-icon" fill="currentColor" aria-hidden="true"><use href="#icon-sparkle"/></svg> Analyze this clip</button>
-                <span class="selection-hint">Highlight a word to ask your companion <span aria-hidden="true">↗</span></span>
+                <span class="selection-hint">Highlight a word. Ask your buddy. <span aria-hidden="true">↗</span></span>
+              </div>
+              <div class="sentence-footnote"><span aria-hidden="true">✳</span><p>Don’t just read it.<br><em>Feel how it sounds.</em></p></div>
+            </div>
+          </section>
+
+          <section id="feedback-card" class="feedback-card panel">
+            <div class="sentence-heading">
+              <div><p class="eyebrow">THE PLAYBACK NOTES</p><h3>Good things take a few takes.</h3></div>
+              <div class="section-actions">
+                <span id="feedback-status" class="subtle-badge">Ready for your first take</span>
+                <button class="collapse-button" data-collapse="feedback-body" data-section-label="speech feedback" type="button" aria-controls="feedback-body" aria-expanded="true" aria-label="Collapse speech feedback">
+                  <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+              </div>
+            </div>
+            <div id="feedback-body">
+              <div id="feedback" class="feedback empty-feedback" aria-live="polite">
+                <div class="feedback-placeholder-metrics" aria-hidden="true"><div><span>Pronunciation</span><strong>—</strong></div><div><span>Rhythm</span><strong>—</strong></div><div><span>Intonation</span><strong>—</strong></div></div>
+                <div class="feedback-invitation"><span class="feedback-spark" aria-hidden="true"><svg class="ui-icon" fill="currentColor"><use href="#icon-sparkle"/></svg></span><p><strong>Small adjustments. Noticeable progress.</strong>Record a take to get personalised feedback and a clear next step.</p></div>
               </div>
             </div>
           </section>
 
         </div>
       </section>
+    </main>
 
-      <!-- Side Panel Companion Chat -->
-      <aside class="chat-panel panel">
+    <footer class="club-footer"><a class="footer-wordmark" href="#home">say it again<span>↗</span></a><div class="footer-details"><p>Made for your ears. And your voice.<br><span>Audio stays local. AI analyzes clips and recordings.</span></p><div id="model-indicator" class="model-indicator" title="AI Model Status"><span id="ai-status" class="status-dot"><i></i> Checking AI</span><span class="status-separator" aria-hidden="true">/</span><span id="model-badge" class="model-badge">Connecting…</span></div><span class="footer-edition">SHADOWING CLUB © 2026</span></div></footer>
+
+      <button id="buddy-open" class="buddy-launcher" type="button" aria-haspopup="dialog" aria-controls="buddy-dialog"><span class="buddy-face" aria-hidden="true">✳</span><span>A little help?<small>ASK YOUR LANGUAGE BUDDY</small></span><span aria-hidden="true">↗</span></button>
+      <dialog id="buddy-dialog" class="chat-panel panel" aria-labelledby="buddy-title">
         <div class="chat-heading">
-          <div><p class="eyebrow">In your corner</p><h2>Your language buddy <svg class="ui-icon companion-spark" fill="currentColor" aria-hidden="true"><use href="#icon-sparkle"/></svg></h2></div>
+          <div><p class="eyebrow">A FRIEND IN YOUR HEADPHONES</p><h2 id="buddy-title">Your language buddy.</h2></div>
           <div class="section-actions">
+            <button id="buddy-close" class="icon-button" type="button" aria-label="Close language buddy">×</button>
             <button class="collapse-button" data-collapse="chat-body" data-section-label="companion chat" type="button" aria-controls="chat-body" aria-expanded="true" aria-label="Collapse companion chat">
               <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </button>
@@ -240,8 +250,7 @@
             </button>
           </form>
         </div>
-      </aside>
-    </main>
+      </dialog>
 
     <!-- Floating Highlight Tooltip -->
     <div id="selection-tooltip" class="selection-tooltip hidden">

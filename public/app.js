@@ -50,6 +50,9 @@ const ui = {
   chatMessages: $("#chat-messages"),
   chatForm: $("#chat-form"),
   chatInput: $("#chat-input"),
+  buddyDialog: $("#buddy-dialog"),
+  buddyOpen: $("#buddy-open"),
+  buddyClose: $("#buddy-close"),
   aiStatus: $("#ai-status"),
   modelIndicator: $("#model-indicator"),
   modelBadge: $("#model-badge"),
@@ -210,15 +213,25 @@ function renderLibrary(files) {
     ui.library.innerHTML = '<p class="library-empty">No compatible audio files found.</p>';
     return;
   }
-  ui.library.innerHTML = files.map((file, index) => `
-    <button class="library-item" data-url="${escapeHtml(file.url)}" data-name="${escapeHtml(file.name)}" type="button" title="${escapeHtml(file.name)}">
-      <b>${String(index + 1).padStart(2, "0")}</b><span>${escapeHtml(file.name.replace(/\.[^.]+$/, ""))}</span>
-    </button>`).join("");
+  ui.library.innerHTML = files.map((file, index) => {
+    const name = file.name.replace(/\.[^.]+$/, "");
+    const episode = name.match(/S(\d+)E(\d+)/i);
+    const title = episode ? name.split(/\s*-\s*S\d+E\d+/i)[0] : name;
+    const number = episode ? episode[2] : String(index + 1).padStart(2, "0");
+    const label = episode ? `S${episode[1]} / EPISODE ${episode[2]}` : `TRACK ${number}`;
+    return `<button class="library-item" data-url="${escapeHtml(file.url)}" data-name="${escapeHtml(file.name)}" type="button" title="${escapeHtml(file.name)}" aria-label="Practice ${escapeHtml(name)}" aria-pressed="false">
+      <span class="track-cover" aria-hidden="true"><span class="track-kicker"><span>SHADOWING SELECTS</span><span>${escapeHtml(number)}</span></span><span class="track-art"><span class="track-disc"><b>${escapeHtml(number)}</b></span></span><span class="track-cover-title">${escapeHtml(title)}</span><span class="track-select">↗</span></span>
+      <span class="track-name">${escapeHtml(title)}</span><span class="track-meta">${escapeHtml(label)}</span>
+    </button>`;
+  }).join("");
 }
 
 function markActiveSource() {
   document.querySelectorAll(".library-item").forEach((item) => {
-    item.classList.toggle("active", item.dataset.name === state.source?.name);
+    const active = item.dataset.name === state.source?.name;
+    item.classList.toggle("active", active);
+    item.setAttribute("aria-pressed", String(active));
+    item.querySelector(".track-select").textContent = active ? "✓" : "↗";
   });
 }
 
@@ -292,6 +305,10 @@ function resetLesson() {
   ui.empty.classList.remove("hidden");
   ui.stage.classList.add("hidden");
   ui.scan.disabled = false;
+  $("#empty-title").innerHTML = 'Your track.<br><em>Your next take.</em>';
+  $("#empty-description").textContent = "Your audio is on the turntable. Split it into short clips, then give the first line a go.";
+  $("#empty-upload").innerHTML = 'Make practice clips <span aria-hidden="true">→</span>';
+  $("#empty-upload").disabled = false;
   stopAutoAnalyze();
 }
 
@@ -308,6 +325,9 @@ function setSource({ name, url, file = null }) {
   ui.sourceName.innerHTML = `<span class="source-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 10v4m4-7v10m4-13v16m4-13v10m4-7v4"/></svg></span><span class="source-filename" title="${escapeHtml(name)}">${escapeHtml(name)}</span>`;
   markActiveSource();
   resetLesson();
+  const studio = $("#studio");
+  studio.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+  studio.focus({ preventScroll: true });
 
   const cached = loadClipCache(name);
   if (cached && cached.length) {
@@ -325,6 +345,7 @@ function setSource({ name, url, file = null }) {
     fetch(`/api/transcript?file=${encodeURIComponent(name)}`)
       .then((r) => r.json())
       .then((res) => {
+        if (state.source?.url !== url) return;
         if (res.exists && res.data?.clips?.length) {
           state.clips = res.data.clips;
           state.active = 0;
@@ -439,6 +460,7 @@ function scanPauses(buffer) {
 async function createPracticeClips() {
   if (!state.source) return;
   ui.scan.disabled = true;
+  $("#empty-upload").disabled = true;
   ui.scan.textContent = "Scanning pauses…";
   try {
     const buffer = await getDecodedAudio();
@@ -461,6 +483,7 @@ async function createPracticeClips() {
     startAutoAnalyze();
   } finally {
     ui.scan.disabled = false;
+    $("#empty-upload").disabled = false;
     ui.scan.innerHTML = 'Make practice clips <span aria-hidden="true">→</span>';
   }
 }
@@ -1301,6 +1324,7 @@ async function askChat(question) {
 }
 
 function handleKeys(event) {
+  if (ui.buddyDialog.open) return;
   const typing = event.target.closest("input, textarea, select, [contenteditable]:not([contenteditable=false])");
   if (typing || event.isComposing || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
   if (!state.clips.length) return;
@@ -1315,7 +1339,24 @@ function handleKeys(event) {
   else if (event.key === "ArrowDown") { event.preventDefault(); selectClip(state.active + 1, true); }
 }
 
-$("#empty-upload").addEventListener("click", () => ui.fileInput.click());
+$("#empty-upload").addEventListener("click", () => state.source ? createPracticeClips() : ui.fileInput.click());
+$("#shelf-back").addEventListener("click", () => scrollShelf(-1));
+$("#shelf-next").addEventListener("click", () => scrollShelf(1));
+function scrollShelf(direction) {
+  ui.library.scrollBy({ left: direction * ui.library.clientWidth * .8, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+}
+
+function openBuddy() {
+  setSectionExpanded("chat-body", true);
+  if (!ui.buddyDialog.open) ui.buddyDialog.showModal();
+  ui.chatInput.focus();
+}
+ui.buddyOpen.addEventListener("click", openBuddy);
+ui.buddyClose.addEventListener("click", () => ui.buddyDialog.close());
+ui.buddyDialog.addEventListener("click", (event) => {
+  const bounds = ui.buddyDialog.getBoundingClientRect();
+  if (event.target === ui.buddyDialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) ui.buddyDialog.close();
+});
 ui.fileInput.addEventListener("change", (event) => {
   const [file] = event.target.files;
   if (!file) return;
@@ -1471,8 +1512,7 @@ function initSelectionTooltip() {
     const contextSentence = clip?.japanese ? ` in the sentence “${clip.japanese}”` : "";
     const prompt = `Briefly explain “${selectedText}”${contextSentence} in Traditional Chinese: its meaning and one useful reading or usage tip.`;
     window.getSelection()?.removeAllRanges();
-    setSectionExpanded('chat-body', true);
-    $(".chat-panel").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+    openBuddy();
     askChat(prompt);
     ui.chatInput.focus({ preventScroll: true });
   });
@@ -1485,8 +1525,8 @@ ui.audio.addEventListener("timeupdate", () => {
   updateTransportProgress();
 });
 ui.audio.addEventListener("ended", () => { if (ui.audio.ended) finishClipPlayback(); });
-ui.audio.addEventListener("play", () => { ui.attemptAudio.pause(); ui.play.textContent = "❚❚"; ui.play.setAttribute("aria-label", "Pause current clip"); });
-ui.audio.addEventListener("pause", () => { ui.play.textContent = "▶"; ui.play.setAttribute("aria-label", "Play current clip"); });
+ui.audio.addEventListener("play", () => { ui.attemptAudio.pause(); ui.play.textContent = "❚❚"; ui.play.setAttribute("aria-label", "Pause current clip"); $(".shadowing-deck").classList.add("is-playing"); });
+ui.audio.addEventListener("pause", () => { ui.play.textContent = "▶"; ui.play.setAttribute("aria-label", "Play current clip"); $(".shadowing-deck").classList.remove("is-playing"); });
 ui.audio.addEventListener("loadedmetadata", () => { ui.scan.disabled = false; });
 ui.audio.addEventListener("error", () => toast("This file could not be played in the browser."));
 
