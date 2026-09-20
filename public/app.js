@@ -1239,31 +1239,29 @@ function startVAD(stream, recorder) {
     vadContext = new (window.AudioContext || window.webkitAudioContext)();
     const source = vadContext.createMediaStreamSource(stream);
     const analyser = vadContext.createAnalyser();
-    analyser.minDecibels = -60;
-    analyser.maxDecibels = -10;
-    analyser.smoothingTimeConstant = 0.85;
-    analyser.fftSize = 256;
+    analyser.fftSize = 1024;
     source.connect(analyser);
 
     let hasSpoken = false;
     let silentSince = null;
-    const threshold = -45; // dB
-    const silenceDelay = 1500; // 1.5s of silence triggers submit
+    const threshold = 0.025; // RMS threshold for speech
+    const silenceDelay = 2000; // 2s of silence triggers submit
 
-    const dataArray = new Float32Array(analyser.frequencyBinCount);
+    const dataArray = new Float32Array(analyser.fftSize);
 
     const checkAudioLevel = () => {
       if (recorder.state !== "recording") {
         stopVAD();
         return;
       }
-      analyser.getFloatFrequencyData(dataArray);
-      let maxDb = -Infinity;
+      analyser.getFloatTimeDomainData(dataArray);
+      let sumSquares = 0;
       for (let i = 0; i < dataArray.length; i++) {
-        if (dataArray[i] > maxDb) maxDb = dataArray[i];
+        sumSquares += dataArray[i] * dataArray[i];
       }
+      const rms = Math.sqrt(sumSquares / dataArray.length);
       
-      const speaking = maxDb > threshold;
+      const speaking = rms > threshold;
       
       if (speaking) {
         hasSpoken = true;
