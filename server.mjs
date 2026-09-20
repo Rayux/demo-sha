@@ -402,6 +402,7 @@ Return ONLY valid JSON matching this exact schema:
     "intonation": 82,
     "overall": 86
   },
+  "recommendation": "keep_practicing",
   "visualCues": [
     { "text": "Japanese word or phrase", "furigana": "ふりがな", "status": "perfect|warning|missed", "note": "簡短、具體的繁體中文發音提示" }
   ],
@@ -414,6 +415,7 @@ Scoring criteria:
 - Pronunciation (0-100): Mora accuracy, phonetic fidelity, glottal stops (促音), long vowels (長音), and devoicing (無聲化).
 - Rhythm & Pace (0-100): Pacing match between target (${targetDuration}s) and user (${recordedDuration}s). Check pauses and smooth mora flow.
 - Intonation (0-100): Particle tone (e.g. rising ↗ for questions/agreement, falling ↘ for statements), pitch accent (頭高/中高/尾高/平板) stability.
+- Recommendation: Based on the overall score and the user's progress, recommend either "move_on" (ready for next clip) or "keep_practicing".
 - Visual Cues: Split the target sentence into words/particles. Mark status as "perfect", "warning" (slight accent/timing hesitation), or "missed". Provide a short note in Traditional Chinese for any non-perfect item.`;
 
     const userPrompt = `Target Sentence: ${target}\nTarget Duration: ${targetDuration}s\nLearner Recognized Speech: ${heard || "(unrecognized / silent)"}\nLearner Duration: ${recordedDuration}s`;

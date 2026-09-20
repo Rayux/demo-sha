@@ -773,9 +773,23 @@ function setAutoRecord(enabled) {
   savePreferences();
 }
 
+let playbackLoopId;
+function monitorPlayback() {
+  if (!state.playbackActive) return;
+  const clip = currentClip();
+  if (clip && (!ui.audio.paused || ui.audio.ended) && ui.audio.currentTime >= clip.end - 0.025) {
+    finishClipPlayback();
+    return;
+  }
+  updateTransportProgress();
+  playbackLoopId = requestAnimationFrame(monitorPlayback);
+}
+
 function beginClipPlayback() {
   state.playbackActive = true;
   ui.recordStatus.textContent = "LISTENING";
+  cancelAnimationFrame(playbackLoopId);
+  playbackLoopId = requestAnimationFrame(monitorPlayback);
   ui.audio.play().catch(() => {
     cancelPracticePlayback();
     toast("The audio could not start. Try selecting the source again.");
@@ -1202,6 +1216,70 @@ function updateAttemptPlayer() {
   ui.attemptTime.textContent = `${seconds(elapsed)} / ${seconds(duration)}`;
 }
 
+let vadContext = null;
+let vadAnimationFrame = null;
+
+function stopVAD() {
+  if (vadAnimationFrame) cancelAnimationFrame(vadAnimationFrame);
+  vadAnimationFrame = null;
+  if (vadContext) {
+    vadContext.close().catch(() => {});
+    vadContext = null;
+  }
+}
+
+function startVAD(stream, recorder) {
+  stopVAD();
+  try {
+    vadContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = vadContext.createMediaStreamSource(stream);
+    const analyser = vadContext.createAnalyser();
+    analyser.minDecibels = -60;
+    analyser.maxDecibels = -10;
+    analyser.smoothingTimeConstant = 0.85;
+    analyser.fftSize = 256;
+    source.connect(analyser);
+
+    let hasSpoken = false;
+    let silentSince = null;
+    const threshold = -45; // dB
+    const silenceDelay = 1500; // 1.5s of silence triggers submit
+
+    const dataArray = new Float32Array(analyser.frequencyBinCount);
+
+    const checkAudioLevel = () => {
+      if (recorder.state !== "recording") {
+        stopVAD();
+        return;
+      }
+      analyser.getFloatFrequencyData(dataArray);
+      let maxDb = -Infinity;
+      for (let i = 0; i < dataArray.length; i++) {
+        if (dataArray[i] > maxDb) maxDb = dataArray[i];
+      }
+      
+      const speaking = maxDb > threshold;
+      
+      if (speaking) {
+        hasSpoken = true;
+        silentSince = null;
+      } else if (hasSpoken) {
+        if (!silentSince) {
+          silentSince = Date.now();
+        } else if (Date.now() - silentSince > silenceDelay) {
+          submitRecording();
+          stopVAD();
+          return;
+        }
+      }
+      vadAnimationFrame = requestAnimationFrame(checkAudioLevel);
+    };
+    checkAudioLevel();
+  } catch (e) {
+    console.warn("VAD failed to start", e);
+  }
+}
+
 async function startRecording() {
   const clip = currentClip();
   if (!clip) return toast("Make practice clips first.");
@@ -1226,6 +1304,7 @@ async function startRecording() {
     const recorder = new MediaRecorder(stream);
     recorder.addEventListener("dataavailable", (event) => { if (event.data.size) chunks.push(event.data); });
     recorder.addEventListener("stop", () => {
+      stopVAD();
       state.attemptDuration = (Date.now() - state.recordStartedAt) / 1000;
       stream.getTracks().forEach((track) => track.stop());
       state.attemptBlob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
@@ -1247,9 +1326,11 @@ async function startRecording() {
     ui.recordTimer.textContent = "0:00";
     state.recordInterval = setInterval(updateRecordTimer, 250);
     recorder.start();
+    startVAD(stream, recorder);
     setRecordState(true);
   } catch {
     stream?.getTracks().forEach((track) => track.stop());
+    stopVAD();
     if (request === state.recordRequest) {
       setRecordState(false);
       toast("Microphone access is needed to record an attempt. Click Record attempt to try again.");
@@ -1265,6 +1346,7 @@ async function startRecording() {
 
 function submitRecording() {
   if (state.recorder?.state === "recording") {
+    stopVAD();
     state.attemptDuration = (Date.now() - state.recordStartedAt) / 1000;
     state.recorder.stop();
   }
@@ -1330,8 +1412,15 @@ function showAdvancedFeedback(evalData, heard, target) {
     </div>
   ` : "";
 
+  const recommendationMap = {
+    keep_practicing: "建議繼續練習",
+    move_on: "練得不錯，可以前往下一句"
+  };
+  const recText = evalData.recommendation ? recommendationMap[evalData.recommendation] || evalData.recommendation : "";
+
   const bulletsHtml = `
     <div class="feedback-bullets">
+      ${recText ? `<div class="feedback-bullet" lang="zh-Hant"><h3><span aria-hidden="true">🎯</span> 練習建議</h3><p>${escapeHtml(recText)}</p></div>` : ""}
       ${evalData.rhythmFeedback ? `<div class="feedback-bullet" lang="zh-Hant"><h3><span aria-hidden="true">↔</span> 節奏與語速</h3><p>${escapeHtml(evalData.rhythmFeedback)}</p></div>` : ""}
       ${evalData.intonationFeedback ? `<div class="feedback-bullet" lang="zh-Hant"><h3><span aria-hidden="true">↗</span> 語調與音高</h3><p>${escapeHtml(evalData.intonationFeedback)}</p></div>` : ""}
     </div>
@@ -1378,6 +1467,7 @@ function computeLocalFeedback(target, heard, targetDuration, recordedDuration) {
   const speedRatio = (recordedDuration / targetDuration).toFixed(2);
   return {
     scores: { pronunciation: pronScore, rhythm: timingScore, intonation: null },
+    recommendation: pronScore >= 80 && timingScore >= 80 ? "move_on" : "keep_practicing",
     visualCues,
     rhythmFeedback: `你的錄音長度約為原音的 ${speedRatio} 倍。${speedRatio > 1.2 ? "可以稍微縮短停頓，讓節奏更貼近原音。" : (speedRatio < 0.85 ? "語速可以稍微放慢，讓每個音拍都清楚完整。" : "整體時間與原音接近，繼續留意句中的停頓位置。")}`,
     intonationFeedback: "仔細聽每個語句結尾的音高起伏。目前的本機文字比對無法判斷實際音高，因此不提供語調分數。",
@@ -1559,7 +1649,7 @@ function handleKeys(event) {
   if (typing || event.isComposing || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
   if (!state.clips.length) return;
   const key = event.key.toLowerCase();
-  if (key === "p") { event.preventDefault(); togglePlay(); return; }
+  if (key === " ") { event.preventDefault(); togglePlay(); return; }
   if (key === "r") { event.preventDefault(); startRecording(); return; }
   if (key === "t") { event.preventDefault(); submitRecording(); return; }
   if (event.target.closest("button, audio, summary, [role=slider]")) return;
@@ -1567,6 +1657,9 @@ function handleKeys(event) {
   else if (event.key === "ArrowRight") { event.preventDefault(); seekBy(state.jumpLength); }
   else if (event.key === "ArrowUp") { event.preventDefault(); selectClip(state.active - 1, true); }
   else if (event.key === "ArrowDown") { event.preventDefault(); selectClip(state.active + 1, true); }
+  else if (key === "1") { event.preventDefault(); askChat("這句有口語省略嗎？是否有特殊的日本慣用語或敬語用法？"); }
+  else if (key === "2") { event.preventDefault(); askChat("請解釋這句中 particles (助詞) 的用法"); }
+  else if (key === "3") { event.preventDefault(); askChat("請列出這句中的動詞變化形"); }
 }
 
 $("#empty-upload")?.addEventListener("click", () => state.source ? createPracticeClips() : ui.fileInput.click());
