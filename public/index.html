@@ -7,7 +7,20 @@
     <meta name="color-scheme" content="light" />
     <meta name="description" content="Turn the Japanese you love listening to into words you love saying. Listen, repeat, and build confidence with Shadowing." />
     <title>Shadowing — Practice Studio &amp; Listening Club</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link id="theme-style" rel="stylesheet" href="./styles-pop.css" />
+    <script>
+      try {
+        var d = localStorage.getItem("kage-ui-design");
+        if (d === "classic") {
+          document.getElementById("theme-style").href = "./styles-classic.css";
+          document.documentElement.setAttribute("data-design", "classic");
+          var tm = document.querySelector('meta[name="theme-color"]');
+          if (tm) tm.content = "#0b0d0d";
+          var cs = document.querySelector('meta[name="color-scheme"]');
+          if (cs) cs.content = "dark";
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#studio">Skip to practice</a>
@@ -20,16 +33,16 @@
     <!-- App Top Navigation Bar -->
     <header class="topbar">
       <!-- Classic Studio Brand -->
-      <a class="brand brand-classic classic-only" href="#" aria-label="Shadowing practice studio">
-        <span class="brand-mark brand-mark-classic" aria-hidden="true">
+      <a class="brand classic-only" href="#" aria-label="Shadowing practice studio">
+        <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 10v4m4-8v12m4-15v18m4-15v12m4-8v4"/></svg>
         </span>
         <span>Shadowing<span class="brand-caption">Practice studio</span></span>
       </a>
 
       <!-- Pop Club Brand -->
-      <a class="brand brand-pop pop-only" href="#home" aria-label="Shadowing listening club">
-        <span class="brand-mark brand-mark-pop" aria-hidden="true">s<span>↗</span></span>
+      <a class="brand pop-only" href="#home" aria-label="Shadowing listening club">
+        <span class="brand-mark" aria-hidden="true">s<span>↗</span></span>
         <span>shadowing<span class="brand-caption">THE LISTENING CLUB</span></span>
       </a>
 
