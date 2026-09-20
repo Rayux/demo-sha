@@ -1328,6 +1328,7 @@ async function startRecording() {
     recorder.start();
     startVAD(stream, recorder);
     setRecordState(true);
+    toast("🎙️ Start recording...");
   } catch {
     stream?.getTracks().forEach((track) => track.stop());
     stopVAD();
