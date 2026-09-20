@@ -164,10 +164,20 @@ function loadClipCache(sourceName) {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+    return Array.isArray(parsed) && parsed.length > 0 ? repairClips(parsed) : null;
   } catch (e) {
     return null;
   }
+}
+
+function repairClips(clips) {
+  clips.forEach(clip => {
+    if (clip.analyzed && clip.japanese && !clip.translation) {
+      clip.analyzed = false;
+      clip.failed = false;
+    }
+  });
+  return clips;
 }
 
 function renderRubyHtml(text = "", rubyText = "") {
@@ -443,7 +453,7 @@ function setSource({ name, url, file = null }) {
     const baseName = name.replace(/\.[^.]+$/, "");
     const applyClips = (clips, sourceMsg) => {
       if (state.source?.url !== url) return;
-      state.clips = clips;
+      state.clips = repairClips(clips);
       state.active = 0;
       ui.empty.classList.add("hidden");
       ui.stage.classList.remove("hidden");
