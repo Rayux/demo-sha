@@ -50,6 +50,9 @@ const ui = {
   chatMessages: $("#chat-messages"),
   chatForm: $("#chat-form"),
   chatInput: $("#chat-input"),
+  buddyDialog: $("#buddy-dialog"),
+  buddyOpen: $("#buddy-open"),
+  buddyClose: $("#buddy-close"),
   aiStatus: $("#ai-status"),
   modelIndicator: $("#model-indicator"),
   modelBadge: $("#model-badge"),
@@ -60,6 +63,24 @@ const ui = {
   settings: $("#settings"),
   settingsButton: $("#settings-button"),
   closeSettings: $("#close-settings"),
+  uiDesign: $("#ui-design"),
+  continuous: $("#continuous-button"),
+  continuousCheckbox: $("#continuous-play"),
+  sourceNameClassic: $("#source-name-classic"),
+  scanClassic: $("#scan-button-classic"),
+  libraryCountClassic: $("#library-count-classic"),
+  emptyUploadClassic: $("#empty-upload-classic"),
+  modelBadgeTopbar: $("#model-badge-topbar"),
+  aiStatusTopbar: $("#ai-status-topbar"),
+  modelIndicatorTopbar: $("#model-indicator-topbar"),
+  lockScreen: $("#app-lock-screen"),
+  lockForm: $("#lock-form"),
+  lockInput: $("#lock-input"),
+  lockTogglePwd: $("#lock-toggle-pwd"),
+  lockError: $("#lock-error"),
+  lockNowBtn: $("#lock-now-button"),
+  passcodeSettingsInput: $("#lock-passcode-input"),
+  savePasscodeBtn: $("#save-passcode-button"),
   jumpLength: $("#jump-length"),
   reflectionDelay: $("#reflection-delay"),
   autoRecord: $("#auto-record"),
@@ -78,7 +99,9 @@ const state = {
   clips: [],
   active: 0,
   rate: 1,
-  autoRecord: stored("kage-auto-record", "true") === "true",
+  uiDesign: stored("kage-ui-design", "pop"),
+  continuousPlay: stored("kage-continuous-play", "false") === "true",
+  autoRecord: stored("kage-continuous-play", "false") === "true" ? false : stored("kage-auto-record", "true") === "true",
   loop: stored("kage-auto-record", "true") === "false" && stored("kage-loop", "false") === "true",
   showTranslation: false,
   jumpLength: Number(stored("kage-jump", "5")),
@@ -183,11 +206,41 @@ function currentClip() {
 }
 
 function savePreferences() {
+  localStorage.setItem("kage-ui-design", state.uiDesign);
+  localStorage.setItem("kage-continuous-play", String(state.continuousPlay));
   localStorage.setItem("kage-loop", String(state.loop));
   localStorage.setItem("kage-auto-record", String(state.autoRecord));
   localStorage.setItem("kage-translation", String(state.showTranslation));
   localStorage.setItem("kage-jump", String(state.jumpLength));
   localStorage.setItem("kage-attempts", String(state.attempts));
+}
+
+function setUIDesign(design) {
+  state.uiDesign = design === "classic" ? "classic" : "pop";
+  document.documentElement.setAttribute("data-design", state.uiDesign);
+  document.body.setAttribute("data-design", state.uiDesign);
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.content = state.uiDesign === "classic" ? "#0b0d0d" : "#f6f4ec";
+  const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+  if (colorSchemeMeta) colorSchemeMeta.content = state.uiDesign === "classic" ? "dark" : "light";
+  if (ui.uiDesign) ui.uiDesign.value = state.uiDesign;
+  if (state.uiDesign === "classic") {
+    if (ui.buddyDialog && !ui.buddyDialog.hasAttribute("open")) ui.buddyDialog.setAttribute("open", "");
+  } else {
+    if (ui.buddyDialog && !ui.buddyDialog.matches(":modal")) ui.buddyDialog.removeAttribute("open");
+  }
+  savePreferences();
+}
+
+function setContinuousPlay(enabled) {
+  cancelPendingRecording();
+  state.continuousPlay = enabled;
+  if (enabled) {
+    state.autoRecord = false;
+    state.loop = false;
+  }
+  renderPlaybackMode();
+  savePreferences();
 }
 
 function updateJumpLabels() {
@@ -205,71 +258,117 @@ function renderTranslationVisibility() {
 }
 
 function renderLibrary(files) {
-  $("#library-count").textContent = String(files.length);
+  const countStr = String(files.length);
+  const countPop = $("#library-count");
+  if (countPop) countPop.textContent = countStr;
+  const countClassic = $("#library-count-classic");
+  if (countClassic) countClassic.textContent = countStr;
+
   if (!files.length) {
     ui.library.innerHTML = '<p class="library-empty">No compatible audio files found.</p>';
     return;
   }
-  ui.library.innerHTML = files.map((file, index) => `
-    <button class="library-item" data-url="${escapeHtml(file.url)}" data-name="${escapeHtml(file.name)}" type="button" title="${escapeHtml(file.name)}">
-      <b>${String(index + 1).padStart(2, "0")}</b><span>${escapeHtml(file.name.replace(/\.[^.]+$/, ""))}</span>
-    </button>`).join("");
+  ui.library.innerHTML = files.map((file, index) => {
+    const name = file.name.replace(/\.[^.]+$/, "");
+    const episode = name.match(/S(\d+)E(\d+)/i);
+    const title = episode ? name.split(/\s*-\s*S\d+E\d+/i)[0] : name;
+    const number = episode ? episode[2] : String(index + 1).padStart(2, "0");
+    const label = episode ? `S${episode[1]} / EPISODE ${episode[2]}` : `TRACK ${number}`;
+    return `<button class="library-item" data-url="${escapeHtml(file.url)}" data-name="${escapeHtml(file.name)}" type="button" title="${escapeHtml(file.name)}" aria-label="Practice ${escapeHtml(name)}" aria-pressed="false">
+      <b class="track-number classic-only">${escapeHtml(number)}</b>
+      <span class="track-cover" aria-hidden="true"><span class="track-kicker"><span>SHADOWING SELECTS</span><span>${escapeHtml(number)}</span></span><span class="track-art"><span class="track-disc"><b>${escapeHtml(number)}</b></span></span><span class="track-cover-title">${escapeHtml(title)}</span><span class="track-select">↗</span></span>
+      <span class="track-name">${escapeHtml(title)}</span><span class="track-meta">${escapeHtml(label)}</span>
+    </button>`;
+  }).join("");
 }
 
 function markActiveSource() {
   document.querySelectorAll(".library-item").forEach((item) => {
-    item.classList.toggle("active", item.dataset.name === state.source?.name);
+    const active = item.dataset.name === state.source?.name;
+    item.classList.toggle("active", active);
+    item.setAttribute("aria-pressed", String(active));
+    const sel = item.querySelector(".track-select");
+    if (sel) sel.textContent = active ? "✓" : "↗";
   });
 }
 
 async function loadLibrary() {
   try {
-    const response = await fetch("/api/library");
-    const data = await response.json();
-    renderLibrary(data.files || []);
-  } catch {
-    ui.library.innerHTML = '<p class="library-empty">The audio library could not be read.</p>';
-  }
+    const response = await fetch("./api/library");
+    if (response.ok) {
+      const data = await response.json();
+      if (data.files && data.files.length) {
+        renderLibrary(data.files);
+        return;
+      }
+    }
+  } catch {}
+
+  try {
+    const fallback = await fetch("./data/library.json");
+    if (fallback.ok) {
+      const data = await fallback.json();
+      if (data.files && data.files.length) {
+        renderLibrary(data.files);
+        return;
+      }
+    }
+  } catch {}
+
+  ui.library.innerHTML = '<p class="library-empty">The audio library could not be read.</p>';
 }
 
 function updateModelIndicator() {
-  if (!ui.modelBadge) return;
   const info = state.modelInfo || {};
   const primary = info.primaryModel || "openai/gpt-oss-120b";
   const hasOpenAI = Boolean(info.hasOpenAI);
   const hasGroq = Boolean(info.hasGroq);
 
-  if (hasGroq) {
-    ui.modelBadge.className = "model-badge groq";
-    ui.modelBadge.textContent = "Groq";
-    if (ui.modelIndicator) ui.modelIndicator.title = `Transcription: ${info.groqWhisper || "whisper-large-v3-turbo"} · Analysis: ${primary}`;
-  } else if (hasOpenAI) {
-    ui.modelBadge.className = "model-badge groq";
-    ui.modelBadge.textContent = "OpenAI Whisper + 4o";
-    if (ui.modelIndicator) ui.modelIndicator.title = `Audio Transcription: OpenAI Whisper (${info.openaiWhisper || "whisper-1"}) | Analysis & Evaluation: ${info.primaryModel || "gpt-4o"}`;
-  } else {
-    ui.modelBadge.className = "model-badge";
-    ui.modelBadge.textContent = primary;
-    if (ui.modelIndicator) ui.modelIndicator.title = `Active Model: ${primary}`;
-  }
+  const updateBadges = (badge, indicator) => {
+    if (!badge) return;
+    if (hasGroq) {
+      badge.className = "model-badge groq";
+      badge.textContent = "Groq";
+      if (indicator) indicator.title = `Transcription: ${info.groqWhisper || "whisper-large-v3-turbo"} · Analysis: ${primary}`;
+    } else if (hasOpenAI) {
+      badge.className = "model-badge groq";
+      badge.textContent = "OpenAI";
+      if (indicator) indicator.title = `Audio Transcription: OpenAI Whisper (${info.openaiWhisper || "whisper-1"}) | Analysis: ${primary}`;
+    } else {
+      badge.className = "model-badge";
+      badge.textContent = primary;
+      if (indicator) indicator.title = `Active Model: ${primary}`;
+    }
+  };
+
+  updateBadges(ui.modelBadge, ui.modelIndicator);
+  updateBadges(ui.modelBadgeTopbar, ui.modelIndicatorTopbar);
 }
 
 async function loadStatus() {
   try {
-    const response = await fetch("/api/status");
+    const response = await fetch("./api/status");
+    if (!response.ok) throw new Error("Status API unavailable");
     const data = await response.json();
     state.aiConfigured = data.aiConfigured;
     state.modelInfo = data;
-    ui.aiStatus.classList.remove("offline", "ready");
-    ui.aiStatus.classList.add(data.aiConfigured ? "ready" : "offline");
-    ui.modelIndicator.classList.toggle("ready", Boolean(data.aiConfigured));
-    ui.aiStatus.innerHTML = `<i></i> ${data.aiConfigured ? "AI ready" : "Local-only"}`;
+    [ui.aiStatus, ui.aiStatusTopbar].forEach((el) => {
+      if (!el) return;
+      el.classList.remove("offline", "ready");
+      el.classList.add(data.aiConfigured ? "ready" : "offline");
+      el.innerHTML = `<i></i> ${data.aiConfigured ? "AI ready" : "Local-only"}`;
+    });
+    [ui.modelIndicator, ui.modelIndicatorTopbar].forEach((el) => el?.classList.toggle("ready", Boolean(data.aiConfigured)));
     updateModelIndicator();
   } catch {
-    ui.modelIndicator.classList.remove("ready");
-    ui.aiStatus.classList.add("offline");
-    ui.aiStatus.innerHTML = "<i></i> Server offline";
-    if (ui.modelBadge) ui.modelBadge.textContent = "Offline";
+    [ui.aiStatus, ui.aiStatusTopbar].forEach((el) => {
+      if (!el) return;
+      el.classList.add("offline");
+      el.innerHTML = "<i></i> Local mode";
+    });
+    [ui.modelBadge, ui.modelBadgeTopbar].forEach((el) => {
+      if (el) el.textContent = "Offline";
+    });
   }
 }
 
@@ -292,6 +391,11 @@ function resetLesson() {
   ui.empty.classList.remove("hidden");
   ui.stage.classList.add("hidden");
   ui.scan.disabled = false;
+  if (ui.scanClassic) ui.scanClassic.disabled = false;
+  $("#empty-title").innerHTML = 'Your track.<br><em>Your next take.</em>';
+  $("#empty-description").textContent = "Your audio is on the turntable. Split it into short clips, then give the first line a go.";
+  $("#empty-upload").innerHTML = 'Make practice clips <span aria-hidden="true">→</span>';
+  $("#empty-upload").disabled = false;
   stopAutoAnalyze();
 }
 
@@ -304,10 +408,18 @@ function setSource({ name, url, file = null }) {
   ui.audio.pause();
   ui.audio.src = url;
   ui.audio.load();
+  const sourceHtml = `<span class="source-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 10v4m4-7v10m4-13v16m4-13v10m4-7v4"/></svg></span><span class="source-filename" title="${escapeHtml(name)}">${escapeHtml(name)}</span>`;
   ui.sourceName.className = "source-file";
-  ui.sourceName.innerHTML = `<span class="source-icon" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 10v4m4-7v10m4-13v16m4-13v10m4-7v4"/></svg></span><span class="source-filename" title="${escapeHtml(name)}">${escapeHtml(name)}</span>`;
+  ui.sourceName.innerHTML = sourceHtml;
+  if (ui.sourceNameClassic) {
+    ui.sourceNameClassic.className = "source-file";
+    ui.sourceNameClassic.innerHTML = sourceHtml;
+  }
   markActiveSource();
   resetLesson();
+  const studio = $("#studio");
+  studio.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+  studio.focus({ preventScroll: true });
 
   const cached = loadClipCache(name);
   if (cached && cached.length) {
@@ -319,25 +431,48 @@ function setSource({ name, url, file = null }) {
     const readyCount = cached.filter((c) => c.analyzed).length;
     toast(`Loaded ${cached.length} clips (${readyCount} analyzed).`);
     updateAutoAnalyzeUI();
-    saveClipCache(); // sync to disk as well
+    saveClipCache();
   } else {
-    // Check if transcripts exist on disk in shadowing/transcripts/
-    fetch(`/api/transcript?file=${encodeURIComponent(name)}`)
-      .then((r) => r.json())
+    const baseName = name.replace(/\.[^.]+$/, "");
+    const applyClips = (clips, sourceMsg) => {
+      if (state.source?.url !== url) return;
+      state.clips = clips;
+      state.active = 0;
+      ui.empty.classList.add("hidden");
+      ui.stage.classList.remove("hidden");
+      renderActiveClip();
+      saveClipCache();
+      const readyCount = state.clips.filter((c) => c.analyzed).length;
+      toast(`Loaded ${state.clips.length} clips ${sourceMsg} (${readyCount} ready).`);
+      updateAutoAnalyzeUI();
+    };
+
+    fetch(`./api/transcript?file=${encodeURIComponent(name)}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("API not available");
+        return r.json();
+      })
       .then((res) => {
         if (res.exists && res.data?.clips?.length) {
-          state.clips = res.data.clips;
-          state.active = 0;
-          ui.empty.classList.add("hidden");
-          ui.stage.classList.remove("hidden");
-          renderActiveClip();
-          saveClipCache();
-          const readyCount = state.clips.filter((c) => c.analyzed).length;
-          toast(`Loaded ${state.clips.length} clips from transcripts/ folder (${readyCount} analyzed).`);
-          updateAutoAnalyzeUI();
+          applyClips(res.data.clips, "from server");
+        } else {
+          throw new Error("No transcript in API");
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        // Static transcript fallback for GitHub Pages / static hosting
+        fetch(`./transcripts/${encodeURIComponent(baseName)}.json`)
+          .then((r) => {
+            if (!r.ok) throw new Error("Static transcript not found");
+            return r.json();
+          })
+          .then((data) => {
+            if (data && data.clips && data.clips.length) {
+              applyClips(data.clips, "from transcripts");
+            }
+          })
+          .catch(() => {});
+      });
   }
 }
 
@@ -439,6 +574,7 @@ function scanPauses(buffer) {
 async function createPracticeClips() {
   if (!state.source) return;
   ui.scan.disabled = true;
+  $("#empty-upload").disabled = true;
   ui.scan.textContent = "Scanning pauses…";
   try {
     const buffer = await getDecodedAudio();
@@ -461,6 +597,7 @@ async function createPracticeClips() {
     startAutoAnalyze();
   } finally {
     ui.scan.disabled = false;
+    $("#empty-upload").disabled = false;
     ui.scan.innerHTML = 'Make practice clips <span aria-hidden="true">→</span>';
   }
 }
@@ -593,14 +730,37 @@ function cancelPracticePlayback() {
 }
 
 function renderPlaybackMode() {
-  ui.guided.setAttribute("aria-checked", String(state.autoRecord));
-  ui.autoRecord.checked = state.autoRecord;
-  ui.loop.classList.toggle("active", state.loop);
-  ui.loop.setAttribute("aria-pressed", String(state.loop));
-  ui.recordHint.textContent = state.autoRecord ? "Recording starts after the clip." : (state.loop ? "Listen on repeat. Record when ready." : "Match the voice. Keep the rhythm.");
+  if (ui.continuous) ui.continuous.setAttribute("aria-checked", String(state.continuousPlay));
+  if (ui.continuousCheckbox) ui.continuousCheckbox.checked = state.continuousPlay;
+
+  if (state.continuousPlay) {
+    ui.guided.disabled = true;
+    ui.guided.setAttribute("aria-disabled", "true");
+    ui.guided.setAttribute("aria-checked", "false");
+    ui.guided.classList.add("is-disabled");
+    ui.autoRecord.checked = false;
+    ui.autoRecord.disabled = true;
+    ui.loop.classList.remove("active");
+    ui.loop.setAttribute("aria-pressed", "false");
+    ui.recordHint.textContent = "Continuous play active: clips will auto-advance.";
+  } else {
+    ui.guided.disabled = false;
+    ui.guided.removeAttribute("aria-disabled");
+    ui.guided.classList.remove("is-disabled");
+    ui.guided.setAttribute("aria-checked", String(state.autoRecord));
+    ui.autoRecord.checked = state.autoRecord;
+    ui.autoRecord.disabled = false;
+    ui.loop.classList.toggle("active", state.loop);
+    ui.loop.setAttribute("aria-pressed", String(state.loop));
+    ui.recordHint.textContent = state.autoRecord ? "Recording starts after the clip." : (state.loop ? "Listen on repeat. Record when ready." : "Match the voice. Keep the rhythm.");
+  }
 }
 
 function setAutoRecord(enabled) {
+  if (state.continuousPlay) {
+    toast("Turn off 'Keep playing clips' to enable Listen → speak.");
+    return;
+  }
   cancelPendingRecording();
   state.autoRecord = enabled;
   if (enabled) state.loop = false;
@@ -645,9 +805,21 @@ function finishClipPlayback() {
   ui.audio.pause();
   ui.audio.currentTime = clip.end;
   updateTransportProgress();
-  if (state.autoRecord) scheduleRecording();
-  else if (state.loop) playCurrentClip();
-  else ui.recordStatus.textContent = "READY";
+
+  if (state.continuousPlay) {
+    if (state.active < state.clips.length - 1) {
+      selectClip(state.active + 1, true);
+    } else {
+      ui.recordStatus.textContent = "FINISHED";
+      toast("Finished all clips in this track.");
+    }
+  } else if (state.autoRecord) {
+    scheduleRecording();
+  } else if (state.loop) {
+    playCurrentClip();
+  } else {
+    ui.recordStatus.textContent = "READY";
+  }
 }
 
 function restartClip(announce = true) {
@@ -1300,7 +1472,82 @@ async function askChat(question) {
   }
 }
 
+function isAppLocked() {
+  return localStorage.getItem("kage-unlocked") !== "true";
+}
+
+function getStoredPasscode() {
+  return localStorage.getItem("kage-access-passcode") || "shadowing";
+}
+
+function initLockScreen() {
+  if (!ui.lockScreen) return;
+
+  if (ui.passcodeSettingsInput) {
+    ui.passcodeSettingsInput.value = getStoredPasscode();
+  }
+
+  const updateLockVisibility = () => {
+    if (isAppLocked()) {
+      ui.lockScreen.classList.remove("hidden");
+      ui.lockScreen.classList.remove("fade-out");
+      setTimeout(() => ui.lockInput?.focus(), 80);
+    } else {
+      ui.lockScreen.classList.add("hidden");
+    }
+  };
+
+  updateLockVisibility();
+
+  ui.lockForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const entered = (ui.lockInput.value || "").trim();
+    if (entered === getStoredPasscode()) {
+      localStorage.setItem("kage-unlocked", "true");
+      ui.lockError.classList.add("hidden");
+      ui.lockScreen.classList.add("fade-out");
+      setTimeout(() => {
+        ui.lockScreen.classList.add("hidden");
+        ui.lockScreen.classList.remove("fade-out");
+      }, 250);
+      toast("Access granted! Welcome to Shadowing.");
+    } else {
+      ui.lockError.classList.remove("hidden");
+      ui.lockInput.classList.add("shake");
+      setTimeout(() => ui.lockInput.classList.remove("shake"), 450);
+      ui.lockInput.select();
+    }
+  });
+
+  ui.lockTogglePwd?.addEventListener("click", () => {
+    const isPwd = ui.lockInput.type === "password";
+    ui.lockInput.type = isPwd ? "text" : "password";
+    ui.lockTogglePwd.textContent = isPwd ? "🙈" : "👁";
+  });
+
+  ui.lockNowBtn?.addEventListener("click", () => {
+    localStorage.removeItem("kage-unlocked");
+    ui.settings.classList.add("hidden");
+    if (ui.lockInput) ui.lockInput.value = "";
+    if (ui.lockError) ui.lockError.classList.add("hidden");
+    updateLockVisibility();
+    toast("App locked.");
+  });
+
+  ui.savePasscodeBtn?.addEventListener("click", () => {
+    const newCode = (ui.passcodeSettingsInput.value || "").trim();
+    if (!newCode) {
+      toast("Passcode cannot be empty.");
+      return;
+    }
+    localStorage.setItem("kage-access-passcode", newCode);
+    toast("Access passcode updated!");
+  });
+}
+
 function handleKeys(event) {
+  if (isAppLocked()) return;
+  if (ui.buddyDialog && ui.buddyDialog.matches(":modal") && ui.buddyDialog.open) return;
   const typing = event.target.closest("input, textarea, select, [contenteditable]:not([contenteditable=false])");
   if (typing || event.isComposing || event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
   if (!state.clips.length) return;
@@ -1315,7 +1562,30 @@ function handleKeys(event) {
   else if (event.key === "ArrowDown") { event.preventDefault(); selectClip(state.active + 1, true); }
 }
 
-$("#empty-upload").addEventListener("click", () => ui.fileInput.click());
+$("#empty-upload")?.addEventListener("click", () => state.source ? createPracticeClips() : ui.fileInput.click());
+ui.emptyUploadClassic?.addEventListener("click", () => state.source ? createPracticeClips() : ui.fileInput.click());
+$("#shelf-back")?.addEventListener("click", () => scrollShelf(-1));
+$("#shelf-next")?.addEventListener("click", () => scrollShelf(1));
+function scrollShelf(direction) {
+  ui.library.scrollBy({ left: direction * ui.library.clientWidth * .8, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+}
+
+function openBuddy() {
+  setSectionExpanded("chat-body", true);
+  if (state.uiDesign === "classic") {
+    ui.buddyDialog?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  } else {
+    if (!ui.buddyDialog.open) ui.buddyDialog.showModal();
+  }
+  ui.chatInput.focus();
+}
+ui.buddyOpen?.addEventListener("click", openBuddy);
+ui.buddyClose?.addEventListener("click", () => ui.buddyDialog.close());
+ui.buddyDialog?.addEventListener("click", (event) => {
+  if (state.uiDesign === "classic") return;
+  const bounds = ui.buddyDialog.getBoundingClientRect();
+  if (event.target === ui.buddyDialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) ui.buddyDialog.close();
+});
 ui.fileInput.addEventListener("change", (event) => {
   const [file] = event.target.files;
   if (!file) return;
@@ -1326,6 +1596,7 @@ ui.library.addEventListener("click", (event) => {
   if (item) setSource({ name: item.dataset.name, url: item.dataset.url });
 });
 ui.scan.addEventListener("click", createPracticeClips);
+ui.scanClassic?.addEventListener("click", createPracticeClips);
 ui.pills.addEventListener("click", (event) => { const button = event.target.closest("[data-index]"); if (button) selectClip(Number(button.dataset.index)); });
 ui.previous.addEventListener("click", () => selectClip(state.active - 1, true));
 ui.next.addEventListener("click", () => selectClip(state.active + 1, true));
@@ -1335,7 +1606,10 @@ ui.forward.addEventListener("click", () => seekBy(state.jumpLength));
 ui.loop.addEventListener("click", () => {
   cancelPendingRecording();
   state.loop = !state.loop;
-  if (state.loop) state.autoRecord = false;
+  if (state.loop) {
+    state.autoRecord = false;
+    state.continuousPlay = false;
+  }
   renderPlaybackMode();
   savePreferences();
 });
@@ -1369,6 +1643,9 @@ ui.autoAnalyzeStop?.addEventListener("click", () => {
 });
 ui.record.addEventListener("click", toggleRecording);
 ui.guided.addEventListener("click", () => setAutoRecord(!state.autoRecord));
+ui.continuous?.addEventListener("click", () => setContinuousPlay(!state.continuousPlay));
+ui.continuousCheckbox?.addEventListener("change", () => setContinuousPlay(ui.continuousCheckbox.checked));
+ui.uiDesign?.addEventListener("change", () => setUIDesign(ui.uiDesign.value));
 ui.cancelAutoRecord.addEventListener("click", cancelPendingRecording);
 ui.grade.addEventListener("click", gradeAttempt);
 ui.attemptPlay.addEventListener("click", () => {
@@ -1391,6 +1668,7 @@ document.querySelectorAll("[data-question]").forEach((button) => button.addEvent
 function setSectionExpanded(id, expanded) {
   const target = document.getElementById(id);
   const button = document.querySelector(`[data-collapse="${id}"]`);
+  if (!target || !button) return;
   target.classList.toggle("hidden", !expanded);
   button.setAttribute("aria-expanded", String(expanded));
   button.setAttribute("aria-label", `${expanded ? "Collapse" : "Expand"} ${button.dataset.sectionLabel}`);
@@ -1471,8 +1749,7 @@ function initSelectionTooltip() {
     const contextSentence = clip?.japanese ? ` in the sentence “${clip.japanese}”` : "";
     const prompt = `Briefly explain “${selectedText}”${contextSentence} in Traditional Chinese: its meaning and one useful reading or usage tip.`;
     window.getSelection()?.removeAllRanges();
-    setSectionExpanded('chat-body', true);
-    $(".chat-panel").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+    openBuddy();
     askChat(prompt);
     ui.chatInput.focus({ preventScroll: true });
   });
@@ -1485,11 +1762,15 @@ ui.audio.addEventListener("timeupdate", () => {
   updateTransportProgress();
 });
 ui.audio.addEventListener("ended", () => { if (ui.audio.ended) finishClipPlayback(); });
-ui.audio.addEventListener("play", () => { ui.attemptAudio.pause(); ui.play.textContent = "❚❚"; ui.play.setAttribute("aria-label", "Pause current clip"); });
-ui.audio.addEventListener("pause", () => { ui.play.textContent = "▶"; ui.play.setAttribute("aria-label", "Play current clip"); });
-ui.audio.addEventListener("loadedmetadata", () => { ui.scan.disabled = false; });
+ui.audio.addEventListener("play", () => { ui.attemptAudio.pause(); ui.play.textContent = "❚❚"; ui.play.setAttribute("aria-label", "Pause current clip"); $(".shadowing-deck")?.classList.add("is-playing"); });
+ui.audio.addEventListener("pause", () => { ui.play.textContent = "▶"; ui.play.setAttribute("aria-label", "Play current clip"); $(".shadowing-deck")?.classList.remove("is-playing"); });
+ui.audio.addEventListener("loadedmetadata", () => {
+  ui.scan.disabled = false;
+  if (ui.scanClassic) ui.scanClassic.disabled = false;
+});
 ui.audio.addEventListener("error", () => toast("This file could not be played in the browser."));
 
+setUIDesign(state.uiDesign);
 renderPlaybackMode();
 setRate(state.rate);
 ui.jumpLength.value = String(state.jumpLength);
@@ -1498,5 +1779,7 @@ ui.sessionCount.textContent = String(state.attempts);
 renderTranslationVisibility();
 updateJumpLabels();
 initSelectionTooltip();
+initLockScreen();
 loadLibrary();
 loadStatus();
+

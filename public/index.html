@@ -1,66 +1,196 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-design="pop">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#08090a" />
-    <meta name="color-scheme" content="dark" />
-    <title>Shadowing</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <meta name="theme-color" content="#f6f4ec" />
+    <meta name="color-scheme" content="light" />
+    <meta name="description" content="Turn the Japanese you love listening to into words you love saying. Listen, repeat, and build confidence with Shadowing." />
+    <title>Shadowing — Practice Studio &amp; Listening Club</title>
+    <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><symbol id="icon-sparkle" viewBox="0 0 24 24"><path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7Z"/></symbol></defs></svg>
+    <a class="skip-link" href="#studio">Skip to practice</a>
+    <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <symbol id="icon-sparkle" viewBox="0 0 24 24"><path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7Z"/></symbol>
+      </defs>
+    </svg>
+
+    <!-- App Top Navigation Bar -->
     <header class="topbar">
-      <a class="brand" href="#" aria-label="Shadowing home">
-        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 10v4m4-8v12m4-15v18m4-15v12m4-8v4"/></svg></span>
+      <!-- Classic Studio Brand -->
+      <a class="brand brand-classic classic-only" href="#" aria-label="Shadowing practice studio">
+        <span class="brand-mark brand-mark-classic" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 10v4m4-8v12m4-15v18m4-15v12m4-8v4"/></svg>
+        </span>
         <span>Shadowing<span class="brand-caption">Practice studio</span></span>
       </a>
+
+      <!-- Pop Club Brand -->
+      <a class="brand brand-pop pop-only" href="#home" aria-label="Shadowing listening club">
+        <span class="brand-mark brand-mark-pop" aria-hidden="true">s<span>↗</span></span>
+        <span>shadowing<span class="brand-caption">THE LISTENING CLUB</span></span>
+      </a>
+
+      <!-- Pop Club Navigation -->
+      <nav class="club-nav pop-only" aria-label="Main navigation">
+        <a href="#collection">The collection <span>01</span></a>
+        <a href="#studio">Your studio <span>02</span></a>
+      </nav>
+
       <div class="topbar-actions">
-        <div id="model-indicator" class="model-indicator" title="AI Model Status">
-          <span id="ai-status" class="status-dot"><i></i> Checking AI</span>
+        <!-- Topbar AI Model Status Indicator (Classic mode) -->
+        <div id="model-indicator-topbar" class="model-indicator model-indicator-topbar classic-only" title="AI Model Status">
+          <span id="ai-status-topbar" class="status-dot"><i></i> Checking AI</span>
           <span class="status-separator" aria-hidden="true">·</span>
-          <span id="model-badge" class="model-badge">Connecting…</span>
+          <span id="model-badge-topbar" class="model-badge">Connecting…</span>
         </div>
-        <div class="session-badge" title="Total recording attempts in this browser, across all visits">
-          <strong id="session-count">0</strong> <span>total recordings</span>
+
+        <div class="session-badge" title="Total recording attempts in this browser">
+          <span class="session-badge-pop pop-only" aria-hidden="true">✳</span>
+          <strong id="session-count">0</strong>
+          <span class="pop-only">takes &amp; counting</span>
+          <span class="classic-only">recordings</span>
         </div>
+
         <button id="settings-button" class="quiet-button" type="button" aria-controls="settings">Settings</button>
       </div>
     </header>
 
-    <main class="app-shell">
-      <aside class="library-panel panel">
-        <div class="panel-heading">
-           <div><p class="eyebrow">Workspace</p><h2>Your library</h2></div>
-          <label class="upload-button" title="Choose an MP3, MP4, M4A, or WAV file"><input id="file-input" type="file" accept="audio/*,video/mp4" /><span aria-hidden="true">＋</span> Add</label>
-        </div>
-        <div id="source-name" class="source-empty">Choose an audio/video file to begin.</div>
-        <button id="scan-button" class="secondary-button wide" type="button" disabled>Make practice clips <span aria-hidden="true">→</span></button>
-        <p class="helper">Short clips, split at natural pauses. Ready to repeat.</p>
-        <div class="library-divider"><span>Available audio</span><span id="library-count" class="count-badge">0</span></div>
-        <div id="library-list" class="library-list" aria-live="polite"></div>
-        <div class="privacy-note"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><p><strong>Local workspace.</strong> AI processes short clips for analysis and recordings for feedback.</p></div>
-      </aside>
-
-      <section class="practice-panel">
-        <div class="practice-heading">
-          <div><p class="eyebrow"><span class="eyebrow-dot"></span> Japanese shadowing</p><h1>Find your rhythm.</h1><p class="practice-subtitle">One line at a time. A little more natural, every take.</p></div>
-          <ol class="practice-flow" aria-label="Practice workflow"><li><span>01</span> Listen</li><li><span>02</span> Repeat</li><li><span>03</span> Refine</li></ol>
-        </div>
-
-        <div id="empty-stage" class="empty-stage">
-          <div class="empty-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>
-            </svg>
+    <main id="home" class="app-shell">
+      <!-- POP HERO (Pop mode only) -->
+      <section class="club-hero pop-only" aria-labelledby="club-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> A space for Japanese, out loud.</p>
+          <h1 id="club-title">GOOD EARS.<br>BRAVE <span class="voice-word">VOICE.<svg viewBox="0 0 560 28" aria-hidden="true"><path d="M5 19Q230-4 551 11M42 26Q319 9 517 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></span></h1>
+          <div class="hero-bottom">
+            <p>Borrow a line. Find your rhythm.<br>Sound a little more like <em>you.</em></p>
+            <a class="round-link" href="#collection" aria-label="Explore the audio collection">↘</a>
           </div>
-          <p class="eyebrow">Your next conversation starts here</p>
-          <h2>Make their words feel like yours.</h2>
-          <p>Choose audio from your library or add a file.<br>We’ll turn it into short, repeatable moments.</p>
-          <button id="empty-upload" class="primary-button" type="button">Add your audio <span aria-hidden="true">↗</span></button>
-          <span class="empty-formats">MP3 · M4A · WAV · MP4</span>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <span class="art-note">your next main-character moment ↴</span>
+          <div class="record-sleeve">
+            <div class="sleeve-top"><span>SHADOWING RECORDS</span><span>VOL. 001 ↗</span></div>
+            <span class="sleeve-japanese" lang="ja">声に<br>出そう。</span>
+            <div class="hero-record"><div class="record-label"><span>ON<br>REPEAT</span><i></i><small>33⅓ RPM</small></div></div>
+            <div class="sleeve-bottom"><span>LISTEN / REPEAT / BECOME</span><span>ステレオ</span></div>
+          </div>
+          <div class="smile-sticker"><svg viewBox="0 0 100 100"><path d="M32 29v14m36-14v14M25 60q25 33 50 0" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg><span>FEEL THE WORDS</span></div>
+          <div class="art-ticket"><span>ADMIT ONE</span><strong>Your voice belongs here.</strong><span>NO PERFECT JAPANESE REQUIRED</span></div>
+          <span class="art-star">✳</span>
+        </div>
+      </section>
+
+      <!-- POP STRIP (Pop mode only) -->
+      <div class="club-strip pop-only" aria-label="Listen, repeat, make it yours">
+        <span>LESS SCROLLING</span><span aria-hidden="true">✳</span><span>MORE SPEAKING</span><span aria-hidden="true">✳</span><span lang="ja">聞いて、まねして、自分の声に。</span><span aria-hidden="true">✳</span><span>MAKE SOME NOISE</span><span aria-hidden="true">↗</span>
+      </div>
+
+      <!-- LIBRARY PANEL (Left sidebar in Classic; Horizontal collection shelf in Pop) -->
+      <section id="collection" class="library-panel panel" aria-labelledby="collection-title">
+        <div class="panel-heading">
+          <div class="pop-only"><p class="eyebrow">01 / THE COLLECTION</p><h2 id="collection-title">Pick your <em>obsession.</em></h2></div>
+          <div class="classic-only"><p class="eyebrow">Workspace</p><h2>Your library</h2></div>
+          <div class="collection-actions">
+            <label class="upload-button" title="Choose an MP3, MP4, M4A, or WAV file">
+              <input id="file-input" type="file" accept="audio/*,video/mp4" />
+              <span aria-hidden="true">＋</span>
+              <span class="pop-only">Bring your own</span>
+              <span class="classic-only">Add</span>
+            </label>
+            <div class="shelf-controls pop-only">
+              <button id="shelf-back" class="icon-button" type="button" aria-label="Scroll collection left">←</button>
+              <button id="shelf-next" class="icon-button" type="button" aria-label="Scroll collection right">→</button>
+            </div>
+          </div>
         </div>
 
+        <div class="collection-caption pop-only">
+          <p>Anime rabbit holes. Podcast favorites. A voice worth borrowing.</p>
+          <span><strong id="library-count">0</strong> TRACKS / LOCAL LIBRARY</span>
+        </div>
+
+        <!-- Classic top controls in sidebar -->
+        <div class="classic-source-wrap classic-only">
+          <div id="source-name-classic" class="source-empty">Choose an audio/video file to begin.</div>
+          <button id="scan-button-classic" class="secondary-button wide scan-button" type="button" disabled>Make practice clips <span aria-hidden="true">→</span></button>
+          <p class="helper">Short clips, split at natural pauses. Ready to repeat.</p>
+          <div class="library-divider"><span>Available audio</span><span id="library-count-classic" class="count-badge">0</span></div>
+        </div>
+
+        <!-- The Track List / Record Shelf -->
+        <div id="library-list" class="library-list" aria-live="polite"></div>
+
+        <!-- Classic privacy note in sidebar -->
+        <div class="privacy-note classic-only">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+          <p><strong>Local workspace.</strong> Audio stays local. AI analyzes clips and recordings.</p>
+        </div>
+
+        <!-- Pop turntable source bar -->
+        <div class="source-bar pop-only">
+          <span class="source-bar-label">ON THE TURNTABLE <span aria-hidden="true">↗</span></span>
+          <div id="source-name" class="source-empty">Nothing spinning yet. Choose a track above.</div>
+          <button id="scan-button" class="secondary-button scan-button" type="button" disabled>Make practice clips <span aria-hidden="true">→</span></button>
+        </div>
+      </section>
+
+      <!-- STUDIO / PRACTICE WORKSPACE -->
+      <section id="studio" class="practice-panel" aria-labelledby="studio-title" tabindex="-1">
+        <div class="practice-heading">
+          <div class="pop-only">
+            <p class="eyebrow">02 / YOUR STUDIO</p>
+            <h2 id="studio-title">A little less shy.<br><em>A little more you.</em></h2>
+          </div>
+          <p class="studio-note pop-only">This is a practice space.<br>Not a perfect space. <span aria-hidden="true">✳</span></p>
+
+          <div class="classic-only">
+            <p class="eyebrow"><span class="eyebrow-dot"></span> Japanese shadowing</p>
+            <h1>Find your rhythm.</h1>
+            <p class="practice-subtitle">One line at a time. A little more natural, every take.</p>
+          </div>
+          <ol class="practice-flow classic-only" aria-label="Practice workflow">
+            <li><span>01</span> Listen</li>
+            <li><span>02</span> Repeat</li>
+            <li><span>03</span> Refine</li>
+          </ol>
+        </div>
+
+        <!-- Empty stage when no audio is loaded -->
+        <div id="empty-stage" class="empty-stage">
+          <!-- Pop empty stage -->
+          <div class="empty-intro pop-only">
+            <span class="empty-doodle" aria-hidden="true">↳</span>
+            <p class="eyebrow">YOUR MIC IS WAITING</p>
+            <h3 id="empty-title">From “I get it”<br>to <em>“I can say it.”</em></h3>
+            <p id="empty-description">Choose a track from the collection, or bring a little audio of your own.</p>
+            <button id="empty-upload" class="primary-button" type="button">Bring your own audio <span aria-hidden="true">↗</span></button>
+            <span class="empty-formats">MP3 / M4A / WAV / MP4</span>
+          </div>
+          <ol class="practice-flow pop-only" aria-label="How shadowing works">
+            <li><span class="step-number">01</span><div><h3>Steal the rhythm.</h3><p>Listen to a bite-sized clip. Catch the little pauses, the rise, the fall.</p></div><span class="step-art" aria-hidden="true">↝</span></li>
+            <li><span class="step-number">02</span><div><h3>Make some noise.</h3><p>Say it back. Record a take. Awkward is just the sound of getting started.</p></div><span class="step-art" aria-hidden="true">✳</span></li>
+            <li><span class="step-number">03</span><div><h3>Find your thing.</h3><p>Get a little feedback, try again, and hear yourself getting closer.</p></div><span class="step-art" aria-hidden="true">↗</span></li>
+          </ol>
+
+          <!-- Classic empty stage -->
+          <div class="empty-classic-content classic-only">
+            <div class="empty-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>
+              </svg>
+            </div>
+            <p class="eyebrow">Your next conversation starts here</p>
+            <h2>Make their words feel like yours.</h2>
+            <p>Choose audio from your library or add a file.<br>We’ll turn it into short, repeatable moments.</p>
+            <button id="empty-upload-classic" class="primary-button" type="button">Add your audio <span aria-hidden="true">↗</span></button>
+            <span class="empty-formats">MP3 · M4A · WAV · MP4</span>
+          </div>
+        </div>
+
+        <!-- Active study stage -->
         <div id="study-stage" class="study-stage hidden">
           <div id="auto-analyze-bar" class="auto-analyze-bar hidden">
             <div class="auto-analyze-info">
@@ -83,10 +213,11 @@
             </button>
           </div>
 
-          <!-- Unified Shadowing Deck: Playback & Recording Combined -->
+          <!-- Unified Practice Deck: Audio Playback & Recording Controls -->
           <div class="shadowing-deck wave-card">
             <div class="deck-heading">
-              <div><p class="eyebrow">01 / Listen & repeat</p><h2>The practice deck</h2></div>
+              <div class="pop-only"><p class="eyebrow">SIDE A / THE ORIGINAL</p><h3>Catch the rhythm.</h3></div>
+              <div class="classic-only"><p class="eyebrow">01 / Listen &amp; repeat</p><h2>The practice deck</h2></div>
               <div class="section-actions">
                 <span class="deck-shortcut"><kbd>P</kbd> to play</span>
                 <button class="collapse-button" data-collapse="deck-body" data-section-label="practice deck" type="button" aria-controls="deck-body" aria-expanded="true" aria-label="Collapse practice deck">
@@ -94,82 +225,90 @@
                 </button>
               </div>
             </div>
+
             <div id="deck-body">
-            <div class="wave-topline">
-              <span id="clip-label">CLIP 01</span>
-              <span id="clip-time">0:00 — 0:08</span>
-            </div>
-            <div class="timeline simple-progress" role="slider" tabindex="0" aria-label="Current clip playback position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-              <div id="progress-fill" class="progress-fill"></div>
-              <div id="playhead" class="playhead"></div>
-            </div>
-
-            <div class="unified-controls">
-              <div class="transport-group">
-                <button id="back-5" class="transport-small" type="button">−<span id="back-label">5s</span></button>
-                <button id="play-clip" class="play-button" type="button" aria-label="Play current clip" aria-keyshortcuts="p" title="Play / pause (P)">▶</button>
-                <button id="forward-3" class="transport-small" type="button">+<span id="forward-label">5s</span></button>
-                <div class="speed-group" aria-label="Playback speed">
-                  <button type="button" data-rate="0.75">.75×</button>
-                  <button type="button" data-rate="0.9">.9×</button>
-                  <button class="active" type="button" data-rate="1">1×</button>
-                  <button type="button" data-rate="1.15">1.15×</button>
-                </div>
-                <button id="loop-button" class="loop-button" type="button">↻ Loop</button>
+              <div class="deck-visual pop-only" aria-hidden="true">
+                <div class="deck-disc"><span>SHADOWING<br><strong>REPEAT<br>AFTER ME.</strong><i></i>33⅓</span></div>
+                <div class="deck-visual-type">LISTEN<br><em>CLOSELY.</em><span>同じリズムで。</span></div>
               </div>
 
-              <div class="record-group">
-                <div class="record-prompt"><strong>Your turn</strong><span id="record-hint">Recording starts after the clip.</span></div>
-                <div class="record-actions">
-                <button id="record-button" class="record-button" type="button" aria-keyshortcuts="r"><span></span> Record attempt <kbd>R</kbd></button>
-                <button id="cancel-auto-record" class="quiet-button hidden" type="button">Cancel</button>
-                <span id="record-timer" class="record-timer">0:00</span>
-                <span id="record-status" class="record-status" role="status">READY</span>
-                </div>
-                <div class="practice-mode-setting">
-                  <div><label id="guided-label" for="guided-button">Listen → speak</label><p id="guided-description">Start recording automatically after each clip.</p></div>
-                  <button id="guided-button" class="switch-control" type="button" role="switch" aria-checked="true" aria-labelledby="guided-label" aria-describedby="guided-description"><span></span></button>
-                </div>
+              <div class="wave-topline">
+                <span id="clip-label">CLIP 01</span>
+                <span id="clip-time">0:00 — 0:08</span>
               </div>
-            </div>
 
-            <div id="recording-result" class="recording-result hidden">
-              <div class="attempt-player" role="group" aria-label="Your recording">
-                <button id="attempt-play" class="icon-button" type="button" aria-label="Play your recording" disabled>▶</button>
-                <div class="attempt-track">
-                  <div class="attempt-topline"><span>Your recording</span><span id="attempt-time">0:00 / 0:00</span></div>
-                  <input id="attempt-seek" class="attempt-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Recording playback position" disabled />
-                </div>
-                <audio id="attempt-audio" preload="metadata"></audio>
+              <div class="timeline simple-progress" role="slider" tabindex="0" aria-label="Current clip playback position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div id="progress-fill" class="progress-fill"></div>
+                <div id="playhead" class="playhead"></div>
               </div>
-              <button id="grade-button" class="secondary-button" type="button">Re-evaluate</button>
-            </div>
-            <audio id="source-audio" preload="metadata"></audio>
+
+              <div class="unified-controls">
+                <div class="transport-group">
+                  <button id="back-5" class="transport-small" type="button">−<span id="back-label">5s</span></button>
+                  <button id="play-clip" class="play-button" type="button" aria-label="Play current clip" aria-keyshortcuts="p" title="Play / pause (P)">▶</button>
+                  <button id="forward-3" class="transport-small" type="button">+<span id="forward-label">5s</span></button>
+                  <div class="speed-group" aria-label="Playback speed">
+                    <button type="button" data-rate="0.75">.75×</button>
+                    <button type="button" data-rate="0.9">.9×</button>
+                    <button class="active" type="button" data-rate="1">1×</button>
+                    <button type="button" data-rate="1.15">1.15×</button>
+                  </div>
+                  <button id="loop-button" class="loop-button" type="button">↻ Loop</button>
+                </div>
+
+                <div class="record-group">
+                  <div class="record-prompt">
+                    <strong class="pop-only">SIDE B / YOUR VOICE</strong>
+                    <strong class="classic-only">Your turn</strong>
+                    <span id="record-hint">Recording starts after the clip.</span>
+                  </div>
+                  <div class="record-actions">
+                    <button id="record-button" class="record-button" type="button" aria-keyshortcuts="r"><span></span> Record attempt <kbd>R</kbd></button>
+                    <button id="cancel-auto-record" class="quiet-button hidden" type="button">Cancel</button>
+                    <span id="record-timer" class="record-timer">0:00</span>
+                    <span id="record-status" class="record-status" role="status">READY</span>
+                  </div>
+
+                  <!-- Listen -> Speak (Auto Record) Setting -->
+                  <div class="practice-mode-setting">
+                    <div>
+                      <label id="guided-label" for="guided-button">Listen → speak</label>
+                      <p id="guided-description">Start recording automatically after each clip.</p>
+                    </div>
+                    <button id="guided-button" class="switch-control" type="button" role="switch" aria-checked="true" aria-labelledby="guided-label" aria-describedby="guided-description"><span></span></button>
+                  </div>
+
+                  <!-- NEW: Keep Playing Clips (Continuous Playback) Setting -->
+                  <div class="practice-mode-setting continuous-setting">
+                    <div>
+                      <label id="continuous-label" for="continuous-button">Keep playing clips</label>
+                      <p id="continuous-description">Play clips continuously without pausing to record.</p>
+                    </div>
+                    <button id="continuous-button" class="switch-control" type="button" role="switch" aria-checked="false" aria-labelledby="continuous-label" aria-describedby="continuous-description"><span></span></button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="recording-result" class="recording-result hidden">
+                <div class="attempt-player" role="group" aria-label="Your recording">
+                  <button id="attempt-play" class="icon-button" type="button" aria-label="Play your recording" disabled>▶</button>
+                  <div class="attempt-track">
+                    <div class="attempt-topline"><span>Your recording</span><span id="attempt-time">0:00 / 0:00</span></div>
+                    <input id="attempt-seek" class="attempt-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Recording playback position" disabled />
+                  </div>
+                  <audio id="attempt-audio" preload="metadata"></audio>
+                </div>
+                <button id="grade-button" class="secondary-button" type="button">Re-evaluate</button>
+              </div>
+              <audio id="source-audio" preload="metadata"></audio>
             </div>
           </div>
-
-          <section id="feedback-card" class="feedback-card panel">
-            <div class="sentence-heading">
-              <div><p class="eyebrow">02 / Refine your delivery</p><h2>Speech feedback</h2></div>
-              <div class="section-actions">
-                <span id="feedback-status" class="subtle-badge">Ready for your first take</span>
-                <button class="collapse-button" data-collapse="feedback-body" data-section-label="speech feedback" type="button" aria-controls="feedback-body" aria-expanded="true" aria-label="Collapse speech feedback">
-                  <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                </button>
-              </div>
-            </div>
-            <div id="feedback-body">
-            <div id="feedback" class="feedback empty-feedback" aria-live="polite">
-              <div class="feedback-placeholder-metrics" aria-hidden="true"><div><span>Pronunciation</span><strong>—</strong></div><div><span>Rhythm</span><strong>—</strong></div><div><span>Intonation</span><strong>—</strong></div></div>
-              <div class="feedback-invitation"><span class="feedback-spark" aria-hidden="true"><svg class="ui-icon" fill="currentColor"><use href="#icon-sparkle"/></svg></span><p><strong>Small adjustments. Noticeable progress.</strong>Record a take to get personalised feedback and a clear next step.</p></div>
-            </div>
-            </div>
-          </section>
 
           <!-- Target Sentence Display with Furigana (Ruby) -->
           <section class="sentence-card panel">
             <div class="sentence-heading">
-              <div><p class="eyebrow">03 / Look a little closer</p><h2>Target sentence</h2></div>
+              <div class="pop-only"><p class="eyebrow">THE LINER NOTES</p><h3>Between the lines.</h3></div>
+              <div class="classic-only"><p class="eyebrow">03 / Look a little closer</p><h2>Target sentence</h2></div>
               <div class="section-actions">
                 <span id="analysis-state" class="analysis-state">Local clip</span>
                 <button id="translation-toggle" class="quiet-button translation-toggle" type="button" aria-expanded="false" title="Toggle translation">
@@ -195,7 +334,29 @@
 
               <div class="sentence-actions">
                 <button id="analyze-button" class="primary-button" type="button"><svg class="ui-icon" fill="currentColor" aria-hidden="true"><use href="#icon-sparkle"/></svg> Analyze this clip</button>
-                <span class="selection-hint">Highlight a word to ask your companion <span aria-hidden="true">↗</span></span>
+                <span class="selection-hint pop-only">Highlight a word. Ask your buddy. <span aria-hidden="true">↗</span></span>
+                <span class="selection-hint classic-only">Highlight a word to ask your companion <span aria-hidden="true">↗</span></span>
+              </div>
+              <div class="sentence-footnote pop-only"><span aria-hidden="true">✳</span><p>Don’t just read it.<br><em>Feel how it sounds.</em></p></div>
+            </div>
+          </section>
+
+          <!-- Speech Feedback Card -->
+          <section id="feedback-card" class="feedback-card panel">
+            <div class="sentence-heading">
+              <div class="pop-only"><p class="eyebrow">THE PLAYBACK NOTES</p><h3>Good things take a few takes.</h3></div>
+              <div class="classic-only"><p class="eyebrow">02 / Refine your delivery</p><h2>Speech feedback</h2></div>
+              <div class="section-actions">
+                <span id="feedback-status" class="subtle-badge">Ready for your first take</span>
+                <button class="collapse-button" data-collapse="feedback-body" data-section-label="speech feedback" type="button" aria-controls="feedback-body" aria-expanded="true" aria-label="Collapse speech feedback">
+                  <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+              </div>
+            </div>
+            <div id="feedback-body">
+              <div id="feedback" class="feedback empty-feedback" aria-live="polite">
+                <div class="feedback-placeholder-metrics" aria-hidden="true"><div><span>Pronunciation</span><strong>—</strong></div><div><span>Rhythm</span><strong>—</strong></div><div><span>Intonation</span><strong>—</strong></div></div>
+                <div class="feedback-invitation"><span class="feedback-spark" aria-hidden="true"><svg class="ui-icon" fill="currentColor"><use href="#icon-sparkle"/></svg></span><p><strong>Small adjustments. Noticeable progress.</strong>Record a take to get personalised feedback and a clear next step.</p></div>
               </div>
             </div>
           </section>
@@ -203,11 +364,15 @@
         </div>
       </section>
 
-      <!-- Side Panel Companion Chat -->
-      <aside class="chat-panel panel">
+      <!-- Language Buddy / Companion Chat
+           In Pop Mode: Modal dialog opened by floating button
+           In Classic Mode: Docked 3rd column sidebar on desktop -->
+      <dialog id="buddy-dialog" class="chat-panel panel" aria-labelledby="buddy-title">
         <div class="chat-heading">
-          <div><p class="eyebrow">A little guidance</p><h2>Line companion <svg class="ui-icon companion-spark" fill="currentColor" aria-hidden="true"><use href="#icon-sparkle"/></svg></h2></div>
+          <div class="pop-only"><p class="eyebrow">A FRIEND IN YOUR HEADPHONES</p><h2 id="buddy-title">Your language buddy.</h2></div>
+          <div class="classic-only"><p class="eyebrow">A little guidance</p><h2 id="buddy-title-classic">Line companion <svg class="ui-icon companion-spark" fill="currentColor" aria-hidden="true"><use href="#icon-sparkle"/></svg></h2></div>
           <div class="section-actions">
+            <button id="buddy-close" class="icon-button pop-only" type="button" aria-label="Close language buddy">×</button>
             <button class="collapse-button" data-collapse="chat-body" data-section-label="companion chat" type="button" aria-controls="chat-body" aria-expanded="true" aria-label="Collapse companion chat">
               <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </button>
@@ -235,14 +400,36 @@
             </button>
           </form>
         </div>
-      </aside>
+      </dialog>
     </main>
+
+    <!-- Pop Club Footer (Pop mode only) -->
+    <footer class="club-footer pop-only">
+      <a class="footer-wordmark" href="#home">say it again<span>↗</span></a>
+      <div class="footer-details">
+        <p>Made for your ears. And your voice.<br><span>Audio stays local. AI analyzes clips and recordings.</span></p>
+        <div id="model-indicator" class="model-indicator" title="AI Model Status">
+          <span id="ai-status" class="status-dot"><i></i> Checking AI</span>
+          <span class="status-separator" aria-hidden="true">/</span>
+          <span id="model-badge" class="model-badge">Connecting…</span>
+        </div>
+        <span class="footer-edition">SHADOWING CLUB © 2026</span>
+      </div>
+    </footer>
+
+    <!-- Floating Buddy Launcher Button (Pop mode only) -->
+    <button id="buddy-open" class="buddy-launcher pop-only" type="button" aria-haspopup="dialog" aria-controls="buddy-dialog">
+      <span class="buddy-face" aria-hidden="true">✳</span>
+      <span>A little help?<small>ASK YOUR LANGUAGE BUDDY</small></span>
+      <span aria-hidden="true">↗</span>
+    </button>
 
     <!-- Floating Highlight Tooltip -->
     <div id="selection-tooltip" class="selection-tooltip hidden">
-       <button id="tooltip-explain-btn" type="button"><svg class="ui-icon" fill="currentColor" aria-hidden="true"><use href="#icon-sparkle"/></svg> Ask companion <span aria-hidden="true">↗</span></button>
+      <button id="tooltip-explain-btn" type="button"><svg class="ui-icon" fill="currentColor" aria-hidden="true"><use href="#icon-sparkle"/></svg> Ask companion <span aria-hidden="true">↗</span></button>
     </div>
 
+    <!-- Practice Settings Drawer -->
     <aside id="settings" class="settings hidden" aria-label="Settings">
       <div class="settings-head">
         <h2>Practice settings</h2>
@@ -250,19 +437,62 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
       </div>
+
+      <!-- Design Switcher -->
+      <label class="setting-row">
+        <span>Interface style</span>
+        <select id="ui-design">
+          <option value="pop" selected>Pop / Listening Club</option>
+          <option value="classic">Classic / Studio Dark</option>
+        </select>
+      </label>
+
       <label class="setting-row">Arrow-key jump <select id="jump-length"><option value="3">3 seconds</option><option value="5" selected>5 seconds</option><option value="8">8 seconds</option><option value="10">10 seconds</option></select></label>
       <label class="setting-row">Reflection pause <select id="reflection-delay"><option value="0">Off</option><option value="3000" selected>3 seconds</option><option value="4000">4 seconds</option></select></label>
       <label class="setting-row">Record after playback <input id="auto-record" type="checkbox" checked></label>
+      <label class="setting-row">Keep playing clips <input id="continuous-play" type="checkbox"></label>
+
+      <!-- Friends Access Lock Settings -->
+      <div class="settings-group">
+        <span class="eyebrow">FRIENDS ACCESS LOCK</span>
+        <label class="setting-row">
+          <span>Passcode</span>
+          <input id="lock-passcode-input" class="text-input" type="text" placeholder="Passcode (default: shadowing)" />
+        </label>
+        <div class="settings-inline-actions">
+          <button id="save-passcode-button" class="quiet-button" type="button">Update</button>
+          <button id="lock-now-button" class="secondary-button" type="button">Lock App Now</button>
+        </div>
+      </div>
+
       <div class="shortcut-list">
         <span><kbd>←</kbd><kbd>→</kbd> jump</span>
         <span><kbd>↑</kbd><kbd>↓</kbd> previous / next (play)</span>
         <span><kbd>P</kbd> play / pause</span>
         <span><kbd>R</kbd> start recording</span>
-        <span><kbd>T</kbd> stop & submit recording</span>
+        <span><kbd>T</kbd> stop &amp; submit recording</span>
       </div>
-      <p>Making clips starts AI analysis. Each recording is sent for feedback when you stop.</p>
+      <p class="settings-note">Making clips starts AI analysis. Each recording is sent for feedback when you stop.</p>
     </aside>
+
+    <!-- Friends Access Lock Screen Overlay -->
+    <div id="app-lock-screen" class="lock-screen hidden" role="dialog" aria-modal="true" aria-labelledby="lock-title">
+      <div class="lock-card">
+        <span class="lock-badge" aria-hidden="true">🔒</span>
+        <h2 id="lock-title">Shadowing Space</h2>
+        <p id="lock-description">Private listening &amp; shadowing room. Enter passcode to begin.</p>
+        <form id="lock-form" class="lock-form">
+          <div class="lock-input-wrap">
+            <input id="lock-input" type="password" placeholder="Enter passcode…" autocomplete="current-password" required />
+            <button type="button" id="lock-toggle-pwd" class="icon-button" aria-label="Toggle password visibility">👁</button>
+          </div>
+          <button type="submit" class="primary-button lock-submit">Enter Studio <span aria-hidden="true">→</span></button>
+          <p id="lock-error" class="lock-error hidden" role="alert">Incorrect passcode. Try again.</p>
+        </form>
+      </div>
+    </div>
+
     <div id="toast" class="toast" role="status"></div>
-    <script type="module" src="/app.js"></script>
+    <script type="module" src="./app.js"></script>
   </body>
 </html>
