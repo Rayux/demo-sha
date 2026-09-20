@@ -15,6 +15,7 @@ const ui = {
   progress: $("#progress-fill"),
   playhead: $("#playhead"),
   play: $("#play-clip"),
+  playFull: $("#play-full"),
   back: $("#back-5"),
   forward: $("#forward-3"),
   backLabel: $("#back-label"),
@@ -662,7 +663,7 @@ function renderAnalyzeButton(clip) {
   ui.analyze.innerHTML = `${sparkleIcon} ${label}`;
 }
 
-function renderActiveClip() {
+function renderActiveClip(preventAudioInterrupt = false) {
   const clip = currentClip();
   if (!clip) return;
   
@@ -683,7 +684,10 @@ function renderActiveClip() {
   ui.analysisState.textContent = clip.analyzed ? "AI analyzed" : (state.autoAnalyzing && state.analyzingIndex === state.active ? "Analyzing…" : (clip.failed ? "Analysis failed" : "Local clip"));
   renderAnalyzeButton(clip);
   ui.chatContext.textContent = clip.japanese || `Clip ${state.active + 1}: add a transcript or analyze this short audio clip.`;
-  restartClip(false);
+  
+  if (!preventAudioInterrupt) {
+    restartClip(false);
+  }
 }
 
 function selectClip(index, autoPlay = false) {
@@ -757,6 +761,8 @@ function cancelPendingRecording() {
 
 function cancelPracticePlayback() {
   state.playbackActive = false;
+  state.playFullTrack = false;
+  if (ui.playFull) ui.playFull.textContent = "▶ ALL";
   ui.audio.pause();
   cancelPendingRecording();
 }
@@ -891,6 +897,52 @@ function togglePlay() {
   } else {
     cancelPracticePlayback();
   }
+}
+
+function toggleFullPlayback() {
+  if (!state.source) return toast("Load an audio track first.");
+  if (state.recorder?.state === "recording") return toast("Stop your recording first.");
+  
+  if (state.playFullTrack && !ui.audio.paused) {
+    state.playFullTrack = false;
+    cancelPracticePlayback();
+    ui.playFull.textContent = "▶ ALL";
+    return;
+  }
+  
+  cancelPendingRecording();
+  state.playFullTrack = true;
+  state.playbackActive = false; // Disable clip bounds checking
+  ui.audio.playbackRate = state.rate;
+  ui.playFull.textContent = "⏸ ALL";
+  
+  cancelAnimationFrame(playbackLoopId);
+  function monitorFullPlayback() {
+    if (!state.playFullTrack) return;
+    if (ui.audio.ended || ui.audio.paused) {
+      state.playFullTrack = false;
+      ui.playFull.textContent = "▶ ALL";
+      return;
+    }
+    
+    const time = ui.audio.currentTime;
+    const currentIdx = state.clips.findIndex(c => time >= c.start && time < c.end);
+    if (currentIdx !== -1 && currentIdx !== state.active) {
+      state.active = currentIdx;
+      renderActiveClip(true);
+    }
+    
+    updateTransportProgress();
+    playbackLoopId = requestAnimationFrame(monitorFullPlayback);
+  }
+  
+  ui.audio.play().then(() => {
+    playbackLoopId = requestAnimationFrame(monitorFullPlayback);
+  }).catch(() => {
+    state.playFullTrack = false;
+    ui.playFull.textContent = "▶ ALL";
+    toast("The audio could not start.");
+  });
 }
 
 function seekBy(amount) {
@@ -1755,6 +1807,7 @@ ui.pills.addEventListener("click", (event) => { const button = event.target.clos
 ui.previous.addEventListener("click", () => selectClip(state.active - 1, true));
 ui.next.addEventListener("click", () => selectClip(state.active + 1, true));
 ui.play.addEventListener("click", togglePlay);
+ui.playFull.addEventListener("click", toggleFullPlayback);
 ui.back.addEventListener("click", () => seekBy(-state.jumpLength));
 ui.forward.addEventListener("click", () => seekBy(state.jumpLength));
 ui.loop.addEventListener("click", () => {
