@@ -228,6 +228,14 @@ function geminiText(response) {
     .map((part) => part.text || "")
     .join("\n");
 }
+function extractJSON(text) {
+  const match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (match) return match[1].trim();
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start !== -1 && end !== -1) return text.slice(start, end + 1).trim();
+  return text.trim();
+}
 
 async function proxyTranscription(req, res) {
   const hasOpenAI = Boolean(process.env.OPENAI_API_KEY?.trim());
@@ -332,7 +340,7 @@ async function askModel(req, res, kind) {
         const text = await groqChat(instructions, input, isExplain);
         const groqModel = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
         if (isExplain) {
-          const cleaned = text.replace(/^```json\s*|\s*```$/g, "").trim();
+          const cleaned = extractJSON(text);
           try { return json(res, 200, { analysis: JSON.parse(cleaned), modelUsed: `Groq (${groqModel})`, provider: "groq" }); }
           catch { return json(res, 200, { analysis: { rubyText: "", translation: "", literal: "", raw: text }, modelUsed: `Groq (${groqModel})`, provider: "groq" }); }
         }
@@ -349,7 +357,7 @@ async function askModel(req, res, kind) {
         const selectedModel = process.env.OPENAI_MODEL || "gpt-4o-mini";
         const text = await openaiChat(instructions, input, isExplain, selectedModel);
         if (isExplain) {
-          const cleaned = text.replace(/^```json\s*|\s*```$/g, "").trim();
+          const cleaned = extractJSON(text);
           try { return json(res, 200, { analysis: JSON.parse(cleaned), modelUsed: selectedModel, provider: "openai" }); }
           catch { return json(res, 200, { analysis: { rubyText: "", translation: "", literal: "", raw: text }, modelUsed: selectedModel, provider: "openai" }); }
         }
@@ -369,7 +377,7 @@ async function askModel(req, res, kind) {
     const result = await geminiRequest(payload);
     const text = geminiText(result);
     if (isExplain) {
-      const cleaned = text.replace(/^```json\s*|\s*```$/g, "").trim();
+      const cleaned = extractJSON(text);
       try { return json(res, 200, { analysis: JSON.parse(cleaned), modelUsed: "gemini-3.8-flash" }); }
       catch { return json(res, 200, { analysis: { rubyText: "", translation: "", literal: "", raw: text }, modelUsed: "gemini-3.8-flash" }); }
     }
@@ -427,7 +435,7 @@ Scoring criteria:
     if (hasGroq) {
       try {
         const reply = await groqChat(systemPrompt, userPrompt, true);
-        evaluation = JSON.parse(reply.replace(/^```json\s*|\s*```$/g, "").trim());
+        evaluation = JSON.parse(extractJSON(reply));
         const groqModel = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
         modelUsed = `Groq (${groqModel})`;
       } catch (err) {
@@ -441,7 +449,7 @@ Scoring criteria:
       try {
         const selectedModel = process.env.OPENAI_MODEL || "gpt-4o-mini";
         const reply = await openaiChat(systemPrompt, userPrompt, true, selectedModel);
-        evaluation = JSON.parse(reply.replace(/^```json\s*|\s*```$/g, "").trim());
+        evaluation = JSON.parse(extractJSON(reply));
         modelUsed = selectedModel;
       } catch (err) {
         console.warn("[evaluateSpeech] OpenAI failed, falling back to Gemini:", err.message);
@@ -456,7 +464,7 @@ Scoring criteria:
         generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
       };
       const result = await geminiRequest(payload);
-      const text = geminiText(result).replace(/^```json\s*|\s*```$/g, "").trim();
+      const text = extractJSON(geminiText(result));
       evaluation = JSON.parse(text);
       modelUsed = process.env.GEMINI_MODEL || "gemini-3.8-flash";
     }
