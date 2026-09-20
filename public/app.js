@@ -178,7 +178,7 @@ function renderRubyHtml(text = "", rubyText = "") {
     return source.replace(/([|‖])/g, '<span class="pause-marker">$1</span>');
   }
   let html = escapeHtml(source);
-  html = html.replace(/([一-龯々〆ヵヶ]+)\[([ぁ-んァ-ヶー]+)\]/g, "<ruby>$1<rt>$2</rt></ruby>");
+  html = html.replace(/([一-龯々〆ヵヶ]+[ぁ-んァ-ヶー]*?)\[([ぁ-んァ-ヶー]+)\]/g, "<ruby>$1<rt>$2</rt></ruby>");
   html = html.replace(/([|‖])/g, '<span class="pause-marker">$1</span>');
   return html;
 }
