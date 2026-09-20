@@ -1,0 +1,1917 @@
+{
+  "source": "The Promised Neverland - S01E02 - 131045 HDTV-1080p.condensed.mp3",
+  "updatedAt": "2026-09-20T03:45:23.988Z",
+  "clipCount": 191,
+  "clips": [
+    {
+      "start": 0.2,
+      "end": 2,
+      "japanese": "コニー",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 3.9,
+      "end": 7.9,
+      "japanese": "おはやー!ほら、ビル走らないの!",
+      "rubyText": "おはやー!ほら、ビル走[はし]らないの!",
+      "translation": "早安！看，比爾沒在跑！",
+      "literal": "Good morning! Look, Bill not‑run (explanatory)",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 11.3,
+      "end": 16.5,
+      "japanese": "マルクはお皿並べてはーいママーおはようエマ",
+      "rubyText": "マルクはお皿[さら]並べて[ならべて]はーいママーおはようエマ",
+      "translation": "Marc，請把盤子擺好，好的，媽媽，早安，Emma。",
+      "literal": "Marc (topic) plates arrange okay Mom good morning Emma",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 16.7,
+      "end": 18,
+      "japanese": "笑って、エマ。",
+      "rubyText": "笑[わら]って、エマ。",
+      "translation": "笑吧，艾瑪。",
+      "literal": "laugh, Emma",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 18.3,
+      "end": 21.8,
+      "japanese": "いいかいエマ普段通りに振る舞うんだ",
+      "rubyText": "いいかいエマ普段[ふだん]通り[どおり]に振[ふ]る舞[ま]うんだ",
+      "translation": "好啦，艾瑪，照平常那樣行事吧。",
+      "literal": "Listen, Emma, (you) will act in the usual way.",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 22.6,
+      "end": 26,
+      "japanese": "僕たちは昨日規則を破って門へ行った",
+      "rubyText": "僕[ぼく]たちは昨日[きのう]規則[きそく]を破[やぶ]って門[もん]へ行[い]った",
+      "translation": "我們昨天違反規則，去了門口。",
+      "literal": "We yesterday rule(s) break gate to went",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 26.8,
+      "end": 28,
+      "japanese": "でも何も見なかった",
+      "rubyText": "でも何[なに]も見[み]なかった",
+      "translation": "但是什麼也沒看到。",
+      "literal": "but nothing saw-not",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 28.9,
+      "end": 35.1,
+      "japanese": "けど、リトルバーニー…ああ、きっとママは見つけただろう。でも…",
+      "rubyText": "けど、リトルバーニー…ああ、きっとママは見[み]つけただろう。でも…",
+      "translation": "但是，Little Bernie…啊，媽媽一定已經找到了。但…",
+      "literal": "但是，Little Bernie…啊，肯定媽媽找到了。但是…",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 35.1,
+      "end": 37.5,
+      "japanese": "誰の仕業かまではわからない",
+      "rubyText": "誰[だれ]の仕業[しわざ]かまではわからない",
+      "translation": "不知道是誰幹的",
+      "literal": "I don't know whose deed it is",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 37.9,
+      "end": 39.3,
+      "japanese": "ママ笑ってた",
+      "rubyText": "ママ笑[わら]ってた",
+      "translation": "媽媽在笑",
+      "literal": "Mama was laughing",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 40.1,
+      "end": 46.5,
+      "japanese": "全然顔に出さない僕らもそうするんだ顔に出せばママは気づく",
+      "rubyText": "全然[ぜんぜん]顔[かお]に出[だ]さない僕[ぼく]らもそうするんだ顔[かお]に出[だ]せばママは気[き]づく",
+      "translation": "即使我們平時完全不把情緒表現在臉上，也會這樣做；只要把情緒表現在臉上，媽媽就會注意到。",
+      "literal": "Even we who never show it on our faces also do it; if we show it on our faces, Mom notices.",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 47.9,
+      "end": 52.5,
+      "japanese": "負けちゃダメだ。笑おう。おいしい餌。",
+      "rubyText": "負[ま]けちゃダメだ。笑[わら]おう。おいしい餌[えさ]。",
+      "translation": "不能輸喔。要笑。好吃的餌食。",
+      "literal": "(Losing) is not allowed. (Let's) laugh. Delicious bait.",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 52.9,
+      "end": 57.8,
+      "japanese": "汚れの目立つ白い服 規則正しい生活",
+      "rubyText": "汚[よご]れの目[め]立[た]つ白[しろ]い服[ふく] 規則[きそく]正[ただ]しい生活[せいかつ]",
+      "translation": "容易顯髒的白衣，規律的生活",
+      "literal": "white clothes where dirt stands out, regular life",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 57.8,
+      "end": 61.8,
+      "japanese": "全部私たち商品の品質を保つため",
+      "rubyText": "全部[ぜんぶ]私[わたし]たち商品の[しょうひん]品質[ひんしつ]を保つ[たもつ]ため[ため]",
+      "translation": "為了保持我們所有商品的品質",
+      "literal": "全部 我們 商品的 品質 保持 為了",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 61.8,
+      "end": 66.5,
+      "japanese": "私たちはただ無差別に出荷されていくのを待つだけ",
+      "rubyText": "私[わたし]たちはただ無差別[むさべつ]に出荷[しゅっか]されていくのを待つ[まつ]だけ",
+      "translation": "我們只是等著被無差別地出貨。",
+      "literal": "We just wait for being shipped out indiscriminately.",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 66.8,
+      "end": 69.3,
+      "japanese": "無差別じゃない鬼が言ってたろ",
+      "rubyText": "無差別[むさべつ]じゃない鬼[おに]が言[い]ってたろ",
+      "translation": "不是無差別的鬼說過吧",
+      "literal": "不是無差別的鬼說過吧",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 69.9,
+      "end": 73.2,
+      "japanese": "また6歳 波の出荷が続いている",
+      "rubyText": "また[また]6歳[ろくさい] 波[なみ]の出荷[しゅっか]が続いている[つづいている]",
+      "translation": "又6歲的波浪出貨持續進行中",
+      "literal": "又 6 歲 波 的 出貨 正在 繼續",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 73.2,
+      "end": 78.6,
+      "japanese": "それが…あの言葉から察するにおそらく年齢イコールランク",
+      "rubyText": "それが…あの言葉[ことば]から察[さっ]するにおそらく年齢[ねんれい]イコールランク",
+      "translation": "那個…從那句話推測，大概是年齡等同於等級。",
+      "literal": "That... from that word, (I) infer probably age equals rank",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 78.6,
+      "end": 84.9,
+      "japanese": "僕が覚えている限り 今まで出荷された兄弟は6歳から12歳",
+      "rubyText": "僕[ぼく]が覚[おぼ]えている限[かぎ]り 今[いま]まで出荷[しゅっか]された兄弟[きょうだい]は6歳[ろくさい]から12歳[じゅうにさい]",
+      "translation": "我所記得的範圍內，至今出貨的兄弟年齡在6歲到12歲之間。",
+      "literal": "我[わたし]が記[おぼ]えている限[かぎ]り 今[いま]まで出貨[しゅっか]された兄弟[きょうだい]は6歲[ろくさい]から12歲[じゅうにさい]",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 84.9,
+      "end": 90,
+      "japanese": "それで6歳が波だというなら一番の女者は12歳",
+      "rubyText": "それで6歳[ろくさい]が波[なみ]だというなら一番[いちばん]の女者[おんなもの]は12歳[じゅうにさい]",
+      "translation": "所以如果6歲的孩子是波的話，那麼最好的女孩就是12歲。",
+      "literal": "那麼6歲是波的話，最好的女孩是12歲。",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 90,
+      "end": 96.5,
+      "japanese": "じゃあスコアは?テストでいい点取っても肉は美味しくならないよねああ",
+      "rubyText": "じゃあスコア[すこあ]は?テスト[てすと]でいい点[てん]取[と]っても肉[にく]は美味[おい]しくならないよねああ",
+      "translation": "那麼分數呢？即使在考試中得了好分數，肉也不會變得好吃呢，啊啊。",
+      "literal": "那麼 分數[すこあ] 是? 考試[てすと] 中 好[いい] 分數[てん] 取[と] 得 也 肉[にく] 不 變得[ならない] 好吃[おい] 嗎[よね] 啊啊",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 96.5,
+      "end": 103.3,
+      "japanese": "フルスコア以外は公表されなかったけど、多分 出荷中!?",
+      "rubyText": "フルスコア以外[いがい]は公表[こうひょう]されなかったけど、多分[たぶん] 出荷中[しゅっかちゅう]!?",
+      "translation": "除了滿分以外的成績沒有公佈，但大概已經在出貨中！?",
+      "literal": "Full score except was not disclosed, but probably (it) is in shipment!",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 103.6,
+      "end": 108.6,
+      "japanese": "6歳以降スコアの低い順に収穫されていくんだ そして",
+      "rubyText": "6歳[ろくさい]以降[いこう]スコア[すこあ]の低い[ひくい]順[じゅん]に収穫[しゅうかく]されていくんだ そして",
+      "translation": "6歲以後將按照分數低的順序進行收穫，然後",
+      "literal": "6歲[ろくさい]以後[いこう] 分數[すこあ] 低[ひく] 的順序[じゅん] 收穫[しゅうかく] 進行[じんこう] 這樣 然後",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 108.6,
+      "end": 112.3,
+      "japanese": "12歳になれば無条件に出荷されるつまり",
+      "rubyText": "12歳[じゅうにさい]になれば無条件[むじょうけん]に出荷[しゅっか]されるつまり[つまり]",
+      "translation": "一旦滿12歲就會無條件出貨，也就是說",
+      "literal": "12歲[じゅうにさい]になれば無条件[むじょうけん]に出荷[しゅっか]されるつまり[つまり]",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 112.3,
+      "end": 116,
+      "japanese": "私たちはフルスコアだから出荷を保留されてた",
+      "rubyText": "私[わたし]たち[たち]はフルスコア[ふるすこあ]だから出荷[しゅっか]を保留[ほりゅう]されてた",
+      "translation": "我們因為是滿分，所以被暫時保留出貨。",
+      "literal": "我們[わたし]たち[たち]是[だから]滿分[ふるすこあ]，所以[だから]被[されてた]暫時[ほりゅう]保留[しゅっか]出貨[しゅっか]。",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 116.2,
+      "end": 122.2,
+      "japanese": "でもわからない なぜスコア順なのか",
+      "rubyText": "でもわからない なぜスコア順[じゅん]なのか",
+      "translation": "但是我不明白，為什麼是按分數順序。",
+      "literal": "but don't understand why score-order is",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 122.2,
+      "end": 128.5,
+      "japanese": "6歳から12歳ってのにも意味があるのかな 体の大きさ",
+      "rubyText": "6歳[ろくさい]から12歳[じゅうにさい]ってのにも意味[いみ]があるのかな 体[からだ]の大きさ[おおきさ]",
+      "translation": "6歲到12歲之間是否也有其意義呢？身體的大小",
+      "literal": "6歲[ろくさい]から12歲[じゅうにさい]ってのにも意味[いみ]があるのかな 身體[からだ]の大きさ[おおきさ]",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 128.5,
+      "end": 130.8,
+      "japanese": "違う、それなら体重で…",
+      "rubyText": "違う[ちがう]、それなら体重[たいじゅう]で…",
+      "translation": "不對，那麼就用體重來…",
+      "literal": "違う、それなら 体重で…",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 131.4,
+      "end": 132.6,
+      "japanese": "脳の大きさ",
+      "rubyText": "脳[のう]の大[おお]きさ",
+      "translation": "腦的大小",
+      "literal": "brain size",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 135.4,
+      "end": 137.1,
+      "japanese": "脳が一番うまいんだろ",
+      "rubyText": "脳[のう]が一番[いちばん]うまいんだろ",
+      "translation": "大腦應該是最厲害的吧",
+      "literal": "Brain is the most good, right?",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 137.3,
+      "end": 139.8,
+      "japanese": "ここの敷地を簡略に表すと",
+      "rubyText": "ここの敷地[しきち]を簡略[かんりゃく]に表す[あらわす]と",
+      "translation": "若把這裡的土地簡略地表示的話",
+      "literal": "If (we) simplify and express the grounds here",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 140.2,
+      "end": 141.9,
+      "japanese": "ハウスを強おうにいもん",
+      "rubyText": "ハウス[はうす]を強[つよ]おうにいもん",
+      "translation": "強烈的房子",
+      "literal": "房子[はうす]を強[つよ]烈[れつ]にいもん",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 142.5,
+      "end": 144.5,
+      "japanese": "そして周りを取り囲む森",
+      "rubyText": "そして[そんで]周り[まわり]を取り囲む[とりかこむ]森[もり]",
+      "translation": "然後圍繞著的森林",
+      "literal": "然後 周圍 被圍繞 森林",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 145.2,
+      "end": 147.3,
+      "japanese": "まずはどこから脱出するか",
+      "rubyText": "まずはどこから脱出[だっしゅつ]するか",
+      "translation": "首先要從哪裡逃脫呢",
+      "literal": "首先，從哪裡脫出",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 150.6,
+      "end": 152.4,
+      "japanese": "森…かな?",
+      "rubyText": "森[もり]…かな?",
+      "translation": "森林…嗎？",
+      "literal": "森林…嗎？",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 152.7,
+      "end": 155.1,
+      "japanese": "モーは出荷時以外は閉まってるし",
+      "rubyText": "モー[もー]は出荷[しゅっか]時[じ]以外[いがい]は閉まって[しまって]るし",
+      "translation": "莫（モー）在出貨時以外都是關閉的",
+      "literal": "莫在出貨時以外是閉著的",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 155.5,
+      "end": 157.8,
+      "japanese": "開く時には奴らがいる",
+      "rubyText": "開[あ]く時[とき]には奴[やつ]らがいる",
+      "translation": "當它開啟時，會有那些傢伙。",
+      "literal": "When it opens, those guys exist.",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 158.5,
+      "end": 160.3,
+      "japanese": "森からいつ逃げるか",
+      "rubyText": "森[もり]からいつ[いつ]逃げる[にげる]か",
+      "translation": "從森林裡什麼時候逃跑呢",
+      "literal": "森林[もり]從何時[いつ]逃跑[にげる]か",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 160.8,
+      "end": 164.1,
+      "japanese": "僕らが自由に外へ出られる昼間の遊び時間か",
+      "rubyText": "僕[ぼく]らが自由[じゆう]に外[そと]へ出[で]られる昼間[ひるま]の遊び時間[あそびじかん]か",
+      "translation": "我們能在白天自由地外出玩耍的時間嗎？",
+      "literal": "我們 が 自由に 外へ 出られる 昼間 の 遊び時間 か",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 164.7,
+      "end": 167.7,
+      "japanese": "ママがいない出荷の夜出荷の夜はダメ",
+      "rubyText": "ママ[まま]がいない出荷[しゅっか]の夜[よる]出荷[しゅっか]の夜[よる]はダメ[だめ]",
+      "translation": "沒有媽媽的出貨之夜是不行的",
+      "literal": "媽媽[まま]がいない 出貨[しゅっか]の 夜[よる] 出貨[しゅっか]の 夜[よる]は ダメ[だめ]",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 167.9,
+      "end": 169.8,
+      "japanese": "必ず一人犠牲になる",
+      "rubyText": "必ず[かならず]一人[ひとり]犠牲[ぎせい]になる",
+      "translation": "一定會有一個人犧牲",
+      "literal": "必然 一人 犧牲 になる",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 171.6,
+      "end": 174.9,
+      "japanese": "第一夜は小さい子たちが起きていられるか心配だ",
+      "rubyText": "第一夜[だいいちや]は小[ちい]さい子[こ]たちが起[お]きていられるか心配[しんぱい]だ",
+      "translation": "我擔心第一夜小朋友們能否保持清醒",
+      "literal": "第一夜是小孩子們能否起來的擔心",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 177.1,
+      "end": 178.9,
+      "japanese": "昼間森を抜けて外へ出る",
+      "rubyText": "昼間[ひるま]森[もり]を抜[ぬ]けて外[そと]へ出[で]る",
+      "translation": "白天穿過森林走到外面。",
+      "literal": "白天 森林 通过 去外面",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 179.2,
+      "end": 183.3,
+      "japanese": "それが可能かどうかはあの先がどうなってるかによる",
+      "rubyText": "それが可能[かのう]かどうかはあの先[さき]がどうなってるかによる",
+      "translation": "這是否可能取決於前方的情況",
+      "literal": "那個 是否 可能 か 如何 取決於 那個 前方 是 什麼樣",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 183.5,
+      "end": 185,
+      "japanese": "あっ、ノーマ!",
+      "rubyText": "あっ、ノーマ[のーま]!",
+      "translation": "啊，諾瑪！",
+      "literal": "啊，諾瑪！",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 185.5,
+      "end": 192,
+      "japanese": "ノーマン!大丈夫?え、え、え、考えすぎて疲れちゃったかな",
+      "rubyText": "ノーマン!大丈夫[だいじょうぶ]?え、え、え、考え[かんがえ]すぎて疲れ[つかれ]ちゃったかな",
+      "translation": "諾曼！沒事吧？呃、呃、呃，是不是因為想太多而累了呢",
+      "literal": "Norman! okay? uh, uh, uh, overthinking got tired, I guess",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 192.2,
+      "end": 194.9,
+      "japanese": "もう しょうがないな",
+      "rubyText": "もう[もう] しょうがない[しょうがない]な",
+      "translation": "已經沒辦法了呢",
+      "literal": "已經[もう] 沒辦法[しょうがない]了[な]",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 195.2,
+      "end": 197.6,
+      "japanese": "どう 上に何かある",
+      "rubyText": "どう 上[うえ]に何[なに]かある",
+      "translation": "怎麼，上面有什麼嗎？",
+      "literal": "how, above something exists",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 199.5,
+      "end": 202.5,
+      "japanese": "ただこの塀、幅が2、3メートルある",
+      "rubyText": "ただこの塀[へい]、幅[はば]が2、3メートル[めーとる]ある",
+      "translation": "只是這個圍牆，寬度有2、3米。",
+      "literal": "只是這個圍牆，寬度有2、3米。",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 202.7,
+      "end": 204.6,
+      "japanese": "それにとにかく高い",
+      "rubyText": "それに[それに]とにかく[とにかく]高い[たかい]",
+      "translation": "而且總之很貴",
+      "literal": "而且 總之 高",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 205,
+      "end": 206.5,
+      "japanese": "でも見張りはいない",
+      "rubyText": "でも見[み]張[は]りは いない",
+      "translation": "但是沒有守衛",
+      "literal": "but guard does not exist",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 211.1,
+      "end": 212.7,
+      "japanese": "エマどう思う",
+      "rubyText": "エマ[えま]どう思[おも]う",
+      "translation": "艾瑪，你怎麼想？",
+      "literal": "艾瑪[えま]怎麼想[おも]？",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 213.4,
+      "end": 214.8,
+      "japanese": "固くて丈夫",
+      "rubyText": "固[かた]くて丈夫[じょうぶ]",
+      "translation": "堅硬且結實",
+      "literal": "hard and durable",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 215.3,
+      "end": 217.5,
+      "japanese": "起伏どころか継ぎ目もない",
+      "rubyText": "起伏[きふく]どころか継ぎ目[つぎめ]もない",
+      "translation": "不僅沒有起伏，連接縫隙都沒有。",
+      "literal": "起伏[きふく]的地方都沒有，連接的地方也沒有。",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 217.9,
+      "end": 219.8,
+      "japanese": "おまけに表面はサラサラ",
+      "rubyText": "おまけ[おまけ]に表面[ひょうめん]はサラサラ",
+      "translation": "而且表面非常光滑",
+      "literal": "而且表面是光滑的",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 220.1,
+      "end": 224.1,
+      "japanese": "普通こんなの登れっこないじゃあ諦める?",
+      "rubyText": "普通[ふつう]こんなの登[のぼ]れっこないじゃあ諦[あき]める?",
+      "translation": "普通情況下，這種東西爬不上去，那就放棄嗎？",
+      "literal": "Normally this kind of cannot-climb then give-up?",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 224.3,
+      "end": 230.7,
+      "japanese": "って思わせる兵なんだろうけど 私やノーマンならロープ1本あれば登れると思う",
+      "rubyText": "って思[おも]わせる兵[へい]なんだろうけど 私[わたし]やノーマンならロープ1本[ほん]あれば登[のぼ]れると思[おも]う",
+      "translation": "雖然是會讓人這樣想的兵種，但如果是我或諾曼，只要有一根繩子就能爬上去。",
+      "literal": "make-think soldier probably but I and Norman if one rope exists can-climb think",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 231.1,
+      "end": 232.6,
+      "japanese": "鬼の気配はない",
+      "rubyText": "鬼[おに]の気配[けはい]はない",
+      "translation": "沒有鬼的氣息",
+      "literal": "鬼的氣配沒有",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 233.2,
+      "end": 234.6,
+      "japanese": "見張りはママ一人",
+      "rubyText": "見張り[みはり]はママ[まま]一人[いちにん]",
+      "translation": "守望者只有媽媽一個人",
+      "literal": "見張り是媽媽一個人",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 235.1,
+      "end": 236.7,
+      "japanese": "大丈夫怖くない",
+      "rubyText": "大丈夫[だいじょうぶ]怖く[こわく]ない",
+      "translation": "沒問題，不怕。",
+      "literal": "大丈夫[だいじょうぶ] 怖く[こわく] ない",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 237.4,
+      "end": 241.6,
+      "japanese": "あれ?二人足りない?ママー!",
+      "rubyText": "あれ?[あれ]?二人[ふたり]足りない[たりない]?ママー[まま]!",
+      "translation": "咦？少了兩個人嗎？媽媽！",
+      "literal": "咦？兩個人不足嗎？媽媽！",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 241.6,
+      "end": 246.3,
+      "japanese": "マルク……何があったの?",
+      "rubyText": "マルク……何[なに]があったの?",
+      "translation": "馬克……發生了什麼事？",
+      "literal": "Mark ... what happened?",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 246.3,
+      "end": 249.7,
+      "japanese": "どうしよう無理でないなとはぐれて",
+      "rubyText": "どうしよう[どうしよう]無理[むり]でない[でない]なとはぐれて[はぐれて]",
+      "translation": "該怎麼辦呢，沒有辦法和你分開。",
+      "literal": "怎麼辦 無法 和 你 分開",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 249.7,
+      "end": 255.5,
+      "japanese": "私はあなたを見つけた! 私はあなたを見つけた! 大丈夫",
+      "rubyText": "私[わたし]はあなたを見[み]つけた! 私[わたし]はあなたを見[み]つけた! 大丈夫[だいじょうぶ]",
+      "translation": "我找到了你！我找到了你！沒事。",
+      "literal": "I (topic) you (object) found! I (topic) you (object) found! All right",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 256.1,
+      "end": 258,
+      "japanese": "みんなここから動かないで",
+      "rubyText": "みんな[みんな]ここ[ここ]から動かない[うごかない]で",
+      "translation": "大家不要從這裡動",
+      "literal": "大家這裡從不動",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 260.3,
+      "end": 265.5,
+      "japanese": "ママママー疲れて眠っちゃったのね",
+      "rubyText": "ママママー[ままままー]疲れて[つかれて]眠っちゃった[ねむっちゃった]のね",
+      "translation": "媽媽累了，睡著了呢",
+      "literal": "媽媽[まま]疲れて[つかれて]眠っちゃった[ねむっちゃった]のね",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 265.5,
+      "end": 271,
+      "japanese": "ほら、毛がひとつないわ 若い! ごめん!",
+      "rubyText": "ほら、毛[け]がひとつないわ 若[わか]い! ごめん!",
+      "translation": "看啊，你一根毛都沒有，真年輕！抱歉！",
+      "literal": "Look, hair not a single one, (you are) young! sorry!",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 271,
+      "end": 274.8,
+      "japanese": "ここのないらママはまるで",
+      "rubyText": "ここの[ここ]ないらママはまるで[まるで]",
+      "translation": "這裡的媽媽完全沒有毛，年輕得讓人驚訝！",
+      "literal": "這裡[ここ]的[の]媽媽[ママ]完全[まるで]沒有[ない]毛[毛]，年輕[若い]！",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 275,
+      "end": 279.8,
+      "japanese": "ナイラがどこにいるか分かっているみたいだった そういえば",
+      "rubyText": "ナイラ[ないら]がどこにいる[いる]か分かっている[わかっている]みたいだった[みたいだった] そういえば[そういえば]",
+      "translation": "看起來好像知道奈拉在哪裡，對了。",
+      "literal": "奈拉[ないら] 在哪裡[どこ] 是[か] 知道[わかっている] 的樣子[みたいだった]，對了[そういえば]。",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 279.8,
+      "end": 284,
+      "japanese": "昔からママは私たちを見つけるのが得意だった",
+      "rubyText": "昔[むかし]からママは私[わたし]たちを見[み]つけるのが得意[とくい]だった",
+      "translation": "從很久以前起，媽媽就擅長找我們。",
+      "literal": "Since long ago, Mom was good at finding us.",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 284.5,
+      "end": 289.5,
+      "japanese": "どこに隠れてもすぐに見つかった あれは時計じゃない",
+      "rubyText": "どこ[どこ]に隠れて[かくれて]もすぐに見つかった[みつかった] あれは時計[とけい]じゃない[じゃない]",
+      "translation": "無論藏在哪裡都會馬上被找到，那不是手錶。",
+      "literal": "哪裡[どこ]隱藏[かくれて]也馬上[すぐ]被找到[みつかった] 那[あれ]是[じゃない]鐘[とけい]不是[じゃない]",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 289.5,
+      "end": 295.8,
+      "japanese": "発進器僕らの体のどこかに埋められているのかもしれない",
+      "rubyText": "発進器[はっしんき]僕[ぼく]らの体[からだ]のどこ[どこ]かに埋[う]められているのかもしれない",
+      "translation": "發射器可能埋藏在我們身體的某個地方。",
+      "literal": "發射器[はっしんき] 我們[ぼく]的身體[からだ]的某個[どこ]地方[どこ]可能埋[う]藏[られている]。",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 295.8,
+      "end": 301.2,
+      "japanese": "しかもママはあのコンパクトを僕らに分かるようにわざと見せた",
+      "rubyText": "しかもママはあのコンパクトを僕[ぼく]らに分[わ]かるようにわざと見[み]せた",
+      "translation": "而且媽媽故意把那個小型裝置給我們看，讓我們能夠理解。",
+      "literal": "Moreover, Mom (topic) that compact (object) to us so that we can understand deliberately showed.",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 301.2,
+      "end": 305.9,
+      "japanese": "誰であろうと逃がさないママが言いたいのは",
+      "rubyText": "誰[だれ]であろうと逃[に]がさないママ[まま]が言[い]いたいのは",
+      "translation": "無論是誰都不會放過的媽媽想說的是",
+      "literal": "誰[だれ]であろうと逃[に]がさないママ[まま]が言[い]いたいのは",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 305.9,
+      "end": 309.1,
+      "japanese": "そういうことだ ママは",
+      "rubyText": "そういうこと[こと]だ ママ[まま]は",
+      "translation": "就是這樣，媽媽是這麼說的。",
+      "literal": "那樣的事情，媽媽是",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 309.4,
+      "end": 312.6,
+      "japanese": "敵だまずはロープを手に入れよう",
+      "rubyText": "敵[てき]だまずはロープ[ろーぷ]を手[て]に入[い]れよう",
+      "translation": "敵人，首先要拿到繩子。",
+      "literal": "敵[てき]是，首先[まず]繩子[ろーぷ]手[て]に入[い]れよう。",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 312.8,
+      "end": 314.7,
+      "japanese": "どこにあるか目星はついてる",
+      "rubyText": "どこにあるか目星[めぼし]はついてる",
+      "translation": "已經大致猜到它在哪裡了",
+      "literal": "哪裡有的話 目星 是 有",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 315,
+      "end": 318.2,
+      "japanese": "今日の夜10時に廊下で待って",
+      "rubyText": "今日[きょう]の夜[よる]10時[じ]に廊下[ろうか]で待[ま]って",
+      "translation": "今晚十點在走廊等我。",
+      "literal": "today night 10 o'clock in hallway wait",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 318.5,
+      "end": 320.4,
+      "japanese": "発信機なんてつけるくらいだから",
+      "rubyText": "発信機[はっしんき]なんてつけるくらいだから",
+      "translation": "既然要裝發信機的話",
+      "literal": "發信機[はっしんき]之類的東西因為要裝",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 320.9,
+      "end": 323.1,
+      "japanese": "他にももっとカメラとか盗聴器とか",
+      "rubyText": "他[ほか]にももっとカメラ[かめら]とか盗聴器[とうちょうき]とか",
+      "translation": "還有更多的相機和竊聽器等",
+      "literal": "他還有更多相機和竊聽器等",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 325.4,
+      "end": 326.6,
+      "japanese": "一通り調べたけど",
+      "rubyText": "一[ひと]通[とお]り調[しら]べたけど",
+      "translation": "雖然我已經大致查過了",
+      "literal": "一遍調查了，但",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 327.2,
+      "end": 331.5,
+      "japanese": "それらしきものはなかったよいつの間に?でも、うかつだった",
+      "rubyText": "それらしき[それらしき]ものはなかった[なかった]よいつの間に[いつのまに]?でも、うかつ[うかつ]だった[だった]",
+      "translation": "沒有那樣的東西，什麼時候的事呢？不過，我太粗心了。",
+      "literal": "那樣的東西[もの]沒有[なかった]，什麼時候[いつ]？但是[でも]，粗心[うかつ]了[だった]。",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 332.1,
+      "end": 335.8,
+      "japanese": "まさか建物じゃなくて僕らの方に財布がしてやるの",
+      "rubyText": "まさか[まさか]建物[たてもん]じゃなくて僕ら[ぼくら]の方[ほう]に財布[さいふ]がしてやるの[の]",
+      "translation": "難道不是建築物，而是朝我們這邊丟錢包嗎？",
+      "literal": "難道不是建築物而是我們的方向丟錢包嗎？",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 335.8,
+      "end": 341.8,
+      "japanese": "もうバレてるかなさっき私たちが塀まで行ったこと",
+      "rubyText": "もうバレてるかなさっき私[わたし]たちが塀[へい]まで行[い]ったこと",
+      "translation": "不知道是不是已經被發現了，剛才我們去到牆那裡的事。",
+      "literal": "already discovered? I wonder, earlier we wall up to went fact",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 342.5,
+      "end": 343.6,
+      "japanese": "大丈夫",
+      "rubyText": "大丈夫[だいじょうぶ]",
+      "translation": "沒問題",
+      "literal": "大丈夫[だいじょうぶ]",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 344.2,
+      "end": 346.1,
+      "japanese": "だってあの時もバレなかったろ?",
+      "rubyText": "だってあの時[とき]もバレ[ばれ]なかったろ?",
+      "translation": "因為那時候也沒有被發現吧？",
+      "literal": "因為 那時 也 沒有 被 發現 嗎？",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 346.7,
+      "end": 348.9,
+      "japanese": "コニーにリトルバーニー届けに行ったとき",
+      "rubyText": "コニーにリトルバーニー届け[とどけ]に行[い]った時[とき]",
+      "translation": "當我去把小伯尼送給康妮的時候",
+      "literal": "When I went to deliver Little Bernie to Connie",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 351.2,
+      "end": 354.3,
+      "japanese": "ママは常に僕らの居場所を把握しているわけじゃない",
+      "rubyText": "ママ[まま]は常に[つねに]僕ら[ぼくら]の居場所[いばしょ]を把握[はあく]しているわけじゃない",
+      "translation": "媽媽並不總是掌握我們的所在之處",
+      "literal": "媽媽[まま]是常[つね]不[ふ]是把握[はあく]我們[ぼくら]的居所[いばしょ]",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 355.2,
+      "end": 357.6,
+      "japanese": "確認して初めて位置を知るんだ",
+      "rubyText": "確認[かくにん]して初[はじ]めて位置[いち]を知[し]るんだ",
+      "translation": "確認後才知道位置",
+      "literal": "確認[かくにん]して初[はじ]めて位置[いち]を知[し]るんだ",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 357.8,
+      "end": 362.9,
+      "japanese": "ママはリトルバーニーがコニー以外の誰かの手で持ち込まれたことは気づいている",
+      "rubyText": "ママ[まま]はリトルバーニーがコニー[こに]以外[いがい]の誰[だれ]かの手[て]で持[も]ち込[こ]まれたことは気[き]づいている",
+      "translation": "媽媽注意到小巴尼是被除了康妮以外的某個人帶進來的。",
+      "literal": "媽媽はリトルバーニーがコニー以外の誰かの手で持ち込まれたことは気づいている",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 363.6,
+      "end": 364.7,
+      "japanese": "でも",
+      "rubyText": "でも",
+      "translation": "但是",
+      "literal": "but",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 365.1,
+      "end": 367.2,
+      "japanese": "誰かの特定はできていないと思う",
+      "rubyText": "誰[だれ]かの特定[とくてい]はできていないと思[おも]う",
+      "translation": "我想應該無法確定是誰。",
+      "literal": "誰[だれ]かの特定[とくてい]はできていないと思[おも]う",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 367.8,
+      "end": 370.5,
+      "japanese": "でなきゃあんな回りくどい警告はしない",
+      "rubyText": "でなきゃあんな回[まわ]りくどい警告[けいこく]はしない",
+      "translation": "如果不是這樣，我不會發出那樣拐彎抹角的警告。",
+      "literal": "if not, such roundabout warning (topic) do not",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 370.7,
+      "end": 374.6,
+      "japanese": "なるほどおい!ノーマン!ちょっといい?",
+      "rubyText": "なるほど[なるほど]おい[おい]!ノーマン[のーまん]!ちょっと[ちょっと]いい[いい]?",
+      "translation": "原來如此，喂！諾曼！可以問你一下嗎？",
+      "literal": "原來如此 喂! 諾曼! 一點 可以 嗎?",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 374.6,
+      "end": 377.9,
+      "japanese": "時計の調子が悪くてさ わかった",
+      "rubyText": "時計[とけい]の調子[ちょうし]が悪[わる]くてさ わかった",
+      "translation": "手錶的狀況不太好，我知道了。",
+      "literal": "Clock's condition is bad, I understood.",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 379.7,
+      "end": 380.9,
+      "japanese": "大丈夫だよエマ",
+      "rubyText": "大丈夫[だいじょうぶ]だよエマ",
+      "translation": "沒關係，艾瑪。",
+      "literal": "It’s okay, Emma",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 381.6,
+      "end": 386.1,
+      "japanese": "僕らは疑われていない コニー え?",
+      "rubyText": "僕[ぼく]らは疑[うたが]われていないコニー[こに]え?",
+      "translation": "我們沒有被懷疑，科妮？",
+      "literal": "我們 沒有 被 懷疑 科妮 嗎？",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 388.3,
+      "end": 389.7,
+      "japanese": "顔色が良くないわ",
+      "rubyText": "顔色[かおいろ]が良[よ]くないわ",
+      "translation": "你的臉色看起來不太好呢",
+      "literal": "臉色[かおいろ] 不好[よ] だわ",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 390.3,
+      "end": 394.2,
+      "japanese": "そういえば、今朝はいつもより元気がなかったんじゃ",
+      "rubyText": "そういえば、今朝[けさ]はいつもより元気[げんき]がなかったんじゃ",
+      "translation": "說起來，今天早上我比平時沒那麼有精神了。",
+      "literal": "Speaking of it, this morning compared to usual, energy not was?",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 396.7,
+      "end": 403.3,
+      "japanese": "なんでもないよ!ただ私ももうじきハウスを出るんだと思うと寂しくなっちゃって…",
+      "rubyText": "なんでもないよ[なんでもないよ]! ただ[ただ]私[わたし]ももうじき[もうじき]ハウス[はうす]を出る[でる]んだ[んだ]と思う[おもう]と寂しく[さびしく]なっちゃって[なっちゃって]…",
+      "translation": "沒什麼啦！只是我也快要離開這個家了，想到這裡就覺得有點寂寞…",
+      "literal": "沒什麼[なんでもないよ]! 只是[ただ]我[私]也[も]快要[もうじき]離開[出る]這個家[ハウス]了[んだ]，想到[思う]這個[と]就[と]覺得[なっちゃって]有點[寂しく]寂寞[寂しく]…",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 405.2,
+      "end": 406.9,
+      "japanese": "エマはハウスが好き?",
+      "rubyText": "エマはハウスが好き[すき]?",
+      "translation": "艾瑪喜歡 House 嗎？",
+      "literal": "Emma は House が 好き?",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 407.1,
+      "end": 410.9,
+      "japanese": "ハンスのママも大好き!コニー",
+      "rubyText": "ハンス[はんす]のママ[まま]も大好き[だいすき]!コニー[こにー]",
+      "translation": "漢斯的媽媽也很喜歡!科妮",
+      "literal": "漢斯的媽媽也大喜歡!科妮",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 411.2,
+      "end": 415.5,
+      "japanese": "今頃どうしてるかなぁ コニーね、大人になったら",
+      "rubyText": "今頃[いまごろ]どうしてるかなぁ コニーね、大人[おとな]になったら",
+      "translation": "現在她大概在做什麼呢？康妮啊，等她長大成人的時候。",
+      "literal": "Now (at this time) how is (she) doing, I wonder; Connie, when become adult",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 415.5,
+      "end": 420.3,
+      "japanese": "ママみたいなお母さんになりたいんだってええ知っているわ",
+      "rubyText": "ママ[まま]みたいな[みたいな]お母さん[おかあさん]になりたい[なりたい]んだって[んだって]ええ[ええ]知っている[しっている]わ[わ]",
+      "translation": "我知道你想成為像媽媽一樣的媽媽呢",
+      "literal": "媽媽[まま]像的[みたいな]母親[おかあさん]成為[なりたい]想[んだって]我[わ]知道[しっている]",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 421.1,
+      "end": 422.7,
+      "japanese": "コニーならきっと素敵なのに",
+      "rubyText": "コニー[こに]ならきっと素敵[すてき]なのに",
+      "translation": "如果是科妮的話，一定會很棒的呢",
+      "literal": "科妮[こに]如果一定很棒[すてき]的呢",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 423.7,
+      "end": 428.6,
+      "japanese": "いいお母さんになるわ。夕飯準備できたよママ。",
+      "rubyText": "いいお母[はは]さんになるわ。夕[ゆう]飯[はん]準[じゅん]備[び]できたよママ。",
+      "translation": "我要成為好媽媽，晚餐已經準備好了，媽媽。",
+      "literal": "好 母親 になるわ。 夕飯 準備 できたよ ママ。",
+      "analyzed": true,
+      "scanned": true
+    },
+    {
+      "start": 428.9,
+      "end": 434,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 434,
+      "end": 437,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 437.2,
+      "end": 439.1,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 439.7,
+      "end": 441.3,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 443.3,
+      "end": 444.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 445.4,
+      "end": 447.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 453.5,
+      "end": 455.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 456.1,
+      "end": 459.9,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 460.4,
+      "end": 462.3,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 462.6,
+      "end": 464.5,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 466.4,
+      "end": 468.9,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 469.4,
+      "end": 470.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 471.3,
+      "end": 473.5,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 473.8,
+      "end": 474.9,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 475.9,
+      "end": 478.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 479.2,
+      "end": 480.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 481.4,
+      "end": 483.9,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 484.2,
+      "end": 486.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 487.3,
+      "end": 489,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 492.3,
+      "end": 494.1,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 494.5,
+      "end": 497.4,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 502.8,
+      "end": 507.9,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 509.6,
+      "end": 510.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 511.4,
+      "end": 513,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 514.9,
+      "end": 517,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 517.2,
+      "end": 518.7,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 519,
+      "end": 521.4,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 521.6,
+      "end": 523.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 525.2,
+      "end": 527.7,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 528.8,
+      "end": 530,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 530.2,
+      "end": 533,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 533.3,
+      "end": 537.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 538.1,
+      "end": 539.4,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 540.1,
+      "end": 545.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 548.5,
+      "end": 550.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 551,
+      "end": 553.5,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 553.8,
+      "end": 556.2,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 557.6,
+      "end": 561,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 563.3,
+      "end": 565.2,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 565.9,
+      "end": 567.9,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 568.6,
+      "end": 569.7,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 570.4,
+      "end": 573.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 573.9,
+      "end": 575.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 576.2,
+      "end": 579.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 580.7,
+      "end": 582.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 583.1,
+      "end": 584.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 585.2,
+      "end": 586.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 588.2,
+      "end": 589.4,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 592.2,
+      "end": 593.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 594.2,
+      "end": 596.4,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 598.1,
+      "end": 599.9,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 600.5,
+      "end": 604.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 604.6,
+      "end": 609.3,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 609.4,
+      "end": 615.4,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 615.4,
+      "end": 619.9,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 619.9,
+      "end": 626.2,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 626.2,
+      "end": 632,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 632,
+      "end": 635.5,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 635.5,
+      "end": 639.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 639.8,
+      "end": 645.2,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 645.2,
+      "end": 649.1,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 649.1,
+      "end": 655.1,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 655.1,
+      "end": 660.1,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 660.1,
+      "end": 663.3,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 663.3,
+      "end": 668,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 668,
+      "end": 674.3,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 674.7,
+      "end": 680.2,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 680.2,
+      "end": 683.7,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 683.7,
+      "end": 688.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 688.6,
+      "end": 691.9,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 691.9,
+      "end": 697.7,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 697.7,
+      "end": 701.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 701.8,
+      "end": 706.7,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 706.7,
+      "end": 710.5,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 710.5,
+      "end": 715.7,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 715.7,
+      "end": 720.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 720.8,
+      "end": 723.1,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 725.1,
+      "end": 726.3,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 726.6,
+      "end": 728.7,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 729,
+      "end": 731.1,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 731.3,
+      "end": 734.3,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 737.6,
+      "end": 738.8,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 739.2,
+      "end": 741.6,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 741.8,
+      "end": 743.1,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    },
+    {
+      "start": 743.4,
+      "end": 745,
+      "japanese": "",
+      "rubyText": "",
+      "translation": "",
+      "literal": "",
+      "analyzed": false,
+      "scanned": true
+    }
+  ]
+}
