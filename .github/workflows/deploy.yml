@@ -1,0 +1,71 @@
+name: Deploy Shadowing to GitHub Pages
+
+on:
+  push:
+    branches:
+      - rs/pop-design
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Assemble static bundle
+        run: |
+          mkdir -p public/audio public/transcripts public/data
+          # Copy existing audio files into public/audio
+          if [ -d "audio" ]; then
+            cp -r audio/* public/audio/ || true
+          fi
+          # Copy existing transcripts into public/transcripts
+          if [ -d "transcripts" ]; then
+            cp -r transcripts/* public/transcripts/ || true
+          fi
+          # Ensure static library manifest is built with all audio files
+          node -e '
+            const fs = require("fs");
+            const audioDir = "public/audio";
+            if (fs.existsSync(audioDir)) {
+              const files = fs.readdirSync(audioDir).filter(f => /\.(mp3|mp4|m4a|wav)$/i.test(f)).sort();
+              fs.writeFileSync("public/data/library.json", JSON.stringify({
+                files: files.map(name => ({
+                  name,
+                  url: "./audio/" + encodeURIComponent(name)
+                }))
+              }, null, 2));
+              console.log(`Generated manifest for ${files.length} audio tracks.`);
+            }
+          '
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './public'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
