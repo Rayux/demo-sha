@@ -219,6 +219,10 @@ function setUIDesign(design) {
   state.uiDesign = design === "classic" ? "classic" : "pop";
   document.documentElement.setAttribute("data-design", state.uiDesign);
   document.body.setAttribute("data-design", state.uiDesign);
+  const themeLink = document.getElementById("theme-style");
+  if (themeLink) {
+    themeLink.href = state.uiDesign === "classic" ? "./styles-classic.css" : "./styles-pop.css";
+  }
   const themeMeta = document.querySelector('meta[name="theme-color"]');
   if (themeMeta) themeMeta.content = state.uiDesign === "classic" ? "#0b0d0d" : "#f6f4ec";
   const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
