@@ -280,8 +280,9 @@ function renderLibrary(files) {
     const label = episode ? `S${episode[1]} / EPISODE ${episode[2]}` : `TRACK ${number}`;
     return `<button class="library-item" data-url="${escapeHtml(file.url)}" data-name="${escapeHtml(file.name)}" type="button" title="${escapeHtml(file.name)}" aria-label="Practice ${escapeHtml(name)}" aria-pressed="false">
       <b class="track-number classic-only">${escapeHtml(number)}</b>
-      <span class="track-cover" aria-hidden="true"><span class="track-kicker"><span>SHADOWING SELECTS</span><span>${escapeHtml(number)}</span></span><span class="track-art"><span class="track-disc"><b>${escapeHtml(number)}</b></span></span><span class="track-cover-title">${escapeHtml(title)}</span><span class="track-select">↗</span></span>
-      <span class="track-name">${escapeHtml(title)}</span><span class="track-meta">${escapeHtml(label)}</span>
+      <span class="classic-only track-title">${escapeHtml(title)}</span>
+      <span class="track-cover pop-only" aria-hidden="true"><span class="track-kicker"><span>SHADOWING SELECTS</span><span>${escapeHtml(number)}</span></span><span class="track-art"><span class="track-disc"><b>${escapeHtml(number)}</b></span></span><span class="track-cover-title">${escapeHtml(title)}</span><span class="track-select">↗</span></span>
+      <span class="track-name pop-only">${escapeHtml(title)}</span><span class="track-meta pop-only">${escapeHtml(label)}</span>
     </button>`;
   }).join("");
 }
