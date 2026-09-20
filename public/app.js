@@ -1409,6 +1409,9 @@ function showAdvancedFeedback(evalData, heard, target) {
           </div>`;
         }).join("")}
       </div>
+      <div class="cues-heard" style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); font-size: 0.9rem; color: var(--text-muted);">
+        <strong style="font-weight: 500;">You said:</strong> <span lang="ja" style="margin-left: 0.5rem; color: var(--text);">${escapeHtml(heard || "—")}</span>
+      </div>
     </div>
   ` : "";
 
@@ -1440,7 +1443,6 @@ function showAdvancedFeedback(evalData, heard, target) {
     ${evalData.coachingTip ? `<div class="coaching-spotlight"><span class="coaching-icon" aria-hidden="true">${sparkleIcon}</span><div><p class="eyebrow">For your next take</p><p lang="zh-Hant">${escapeHtml(evalData.coachingTip)}</p></div></div>` : ""}
     ${cuesHtml}
     ${bulletsHtml}
-    <details class="transcript-comparison"><summary>Compare transcripts <span aria-hidden="true">⌄</span></summary><dl><div><dt>You said</dt><dd lang="ja">${escapeHtml(heard || "—")}</dd></div>${target ? `<div><dt>Original</dt><dd lang="ja">${escapeHtml(target)}</dd></div>` : ''}</dl></details>
   `;
 }
 
