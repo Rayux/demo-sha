@@ -413,7 +413,7 @@ Return ONLY valid JSON matching this exact schema:
 
 Scoring criteria:
 - Pronunciation (0-100): Mora accuracy, phonetic fidelity, glottal stops (促音), long vowels (長音), and devoicing (無聲化).
-- Rhythm & Pace (0-100): Pacing match between target (${targetDuration}s) and user (${recordedDuration}s). Check pauses and smooth mora flow.
+- Rhythm & Pace (0-100): Focus on internal pacing, pauses, and smooth mora flow within the spoken sentence. Do NOT penalize the score if the total Learner Duration (${recordedDuration}s) is longer than the Target Duration (${targetDuration}s), as the user may have paused before or after speaking.
 - Intonation (0-100): Particle tone (e.g. rising ↗ for questions/agreement, falling ↘ for statements), pitch accent (頭高/中高/尾高/平板) stability.
 - Recommendation: Based on the overall score and the user's progress, recommend either "move_on" (ready for next clip) or "keep_practicing".
 - Visual Cues: Split the target sentence into words/particles. Mark status as "perfect", "warning" (slight accent/timing hesitation), or "missed". Provide a short note in Traditional Chinese for any non-perfect item.`;

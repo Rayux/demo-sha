@@ -1453,7 +1453,10 @@ function computeLocalFeedback(target, heard, targetDuration, recordedDuration) {
   const pronScore = normTarget && normHeard
     ? Math.max(0, Math.round((1 - distance / Math.max(normTarget.length, normHeard.length)) * 100))
     : 0;
-  const timingScore = Math.max(0, Math.round(100 - Math.abs(recordedDuration - targetDuration) / targetDuration * 100));
+  const durationDiff = recordedDuration - targetDuration;
+  const timingScore = durationDiff < -0.5 
+    ? Math.max(0, Math.round(100 - (Math.abs(durationDiff) / targetDuration) * 100))
+    : (pronScore > 0 ? 85 : 0);
 
   const chars = Array.from(normTarget);
   const heardChars = Array.from(normHeard);
@@ -1471,7 +1474,7 @@ function computeLocalFeedback(target, heard, targetDuration, recordedDuration) {
     scores: { pronunciation: pronScore, rhythm: timingScore, intonation: null },
     recommendation: pronScore >= 80 && timingScore >= 80 ? "move_on" : "keep_practicing",
     visualCues,
-    rhythmFeedback: `你的錄音長度約為原音的 ${speedRatio} 倍。${speedRatio > 1.2 ? "可以稍微縮短停頓，讓節奏更貼近原音。" : (speedRatio < 0.85 ? "語速可以稍微放慢，讓每個音拍都清楚完整。" : "整體時間與原音接近，繼續留意句中的停頓位置。")}`,
+    rhythmFeedback: durationDiff < -0.5 ? "語速有點太快，可以稍微放慢，讓每個音拍都清楚完整。" : "本機模式不評估整體長度，請專注於發音與語調即可。",
     intonationFeedback: "仔細聽每個語句結尾的音高起伏。目前的本機文字比對無法判斷實際音高，因此不提供語調分數。",
     coachingTip: "跟著原音的換氣點練習，特別留意長音與促音的完整長度，再錄一次比較看看。"
   };
