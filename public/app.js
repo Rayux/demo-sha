@@ -104,7 +104,7 @@ const state = {
   continuousPlay: stored("kage-continuous-play", "false") === "true",
   autoRecord: stored("kage-continuous-play", "false") === "true" ? false : stored("kage-auto-record", "true") === "true",
   loop: stored("kage-auto-record", "true") === "false" && stored("kage-loop", "false") === "true",
-  showTranslation: false,
+  showTranslation: stored("kage-translation", "true") === "true",
   jumpLength: Number(stored("kage-jump", "5")),
   attemptBlob: null,
   attemptUrl: null,
@@ -644,7 +644,7 @@ function renderPills() {
       clip.mastered ? "mastered" : ""
     ].filter(Boolean).join(" ");
     let icon = "";
-    if (clip.mastered) icon = '<span class="pill-check" style="font-size: 1.1em; line-height: 1;">🏆</span>';
+    if (clip.mastered) icon = '<span class="pill-check" style="color: var(--blue)"><svg class="ui-icon" style="width: 12px; height: 12px;" fill="currentColor" aria-hidden="true"><use href="#icon-sparkle"/></svg></span>';
     else if (isAnalyzed) icon = '<span class="pill-check">✓</span>';
     else if (isFailed) icon = '<span class="pill-check" style="color:var(--danger)">!</span>';
     return `<button class="${classes}" type="button" data-index="${index}" aria-label="Clip ${index + 1}${isAnalyzed ? ', analyzed' : ''}" ${isActive ? 'aria-current="true"' : ''}>${String(index + 1).padStart(2, "0")}${icon}</button>`;
@@ -762,7 +762,7 @@ function cancelPendingRecording() {
 function cancelPracticePlayback() {
   state.playbackActive = false;
   state.playFullTrack = false;
-  if (ui.playFull) ui.playFull.textContent = "▶ ALL";
+  if (ui.playFull) ui.playFull.textContent = "Play All";
   ui.audio.pause();
   cancelPendingRecording();
 }
@@ -906,7 +906,7 @@ function toggleFullPlayback() {
   if (state.playFullTrack && !ui.audio.paused) {
     state.playFullTrack = false;
     cancelPracticePlayback();
-    ui.playFull.textContent = "▶ ALL";
+    ui.playFull.textContent = "Play All";
     return;
   }
   
@@ -914,14 +914,14 @@ function toggleFullPlayback() {
   state.playFullTrack = true;
   state.playbackActive = false; // Disable clip bounds checking
   ui.audio.playbackRate = state.rate;
-  ui.playFull.textContent = "⏸ ALL";
+  ui.playFull.textContent = "Pause All";
   
   cancelAnimationFrame(playbackLoopId);
   function monitorFullPlayback() {
     if (!state.playFullTrack) return;
     if (ui.audio.ended || ui.audio.paused) {
       state.playFullTrack = false;
-      ui.playFull.textContent = "▶ ALL";
+      ui.playFull.textContent = "Play All";
       return;
     }
     
@@ -940,7 +940,7 @@ function toggleFullPlayback() {
     playbackLoopId = requestAnimationFrame(monitorFullPlayback);
   }).catch(() => {
     state.playFullTrack = false;
-    ui.playFull.textContent = "▶ ALL";
+    ui.playFull.textContent = "Play All";
     toast("The audio could not start.");
   });
 }
@@ -1119,10 +1119,10 @@ function updateAutoAnalyzeUI() {
   const failed = state.clips.filter((c) => c.failed).length;
 
   if (ui.scan) {
-    let btnText = 'Practice clips ready <span aria-hidden="true">✓</span>';
+    let btnText = 'Practice clips ready';
     if (ready < total) {
       btnText = state.autoAnalyzing 
-        ? (state.autoAnalyzePaused ? 'Auto-analyze paused ⏸' : 'Analyzing transcripts... ⏳')
+        ? (state.autoAnalyzePaused ? 'Auto-analyze paused' : 'Analyzing transcripts...')
         : 'Resume auto-analyze <span aria-hidden="true">→</span>';
     }
     ui.scan.innerHTML = btnText;
