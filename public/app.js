@@ -437,6 +437,7 @@ function setSource({ name, url, file = null }) {
     toast(`Loaded ${cached.length} clips (${readyCount} analyzed).`);
     updateAutoAnalyzeUI();
     saveClipCache();
+    if (readyCount < cached.length) startAutoAnalyze();
   } else {
     const baseName = name.replace(/\.[^.]+$/, "");
     const applyClips = (clips, sourceMsg) => {
@@ -450,6 +451,7 @@ function setSource({ name, url, file = null }) {
       const readyCount = state.clips.filter((c) => c.analyzed).length;
       toast(`Loaded ${state.clips.length} clips ${sourceMsg} (${readyCount} ready).`);
       updateAutoAnalyzeUI();
+      if (readyCount < state.clips.length) startAutoAnalyze();
     };
 
     fetch(`./api/transcript?file=${encodeURIComponent(name)}`)
@@ -581,7 +583,13 @@ async function createPracticeClips() {
   if (state.clips && state.clips.length > 0) {
     ui.empty.classList.add("hidden");
     ui.stage.classList.remove("hidden");
-    toast("Practice clips are already loaded.");
+    const unanalyzed = state.clips.some(c => !c.analyzed);
+    if (unanalyzed && !state.autoAnalyzing) {
+      toast("Resuming auto-analyzer in the background...");
+      startAutoAnalyze();
+    } else {
+      toast("Practice clips are already loaded.");
+    }
     return;
   }
   ui.scan.disabled = true;
