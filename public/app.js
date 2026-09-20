@@ -587,8 +587,13 @@ async function createPracticeClips() {
     if (unanalyzed && !state.autoAnalyzing) {
       toast("Resuming auto-analyzer in the background...");
       startAutoAnalyze();
+    } else if (unanalyzed && state.autoAnalyzePaused) {
+      toast("Resuming auto-analyzer...");
+      pauseResumeAutoAnalyze();
+    } else if (unanalyzed) {
+      toast("Auto-analyzer is currently running.");
     } else {
-      toast("Practice clips are already loaded.");
+      toast("All clips are analyzed and ready!");
     }
     return;
   }
@@ -661,12 +666,6 @@ function renderActiveClip() {
   const clip = currentClip();
   if (!clip) return;
   
-  if (state.clips.length > 0) {
-    const readyText = 'Practice clips ready <span aria-hidden="true">✓</span>';
-    ui.scan.innerHTML = readyText;
-    if (ui.scanClassic) ui.scanClassic.innerHTML = readyText;
-  }
-
   renderPills();
   ui.clipLabel.textContent = `CLIP ${String(state.active + 1).padStart(2, "0")} / ${String(state.clips.length).padStart(2, "0")}`;
   ui.previous.disabled = state.active === 0;
@@ -1066,6 +1065,17 @@ function updateAutoAnalyzeUI() {
   const total = state.clips.length;
   const ready = state.clips.filter((c) => c.analyzed).length;
   const failed = state.clips.filter((c) => c.failed).length;
+
+  if (ui.scan) {
+    let btnText = 'Practice clips ready <span aria-hidden="true">✓</span>';
+    if (ready < total) {
+      btnText = state.autoAnalyzing 
+        ? (state.autoAnalyzePaused ? 'Auto-analyze paused ⏸' : 'Analyzing transcripts... ⏳')
+        : 'Resume auto-analyze <span aria-hidden="true">→</span>';
+    }
+    ui.scan.innerHTML = btnText;
+    if (ui.scanClassic) ui.scanClassic.innerHTML = btnText;
+  }
 
   if (state.autoAnalyzing) {
     ui.autoAnalyzeBar.classList.remove("hidden");
