@@ -618,9 +618,14 @@ function renderPills() {
       isActive ? "active" : "",
       isAnalyzed ? "analyzed" : "",
       isAnalyzing ? "analyzing" : "",
-      isFailed ? "failed" : ""
+      isFailed ? "failed" : "",
+      clip.mastered ? "mastered" : ""
     ].filter(Boolean).join(" ");
-    return `<button class="${classes}" type="button" data-index="${index}" aria-label="Clip ${index + 1}${isAnalyzed ? ', analyzed' : ''}" ${isActive ? 'aria-current="true"' : ''}>${String(index + 1).padStart(2, "0")}${isAnalyzed ? '<span class="pill-check">✓</span>' : (isFailed ? '<span class="pill-check" style="color:var(--danger)">!</span>' : "")}</button>`;
+    let icon = "";
+    if (clip.mastered) icon = '<span class="pill-check" style="font-size: 1.1em; line-height: 1;">🏆</span>';
+    else if (isAnalyzed) icon = '<span class="pill-check">✓</span>';
+    else if (isFailed) icon = '<span class="pill-check" style="color:var(--danger)">!</span>';
+    return `<button class="${classes}" type="button" data-index="${index}" aria-label="Clip ${index + 1}${isAnalyzed ? ', analyzed' : ''}" ${isActive ? 'aria-current="true"' : ''}>${String(index + 1).padStart(2, "0")}${icon}</button>`;
   }).join("");
   const active = ui.pills.querySelector(".active");
   if (active) {
@@ -1391,6 +1396,13 @@ function showAdvancedFeedback(evalData, heard, target) {
   const pron = scoreValue(scores.pronunciation);
   const rhythm = scoreValue(scores.rhythm);
   const into = scoreValue(scores.intonation);
+
+  const clip = currentClip();
+  if (clip) {
+    clip.mastered = evalData.recommendation === "move_on";
+    saveClipCache();
+    renderPills();
+  }
 
   const getScoreClass = (val) => val >= 85 ? "" : (val >= 70 ? "amber" : "red");
 
