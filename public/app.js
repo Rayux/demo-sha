@@ -1196,7 +1196,10 @@ function setRecordState(recording) {
   ui.record.classList.toggle("recording", recording);
   ui.record.innerHTML = recording ? "<span></span> Stop & submit <kbd>T</kbd>" : "<span></span> Record attempt <kbd>R</kbd>";
   ui.record.setAttribute("aria-keyshortcuts", recording ? "t" : "r");
-  ui.recordStatus.textContent = recording ? "RECORDING" : "READY";
+  ui.recordStatus.textContent = recording ? "🔴 RECORDING" : "READY";
+  if (recording) {
+    ui.recordHint.innerHTML = "<strong style='color: var(--primary)'>🎙️ Listening... Speak now.</strong>";
+  }
   ui.recordStatus.classList.toggle("recording", recording);
 }
 
@@ -1239,29 +1242,31 @@ function startVAD(stream, recorder) {
     vadContext = new (window.AudioContext || window.webkitAudioContext)();
     const source = vadContext.createMediaStreamSource(stream);
     const analyser = vadContext.createAnalyser();
-    analyser.fftSize = 1024;
+    analyser.minDecibels = -60;
+    analyser.maxDecibels = -10;
+    analyser.smoothingTimeConstant = 0.85;
+    analyser.fftSize = 256;
     source.connect(analyser);
 
     let hasSpoken = false;
     let silentSince = null;
-    const threshold = 0.025; // RMS threshold for speech
-    const silenceDelay = 2000; // 2s of silence triggers submit
+    const threshold = -45; // dB
+    const silenceDelay = 1500; // 1.5s of silence triggers submit
 
-    const dataArray = new Float32Array(analyser.fftSize);
+    const dataArray = new Float32Array(analyser.frequencyBinCount);
 
     const checkAudioLevel = () => {
       if (recorder.state !== "recording") {
         stopVAD();
         return;
       }
-      analyser.getFloatTimeDomainData(dataArray);
-      let sumSquares = 0;
+      analyser.getFloatFrequencyData(dataArray);
+      let maxDb = -Infinity;
       for (let i = 0; i < dataArray.length; i++) {
-        sumSquares += dataArray[i] * dataArray[i];
+        if (dataArray[i] > maxDb) maxDb = dataArray[i];
       }
-      const rms = Math.sqrt(sumSquares / dataArray.length);
       
-      const speaking = rms > threshold;
+      const speaking = maxDb > threshold;
       
       if (speaking) {
         hasSpoken = true;
