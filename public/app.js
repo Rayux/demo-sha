@@ -578,6 +578,12 @@ function scanPauses(buffer) {
 
 async function createPracticeClips() {
   if (!state.source) return;
+  if (state.clips && state.clips.length > 0) {
+    ui.empty.classList.add("hidden");
+    ui.stage.classList.remove("hidden");
+    toast("Practice clips are already loaded.");
+    return;
+  }
   ui.scan.disabled = true;
   $("#empty-upload").disabled = true;
   ui.scan.textContent = "Scanning pauses…";
@@ -603,7 +609,9 @@ async function createPracticeClips() {
   } finally {
     ui.scan.disabled = false;
     $("#empty-upload").disabled = false;
-    ui.scan.innerHTML = 'Make practice clips <span aria-hidden="true">→</span>';
+    if (!state.clips || state.clips.length === 0) {
+      ui.scan.innerHTML = 'Make practice clips <span aria-hidden="true">→</span>';
+    }
   }
 }
 
@@ -644,6 +652,13 @@ function renderAnalyzeButton(clip) {
 function renderActiveClip() {
   const clip = currentClip();
   if (!clip) return;
+  
+  if (state.clips.length > 0) {
+    const readyText = 'Practice clips ready <span aria-hidden="true">✓</span>';
+    ui.scan.innerHTML = readyText;
+    if (ui.scanClassic) ui.scanClassic.innerHTML = readyText;
+  }
+
   renderPills();
   ui.clipLabel.textContent = `CLIP ${String(state.active + 1).padStart(2, "0")} / ${String(state.clips.length).padStart(2, "0")}`;
   ui.previous.disabled = state.active === 0;
