@@ -1,6 +1,6 @@
 # Shadowing Transcript: The Promised Neverland - S01E01 - 121045 HDTV-1080p.condensed.mp3
 
-*Updated on 9/19/2026, 8:45:03 PM*
+*Updated on 9/19/2026, 10:10:03 PM*
 
 | # | Time | Japanese Transcript (with Furigana) | 繁體中文翻譯 | 直譯 |
 | :---: | :---: | :--- | :--- | :--- |
