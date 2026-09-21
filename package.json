@@ -6,5 +6,9 @@
   "scripts": {
     "start": "node server.mjs",
     "build:static": "node -e 'const fs=require(\"fs\"); const files=fs.readdirSync(\"audio\").filter(f=>/\\.(mp3|mp4|m4a|wav)$/i.test(f)).sort(); fs.mkdirSync(\"public/data\",{recursive:true}); fs.writeFileSync(\"public/data/library.json\", JSON.stringify({files: files.map(name=>({name, url: \"./audio/\"+encodeURIComponent(name)}))}, null, 2)); console.log(\"Static library updated.\");'"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^9.2.0",
+    "firebase-admin": "^14.4.0"
   }
 }
