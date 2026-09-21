@@ -1080,9 +1080,15 @@ async function analyzeSingleClip(index) {
         console.warn(`[analyzeSingleClip] Explanation failed for clip ${index + 1}:`, explainError);
         clip.rubyText = clip.rubyText || clip.japanese;
       }
-      clip.analyzed = true;
-      clip.failed = false;
-      clip.retryCount = 0;
+      
+      if (!clip.translation || !clip.translation.trim()) {
+        clip.analyzed = false;
+        clip.failed = true;
+      } else {
+        clip.analyzed = true;
+        clip.failed = false;
+        clip.retryCount = 0;
+      }
       saveClipCache();
     }
 
@@ -1111,7 +1117,11 @@ async function analyzeCurrentClip() {
   clip.retryCount = 0;
   try {
     await analyzeSingleClip(state.active);
-    toast("Your transcript, reading guides, and translation are ready.");
+    if (clip.failed) {
+      toast("Analysis failed: Missing Traditional Chinese translation.");
+    } else {
+      toast("Your transcript, reading guides, and translation are ready.");
+    }
   } catch (error) {
     clip.failed = true;
     renderActiveClip();
