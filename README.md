@@ -15,14 +15,14 @@ The included `audio/` folder is automatically listed in the app. You can also ch
 
 ## Optional AI features
 
-The core player, pause-based clip scan, recording, side-by-side playback, and local history work without a key. To enable transcription, Traditional Chinese translation, grammar notes, contextual chat, and attempt transcription, add a Google AI Studio key to `.env`, then restart the server.
+The core player, pause-based clip scan, recording, side-by-side playback, and local history work without a key. To enable transcription, Traditional Chinese translation, grammar notes, contextual chat, and attempt transcription, add a Groq API key to `.env`, then restart the server.
 
 ```bash
-# edit .env and set GEMINI_API_KEY
+# edit .env and set GROQ_API_KEY
 npm start
 ```
 
-Only the short active audio clip or recording that you explicitly analyze is sent to Gemini. The source video/audio file remains on this computer. The app does not put the API key in the browser.
+Only the short active audio clip or recording that you explicitly analyze is sent to Groq. The source video/audio file remains on this computer. The app does not put the API key in the browser.
 
 ## Current MVP boundaries
 

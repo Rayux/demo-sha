@@ -82,42 +82,6 @@ async function groqTranscribe(audioBytes, mimeType = "audio/wav", filename = "cl
   }
 }
 
-async function openaiTranscribe(audioBytes, mimeType = "audio/wav", filename = "clip.wav") {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) return null;
-  const model = process.env.OPENAI_WHISPER_MODEL || "whisper-1";
-  try {
-    const form = new FormData();
-    const blob = new Blob([audioBytes], { type: mimeType });
-    form.append("file", blob, filename);
-    form.append("model", model);
-    form.append("language", "ja");
-    form.append("response_format", "json");
-
-    const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${apiKey}` },
-      body: form
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.warn(`[OpenAI Whisper] Request failed (${response.status}):`, errorText);
-      return null;
-    }
-
-    const data = await response.json();
-    return {
-      text: (data.text || "").trim(),
-      modelUsed: `OpenAI Whisper (${model})`,
-      provider: "openai"
-    };
-  } catch (err) {
-    console.warn("[OpenAI Whisper] Network/processing error:", err.message);
-    return null;
-  }
-}
-
 async function groqChat(systemInstruction, userContent, jsonMode = false) {
   const apiKey = process.env.GROQ_API_KEY?.trim();
   if (!apiKey) throw new Error("GROQ_API_KEY is not configured.");
@@ -153,81 +117,6 @@ async function groqChat(systemInstruction, userContent, jsonMode = false) {
   return data.choices?.[0]?.message?.content || "";
 }
 
-async function openaiChat(systemInstruction, userContent, jsonMode = false, modelOverride = null) {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) throw new Error("OPENAI_API_KEY is not configured.");
-  const model = modelOverride || process.env.OPENAI_MODEL || "gpt-4o-mini";
-
-  const payload = {
-    model,
-    messages: [
-      { role: "system", content: systemInstruction },
-      { role: "user", content: userContent }
-    ],
-    temperature: 0.2
-  };
-  if (jsonMode) {
-    payload.response_format = { type: "json_object" };
-  }
-
-  let response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    if (model === "gpt-6" && (response.status === 404 || errText.includes("model_not_found"))) {
-      console.warn("[openaiChat] 'gpt-6' not yet available on OpenAI API, falling back to gpt-4o...");
-      payload.model = "gpt-4o";
-      response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return data.choices?.[0]?.message?.content || "";
-      }
-    }
-    throw new Error(`OpenAI API error (${response.status}): ${errText}`);
-  }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
-}
-
-async function geminiRequest(payload) {
-  const model = encodeURIComponent(process.env.GEMINI_MODEL || "gemini-3.8-flash");
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: "POST",
-    headers: { "x-goog-api-key": process.env.GEMINI_API_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  const result = await response.json();
-  if (!response.ok) {
-    const rawMsg = result?.error?.message || "";
-    if (response.status === 503 || response.status === 429 || rawMsg.toLowerCase().includes("demand") || rawMsg.toLowerCase().includes("overloaded")) {
-      throw new Error("Gemini 3.8 Flash is currently experiencing high demand. Please wait a few moments and try again.");
-    }
-    throw new Error(rawMsg || `Gemini API request failed with status ${response.status}.`);
-  }
-  return result;
-}
-
-function geminiText(response) {
-  return (response.candidates || [])
-    .flatMap((candidate) => candidate.content?.parts || [])
-    .map((part) => part.text || "")
-    .join("\n");
-}
 function extractJSON(text) {
   const match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
   if (match) return match[1].trim();
@@ -238,11 +127,9 @@ function extractJSON(text) {
 }
 
 async function proxyTranscription(req, res) {
-  const hasOpenAI = Boolean(process.env.OPENAI_API_KEY?.trim());
   const hasGroq = Boolean(process.env.GROQ_API_KEY?.trim());
-  const hasGemini = Boolean(process.env.GEMINI_API_KEY?.trim());
-  if (!hasOpenAI && !hasGroq && !hasGemini) {
-    return json(res, 503, { error: "AI is not configured. Add OPENAI_API_KEY, GROQ_API_KEY, or GEMINI_API_KEY to .env and restart." });
+  if (!hasGroq) {
+    return json(res, 503, { error: "AI is not configured. Add GROQ_API_KEY to .env and restart." });
   }
 
   try {
@@ -260,59 +147,18 @@ async function proxyTranscription(req, res) {
     const mimeType = file.type || "audio/wav";
     const filename = file.name || "clip.wav";
 
-    // 1. Try Groq Whisper first (ultra-fast & free tier)
-    if (hasGroq) {
-      const groqResult = await groqTranscribe(audioBytes, mimeType, filename);
-      if (groqResult) {
-        return json(res, 200, {
-          text: groqResult.text || "",
-          words: [],
-          modelUsed: groqResult.modelUsed,
-          provider: "groq",
-          fallbackTriggered: false
-        });
-      }
-      console.warn("[Transcription] Groq Whisper failed or unavailable. Falling back to OpenAI/Gemini...");
+    const groqResult = await groqTranscribe(audioBytes, mimeType, filename);
+    if (groqResult) {
+      return json(res, 200, {
+        text: groqResult.text || "",
+        words: [],
+        modelUsed: groqResult.modelUsed,
+        provider: "groq",
+        fallbackTriggered: false
+      });
+    } else {
+      throw new Error("Groq Whisper transcription failed.");
     }
-
-    // 2. Try OpenAI Whisper as backup
-    if (hasOpenAI) {
-      const openaiResult = await openaiTranscribe(audioBytes, mimeType, filename);
-      if (openaiResult) {
-        return json(res, 200, {
-          text: openaiResult.text || "",
-          words: [],
-          modelUsed: openaiResult.modelUsed,
-          provider: "openai",
-          fallbackTriggered: Boolean(hasGroq)
-        });
-      }
-      console.warn("[Transcription] OpenAI Whisper failed. Falling back to Gemini...");
-    }
-
-    // 3. Fall back to Gemini
-    if (!hasGemini) {
-      throw new Error("Whisper transcription was unavailable and no GEMINI_API_KEY is configured as backup.");
-    }
-
-    const payload = {
-      contents: [{
-        role: "user",
-        parts: [
-          { text: "Transcribe the spoken Japanese in this short audio clip exactly. Return only the Japanese transcription, with natural punctuation. Do not explain or translate." },
-          { inlineData: { mimeType: mimeType || "audio/wav", data: audioBytes.toString("base64") } }
-        ]
-      }],
-      generationConfig: { temperature: 0, maxOutputTokens: 1024 }
-    };
-
-    const result = await geminiRequest(payload);
-    json(res, 200, {
-      text: geminiText(result),
-      words: [],
-      modelUsed: "gemini-3.8-flash",
-      provider: "gemini"
-    });
   } catch (error) {
     json(res, 500, { error: error.message || "Unable to transcribe this clip." });
   }
@@ -320,9 +166,7 @@ async function proxyTranscription(req, res) {
 
 async function askModel(req, res, kind) {
   const hasGroq = Boolean(process.env.GROQ_API_KEY?.trim());
-  const hasOpenAI = Boolean(process.env.OPENAI_API_KEY?.trim());
-  const hasGemini = Boolean(process.env.GEMINI_API_KEY?.trim());
-  if (!hasGroq && !hasOpenAI && !hasGemini) return json(res, 503, { error: "AI is not configured. Add GROQ_API_KEY to .env and restart." });
+  if (!hasGroq) return json(res, 503, { error: "AI is not configured. Add GROQ_API_KEY to .env and restart." });
 
   try {
     const isExplain = kind === "explain";
@@ -334,54 +178,15 @@ async function askModel(req, res, kind) {
       ? `Target sentence: ${body.sentence}\nNearby context: ${body.context || "(not provided)"}`
       : `Target sentence: ${body.sentence}\nTraditional Chinese translation: ${body.translation || "(not available)"}\nGrammar notes: ${body.grammar || "(not available)"}\nLearner question: ${body.question}`;
 
-    // 1. Prioritize Groq
-    if (hasGroq) {
-      try {
-        const text = await groqChat(instructions, input, isExplain);
-        const groqModel = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
-        if (isExplain) {
-          const cleaned = extractJSON(text);
-          try { return json(res, 200, { analysis: JSON.parse(cleaned), modelUsed: `Groq (${groqModel})`, provider: "groq" }); }
-          catch { return json(res, 200, { analysis: { rubyText: "", translation: "", literal: "", raw: text }, modelUsed: `Groq (${groqModel})`, provider: "groq" }); }
-        }
-        return json(res, 200, { answer: text, modelUsed: `Groq (${groqModel})`, provider: "groq" });
-      } catch (err) {
-        console.warn("[askModel] Groq failed, falling back to OpenAI/Gemini:", err.message);
-        if (!hasOpenAI && !hasGemini) throw err;
-      }
-    }
-
-    // 2. Fallback to OpenAI
-    if (hasOpenAI) {
-      try {
-        const selectedModel = process.env.OPENAI_MODEL || "gpt-4o-mini";
-        const text = await openaiChat(instructions, input, isExplain, selectedModel);
-        if (isExplain) {
-          const cleaned = extractJSON(text);
-          try { return json(res, 200, { analysis: JSON.parse(cleaned), modelUsed: selectedModel, provider: "openai" }); }
-          catch { return json(res, 200, { analysis: { rubyText: "", translation: "", literal: "", raw: text }, modelUsed: selectedModel, provider: "openai" }); }
-        }
-        return json(res, 200, { answer: text, modelUsed: selectedModel, provider: "openai" });
-      } catch (err) {
-        console.warn("[askModel] OpenAI failed, falling back to Gemini:", err.message);
-        if (!hasGemini) throw err;
-      }
-    }
-
-    const payload = {
-      systemInstruction: { parts: [{ text: instructions }] },
-      contents: [{ role: "user", parts: [{ text: input }] }],
-      generationConfig: isExplain ? { temperature: 0.25, responseMimeType: "application/json" } : { temperature: 0.3 }
-    };
-
-    const result = await geminiRequest(payload);
-    const text = geminiText(result);
+    const text = await groqChat(instructions, input, isExplain);
+    const groqModel = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
+    
     if (isExplain) {
       const cleaned = extractJSON(text);
-      try { return json(res, 200, { analysis: JSON.parse(cleaned), modelUsed: "gemini-3.8-flash" }); }
-      catch { return json(res, 200, { analysis: { rubyText: "", translation: "", literal: "", raw: text }, modelUsed: "gemini-3.8-flash" }); }
+      try { return json(res, 200, { analysis: JSON.parse(cleaned), modelUsed: `Groq (${groqModel})`, provider: "groq" }); }
+      catch { return json(res, 200, { analysis: { rubyText: "", translation: "", literal: "", raw: text }, modelUsed: `Groq (${groqModel})`, provider: "groq" }); }
     }
-    json(res, 200, { answer: text, modelUsed: "gemini-3.8-flash" });
+    return json(res, 200, { answer: text, modelUsed: `Groq (${groqModel})`, provider: "groq" });
   } catch (error) {
     json(res, 500, { error: error.message || "The AI request could not be completed." });
   }
@@ -389,11 +194,7 @@ async function askModel(req, res, kind) {
 
 async function evaluateSpeech(req, res) {
   const hasGroq = Boolean(process.env.GROQ_API_KEY?.trim());
-  const hasOpenAI = Boolean(process.env.OPENAI_API_KEY?.trim());
-  const hasGemini = Boolean(process.env.GEMINI_API_KEY?.trim());
-  if (!hasGroq && !hasOpenAI && !hasGemini) {
-    return json(res, 503, { error: "AI is not configured for speech evaluation. Add GROQ_API_KEY to .env." });
-  }
+  if (!hasGroq) return json(res, 503, { error: "AI is not configured for speech evaluation. Add GROQ_API_KEY to .env." });
 
   try {
     const body = JSON.parse((await readBody(req, 512 * 1024)).toString("utf8"));
@@ -428,48 +229,11 @@ Scoring criteria:
 
     const userPrompt = `Target Sentence: ${target}\nTarget Duration: ${targetDuration}s\nLearner Recognized Speech: ${heard || "(unrecognized / silent)"}\nLearner Duration: ${recordedDuration}s`;
 
-    let evaluation = null;
-    let modelUsed = "";
+    const reply = await groqChat(systemPrompt, userPrompt, true);
+    const evaluation = JSON.parse(extractJSON(reply));
+    const groqModel = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
 
-    // 1. Prioritize Groq
-    if (hasGroq) {
-      try {
-        const reply = await groqChat(systemPrompt, userPrompt, true);
-        evaluation = JSON.parse(extractJSON(reply));
-        const groqModel = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
-        modelUsed = `Groq (${groqModel})`;
-      } catch (err) {
-        console.warn("[evaluateSpeech] Groq failed, falling back to OpenAI/Gemini:", err.message);
-        if (!hasOpenAI && !hasGemini) throw err;
-      }
-    }
-
-    // 2. Fallback to OpenAI
-    if (!evaluation && hasOpenAI) {
-      try {
-        const selectedModel = process.env.OPENAI_MODEL || "gpt-4o-mini";
-        const reply = await openaiChat(systemPrompt, userPrompt, true, selectedModel);
-        evaluation = JSON.parse(extractJSON(reply));
-        modelUsed = selectedModel;
-      } catch (err) {
-        console.warn("[evaluateSpeech] OpenAI failed, falling back to Gemini:", err.message);
-        if (!hasGemini) throw err;
-      }
-    }
-
-    if (!evaluation && hasGemini) {
-      const payload = {
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
-      };
-      const result = await geminiRequest(payload);
-      const text = extractJSON(geminiText(result));
-      evaluation = JSON.parse(text);
-      modelUsed = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-    }
-
-    json(res, 200, { evaluation, modelUsed });
+    json(res, 200, { evaluation, modelUsed: `Groq (${groqModel})` });
   } catch (error) {
     console.error("Speech evaluation error:", error);
     json(res, 500, { error: error.message || "Speech evaluation failed." });
@@ -517,20 +281,17 @@ const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
   if (req.method === "GET" && url.pathname === "/api/status") {
     const hasGroq = Boolean(process.env.GROQ_API_KEY?.trim());
-    const hasOpenAI = Boolean(process.env.OPENAI_API_KEY?.trim());
-    const hasGemini = Boolean(process.env.GEMINI_API_KEY?.trim());
     const groqChatModel = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
     const groqModel = process.env.GROQ_MODEL || "whisper-large-v3-turbo";
-    const primaryModel = hasGroq ? groqChatModel : (hasOpenAI ? (process.env.OPENAI_MODEL || "gpt-4o-mini") : "gemini-3.8-flash");
     return json(res, 200, {
-      aiConfigured: hasGroq || hasOpenAI || hasGemini,
+      aiConfigured: hasGroq,
       hasGroq,
-      hasOpenAI,
-      hasGemini,
-      primaryModel,
+      hasOpenAI: false,
+      hasGemini: false,
+      primaryModel: groqChatModel,
       groqWhisper: groqModel,
       groqChatModel,
-      activeProvider: hasGroq ? "groq" : (hasOpenAI ? "openai" : "gemini")
+      activeProvider: "groq"
     });
   }
   if (req.method === "GET" && url.pathname === "/api/library") return listLibrary(res);
@@ -616,3 +377,22 @@ async function saveTranscript(req, res) {
 }
 
 server.listen(PORT, "0.0.0.0", () => console.log(`Kage is ready at http://0.0.0.0:${PORT}`));
+
+async function subtitleTranslate(req, res) {
+  try {
+    const body = JSON.parse((await readBody(req, 1024 * 1024)).toString("utf8"));
+    if (!body.text) return json(res, 400, { error: "Text required" });
+
+    const systemPrompt = `Japanese tutor for Traditional Chinese.
+Output ONLY JSON:
+{"sentence_translation":"...","chunks":[{"japanese":"...","furigana":"...","translation":"..."}]}
+Break into natural words.`;
+
+    const reply = await groqChat(systemPrompt, body.text, true);
+    let content = extractJSON(reply);
+    json(res, 200, JSON.parse(content));
+  } catch (error) {
+    console.error("Subtitle translate error:", error);
+    json(res, 500, { error: error.message || "Translation failed." });
+  }
+}
