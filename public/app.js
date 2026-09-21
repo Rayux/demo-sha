@@ -304,7 +304,7 @@ function markActiveSource() {
     item.classList.toggle("active", active);
     item.setAttribute("aria-pressed", String(active));
     const sel = item.querySelector(".track-select");
-    if (sel) sel.textContent = active ? "✓" : "↗";
+    if (sel) sel.innerHTML = active ? '<svg class="ui-icon" width="16" height="16"><use href="#icon-check"/></svg>' : "↗";
   });
 }
 
@@ -655,7 +655,7 @@ function renderPills() {
     ].filter(Boolean).join(" ");
     let icon = "";
     if (clip.mastered) icon = '<span class="pill-check" style="color: var(--blue)"><svg class="ui-icon" style="width: 12px; height: 12px;" fill="currentColor" aria-hidden="true"><use href="#icon-sparkle"/></svg></span>';
-    else if (isAnalyzed) icon = '<span class="pill-check">✓</span>';
+    else if (isAnalyzed) icon = '<span class="pill-check"><svg class="ui-icon" width="14" height="14" stroke="currentColor"><use href="#icon-check"/></svg></span>';
     else if (isFailed) icon = '<span class="pill-check" style="color:var(--danger)">!</span>';
     return `<button class="${classes}" type="button" data-index="${index}" aria-label="Clip ${index + 1}${isAnalyzed ? ', analyzed' : ''}" ${isActive ? 'aria-current="true"' : ''}>${String(index + 1).padStart(2, "0")}${icon}</button>`;
   }).join("");
@@ -889,7 +889,7 @@ function restartClip(announce = true) {
   if (!clip) return;
   cancelPracticePlayback();
   ui.audio.currentTime = clip.start;
-  ui.play.textContent = "▶";
+  ui.play.innerHTML = '<svg class="ui-icon" fill="currentColor" aria-hidden="true" width="24" height="24"><use href="#icon-play"/></svg>';
   updateTransportProgress();
   if (announce) toast("Restarted this sentence.");
 }
@@ -1148,7 +1148,7 @@ function updateAutoAnalyzeUI() {
     if (ui.autoAnalyzeStop) ui.autoAnalyzeStop.textContent = "Stop";
     if (ui.autoAnalyzeText) {
       if (state.autoAnalyzePaused) {
-        ui.autoAnalyzeText.textContent = `⏸ Auto-analysis paused (${ready} / ${total} ready${failed ? `, ${failed} failed` : ""})`;
+        ui.autoAnalyzeText.innerHTML = `<svg class="ui-icon" width="16" height="16" fill="currentColor"><use href="#icon-pause"/></svg> Auto-analysis paused (${ready} / ${total} ready${failed ? `, ${failed} failed` : ""})`;
       } else if (state.analyzingIndex >= 0) {
         ui.autoAnalyzeText.textContent = `Analyzing clip ${String(state.analyzingIndex + 1).padStart(2, "0")} (${ready} / ${total} ready${failed ? `, ${failed} failed` : ""})…`;
       } else {
@@ -1157,7 +1157,7 @@ function updateAutoAnalyzeUI() {
     }
   } else if (ready === total && total > 0) {
     ui.autoAnalyzeBar.classList.remove("hidden");
-    if (ui.autoAnalyzeText) ui.autoAnalyzeText.textContent = `✓ All ${total} clips analyzed and ready!`;
+    if (ui.autoAnalyzeText) ui.autoAnalyzeText.innerHTML = `<svg class="ui-icon" width="16" height="16" stroke="currentColor"><use href="#icon-check"/></svg> All ${total} clips analyzed and ready!`;
     if (ui.autoAnalyzePause) ui.autoAnalyzePause.classList.add("hidden");
     if (ui.autoAnalyzeStop) ui.autoAnalyzeStop.textContent = "Dismiss";
   } else if (failed > 0 && ready + failed === total) {
@@ -1260,7 +1260,7 @@ async function runAutoAnalyzeQueue() {
     const isRateLimit = msg.includes("high demand") || msg.includes("503") || msg.includes("429");
     if (isRateLimit) {
       if (ui.autoAnalyzeText) {
-        ui.autoAnalyzeText.textContent = `⏳ High demand on AI service, retrying in 5s… (${state.clips.filter((c) => c.analyzed).length} / ${state.clips.length} ready)`;
+        ui.autoAnalyzeText.innerHTML = `<svg class="ui-icon" width="16" height="16" stroke="currentColor"><use href="#icon-loader"/></svg> High demand on AI service, retrying in 5s… (${state.clips.filter((c) => c.analyzed).length} / ${state.clips.length} ready)`;
       }
       autoAnalyzeTimer = setTimeout(() => {
         if (state.autoAnalyzing && !state.autoAnalyzePaused) {
@@ -1291,9 +1291,9 @@ function setRecordState(recording) {
   ui.record.classList.toggle("recording", recording);
   ui.record.innerHTML = recording ? "<span></span> Stop & submit <kbd>T</kbd>" : "<span></span> Record attempt <kbd>R</kbd>";
   ui.record.setAttribute("aria-keyshortcuts", recording ? "t" : "r");
-  ui.recordStatus.textContent = recording ? "🔴 RECORDING" : "READY";
+  ui.recordStatus.textContent = recording ? "RECORDING" : "READY";
   if (recording) {
-    ui.recordHint.innerHTML = "<strong style='color: var(--primary)'>🎙️ Listening... Speak now.</strong>";
+    ui.recordHint.innerHTML = "<strong style='color: var(--primary); display: flex; align-items: center; gap: 4px;'><svg class='ui-icon' width='16' height='16'><use href='#icon-mic'/></svg> Listening... Speak now.</strong>";
   }
   ui.recordStatus.classList.toggle("recording", recording);
 }
@@ -1310,7 +1310,7 @@ function updateAttemptPlayer() {
   const progress = duration > 0 ? Math.min(100, elapsed / duration * 100) : 0;
   const playing = !ui.attemptAudio.paused && !ui.attemptAudio.ended;
   ui.attemptPlay.disabled = !state.attemptUrl;
-  ui.attemptPlay.textContent = playing ? "❚❚" : "▶";
+  ui.attemptPlay.innerHTML = playing ? '<svg class="ui-icon" width="20" height="20" fill="currentColor"><use href="#icon-pause"/></svg>' : '<svg class="ui-icon" width="20" height="20" fill="currentColor"><use href="#icon-play"/></svg>';
   ui.attemptPlay.setAttribute("aria-label", playing ? "Pause your recording" : "Play your recording");
   ui.attemptSeek.disabled = !state.attemptUrl || duration <= 0;
   ui.attemptSeek.value = String(progress);
@@ -1431,7 +1431,7 @@ async function startRecording() {
     recorder.start();
     startVAD(stream, recorder);
     setRecordState(true);
-    toast("🎙️ Start recording...");
+    toast("Start recording...");
   } catch {
     stream?.getTracks().forEach((track) => track.stop());
     stopVAD();
@@ -1979,8 +1979,8 @@ ui.audio.addEventListener("timeupdate", () => {
   updateTransportProgress();
 });
 ui.audio.addEventListener("ended", () => { if (ui.audio.ended) finishClipPlayback(); });
-ui.audio.addEventListener("play", () => { ui.attemptAudio.pause(); ui.play.textContent = "❚❚"; ui.play.setAttribute("aria-label", "Pause current clip"); $(".shadowing-deck")?.classList.add("is-playing"); });
-ui.audio.addEventListener("pause", () => { ui.play.textContent = "▶"; ui.play.setAttribute("aria-label", "Play current clip"); $(".shadowing-deck")?.classList.remove("is-playing"); });
+ui.audio.addEventListener("play", () => { ui.attemptAudio.pause(); ui.play.innerHTML = '<svg class="ui-icon" fill="currentColor" aria-hidden="true" width="24" height="24"><use href="#icon-pause"/></svg>'; ui.play.setAttribute("aria-label", "Pause current clip"); $(".shadowing-deck")?.classList.add("is-playing"); });
+ui.audio.addEventListener("pause", () => { ui.play.innerHTML = '<svg class="ui-icon" fill="currentColor" aria-hidden="true" width="24" height="24"><use href="#icon-play"/></svg>'; ui.play.setAttribute("aria-label", "Play current clip"); $(".shadowing-deck")?.classList.remove("is-playing"); });
 ui.audio.addEventListener("loadedmetadata", () => {
   ui.scan.disabled = false;
   if (ui.scanClassic) ui.scanClassic.disabled = false;
