@@ -139,7 +139,9 @@ function saveClipCache() {
     translation: clip.translation || "",
     literal: clip.literal || "",
     analyzed: Boolean(clip.analyzed),
-    scanned: Boolean(clip.scanned)
+    scanned: Boolean(clip.scanned),
+    failed: Boolean(clip.failed),
+    error: clip.error || ""
   }));
   try {
     localStorage.setItem(key, JSON.stringify(dataToSave));
@@ -691,7 +693,7 @@ function renderActiveClip(preventAudioInterrupt = false) {
     ui.translation.classList.toggle("empty", !clip.translation);
   }
   ui.literal.textContent = clip.literal ? `Literal: ${clip.literal}` : "";
-  ui.analysisState.textContent = clip.analyzed ? "AI analyzed" : (state.autoAnalyzing && state.analyzingIndex === state.active ? "Analyzing…" : (clip.failed ? "Analysis failed" : "Local clip"));
+  ui.analysisState.textContent = clip.analyzed ? "AI analyzed" : (state.autoAnalyzing && state.analyzingIndex === state.active ? "Analyzing…" : (clip.failed ? (clip.error ? `Failed: ${clip.error}` : "Analysis failed") : "Local clip"));
   renderAnalyzeButton(clip);
   ui.chatContext.textContent = clip.japanese || `Clip ${state.active + 1}: add a transcript or analyze this short audio clip.`;
   
@@ -1061,6 +1063,7 @@ async function analyzeSingleClip(index) {
       }
       const before = state.clips[index - 1]?.japanese || "";
       const after = state.clips[index + 1]?.japanese || "";
+      let explainErrorMsg = "";
       try {
         const response = await fetch("/api/explain", {
           method: "POST",
@@ -1078,15 +1081,18 @@ async function analyzeSingleClip(index) {
         clip.literal = analysis.literal || "";
       } catch (explainError) {
         console.warn(`[analyzeSingleClip] Explanation failed for clip ${index + 1}:`, explainError);
+        explainErrorMsg = explainError.message || "Failed to fetch translation.";
         clip.rubyText = clip.rubyText || clip.japanese;
       }
       
       if (!clip.translation || !clip.translation.trim()) {
         clip.analyzed = false;
         clip.failed = true;
+        clip.error = explainErrorMsg || "Missing Traditional Chinese translation.";
       } else {
         clip.analyzed = true;
         clip.failed = false;
+        clip.error = null;
         clip.retryCount = 0;
       }
       saveClipCache();
@@ -1124,8 +1130,9 @@ async function analyzeCurrentClip() {
     }
   } catch (error) {
     clip.failed = true;
+    clip.error = error.message || "This clip could not be analyzed.";
     renderActiveClip();
-    toast(error.message || "This clip could not be analyzed.");
+    toast(clip.error);
   }
 }
 
@@ -1283,6 +1290,7 @@ async function runAutoAnalyzeQueue() {
     state.clips[targetIndex].retryCount = (state.clips[targetIndex].retryCount || 0) + 1;
     if (state.clips[targetIndex].retryCount >= 2) {
       state.clips[targetIndex].failed = true;
+      state.clips[targetIndex].error = msg || "Auto-analysis failed after 2 attempts.";
       console.warn(`Skipping clip ${targetIndex + 1} after 2 failed attempts: ${msg}`);
     }
   }
