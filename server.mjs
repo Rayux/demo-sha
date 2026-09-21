@@ -3,6 +3,8 @@ import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
 import { createReadStream, existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, "public");
@@ -11,6 +13,34 @@ const TRANSCRIPTS = path.join(ROOT, "transcripts");
 const PORT = Number(process.env.PORT || 4173);
 
 await loadDotEnv();
+
+let db = null;
+function initFirebase() {
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  if (projectId && clientEmail && privateKey) {
+    if (privateKey.includes("\\n")) {
+      privateKey = privateKey.replace(/\\n/g, "\n");
+    }
+    try {
+      initializeApp({
+        credential: cert({
+          projectId,
+          clientEmail,
+          privateKey
+        })
+      });
+      db = getFirestore();
+      console.log("Firebase initialized");
+    } catch (e) {
+      console.warn("Failed to initialize Firebase:", e.message);
+    }
+  } else {
+    console.warn("Firebase credentials not fully provided in .env. Falling back to local ephemeral storage.");
+  }
+}
+initFirebase();
 
 function loadDotEnv() {
   const envPath = path.join(ROOT, ".env");
@@ -333,6 +363,19 @@ async function getTranscript(req, res, searchParams) {
   const file = searchParams.get("file");
   if (!file) return json(res, 400, { error: "Filename required" });
   const baseName = path.basename(file).replace(/\.[^.]+$/, "");
+  
+  try {
+    if (db) {
+      const doc = await db.collection("transcripts").doc(baseName).get();
+      if (doc.exists) {
+        return json(res, 200, { exists: true, data: doc.data() });
+      }
+    }
+  } catch (e) {
+    console.warn("Error fetching from Firebase:", e.message);
+  }
+
+  // Fallback to local ephemeral disk
   const jsonPath = path.join(TRANSCRIPTS, `${baseName}.json`);
   try {
     const raw = await readFile(jsonPath, "utf8");
@@ -349,19 +392,24 @@ async function saveTranscript(req, res) {
     const { filename, clips } = body;
     if (!filename || !Array.isArray(clips)) return json(res, 400, { error: "Invalid payload" });
     const baseName = path.basename(filename).replace(/\.[^.]+$/, "");
-    if (!existsSync(TRANSCRIPTS)) await mkdir(TRANSCRIPTS, { recursive: true });
 
-    // 1. Write formatted JSON data
-    const jsonPath = path.join(TRANSCRIPTS, `${baseName}.json`);
     const payload = {
       source: filename,
       updatedAt: new Date().toISOString(),
       clipCount: clips.length,
       clips
     };
+
+    if (db) {
+      await db.collection("transcripts").doc(baseName).set(payload);
+    }
+
+    // Always keep a local copy for static fallback (even if ephemeral on Render)
+    if (!existsSync(TRANSCRIPTS)) await mkdir(TRANSCRIPTS, { recursive: true });
+    
+    const jsonPath = path.join(TRANSCRIPTS, `${baseName}.json`);
     await writeFile(jsonPath, JSON.stringify(payload, null, 2), "utf8");
 
-    // 2. Write readable Markdown summary
     const mdPath = path.join(TRANSCRIPTS, `${baseName}.md`);
     const mdContent = generateMarkdownTranscript(filename, clips);
     await writeFile(mdPath, mdContent, "utf8");
