@@ -27,6 +27,12 @@
     <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
         <symbol id="icon-sparkle" viewBox="0 0 24 24"><path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7Z"/></symbol>
+        <symbol id="icon-asterisk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M18.9 7.1L5.1 16.9M5.1 7.1l13.8 9.8"/></symbol>
+        <symbol id="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></symbol>
+        <symbol id="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
+        <symbol id="icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></symbol>
+        <symbol id="icon-loader" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="4.93" x2="19.07" y2="7.76"/></symbol>
       </defs>
     </svg>
 
@@ -61,7 +67,7 @@
         </div>
 
         <div class="session-badge" title="Total recording attempts in this browser">
-          <span class="session-badge-pop pop-only" aria-hidden="true">✳</span>
+          <span class="session-badge-pop pop-only" aria-hidden="true"><svg class="ui-icon" width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#icon-asterisk"/></svg></span>
           <strong id="session-count">0</strong>
           <span class="pop-only">takes &amp; counting</span>
           <span class="classic-only">recordings</span>
@@ -92,13 +98,13 @@
           </div>
           <div class="smile-sticker"><svg viewBox="0 0 100 100"><path d="M32 29v14m36-14v14M25 60q25 33 50 0" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg><span>FEEL THE WORDS</span></div>
           <div class="art-ticket"><span>ADMIT ONE</span><strong>Your voice belongs here.</strong><span>NO PERFECT JAPANESE REQUIRED</span></div>
-          <span class="art-star">✳</span>
+          <span class="art-star"><svg class="ui-icon" width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#icon-asterisk"/></svg></span>
         </div>
       </section>
 
       <!-- POP STRIP (Pop mode only) -->
       <div class="club-strip pop-only" aria-label="Listen, repeat, make it yours">
-        <span>LESS SCROLLING</span><span aria-hidden="true">✳</span><span>MORE SPEAKING</span><span aria-hidden="true">✳</span><span lang="ja">聞いて、まねして、自分の声に。</span><span aria-hidden="true">✳</span><span>MAKE SOME NOISE</span><span aria-hidden="true">↗</span>
+        <span>LESS SCROLLING</span><span aria-hidden="true"><svg class="ui-icon" width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#icon-asterisk"/></svg></span><span>MORE SPEAKING</span><span aria-hidden="true"><svg class="ui-icon" width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#icon-asterisk"/></svg></span><span lang="ja">聞いて、まねして、自分の声に。</span><span aria-hidden="true"><svg class="ui-icon" width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#icon-asterisk"/></svg></span><span>MAKE SOME NOISE</span><span aria-hidden="true">↗</span>
       </div>
 
       <!-- LIBRARY PANEL (Left sidebar in Classic; Horizontal collection shelf in Pop) -->
@@ -157,7 +163,7 @@
             <p class="eyebrow">02 / YOUR STUDIO</p>
             <h2 id="studio-title">A little less shy.<br><em>A little more you.</em></h2>
           </div>
-          <p class="studio-note pop-only">This is a practice space.<br>Not a perfect space. <span aria-hidden="true">✳</span></p>
+          <p class="studio-note pop-only">This is a practice space.<br>Not a perfect space. <span aria-hidden="true"><svg class="ui-icon" width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#icon-asterisk"/></svg></span></p>
 
           <div class="classic-only">
             <p class="eyebrow"><span class="eyebrow-dot"></span> Japanese shadowing</p>
@@ -184,7 +190,7 @@
           </div>
           <ol class="practice-flow pop-only" aria-label="How shadowing works">
             <li><span class="step-number">01</span><div><h3>Steal the rhythm.</h3><p>Listen to a bite-sized clip. Catch the little pauses, the rise, the fall.</p></div><span class="step-art" aria-hidden="true">↝</span></li>
-            <li><span class="step-number">02</span><div><h3>Make some noise.</h3><p>Say it back. Record a take. Awkward is just the sound of getting started.</p></div><span class="step-art" aria-hidden="true">✳</span></li>
+            <li><span class="step-number">02</span><div><h3>Make some noise.</h3><p>Say it back. Record a take. Awkward is just the sound of getting started.</p></div><span class="step-art" aria-hidden="true"><svg class="ui-icon" width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#icon-asterisk"/></svg></span></li>
             <li><span class="step-number">03</span><div><h3>Find your thing.</h3><p>Get a little feedback, try again, and hear yourself getting closer.</p></div><span class="step-art" aria-hidden="true">↗</span></li>
           </ol>
 
@@ -258,7 +264,9 @@
               <div class="unified-controls">
                 <div class="transport-group">
                   <button id="back-5" class="transport-small" type="button">−<span id="back-label">5s</span></button>
-                  <button id="play-clip" class="play-button" type="button" aria-label="Play current clip" aria-keyshortcuts="p" title="Play clip / pause (P)">▶</button>
+                  <button id="play-clip" class="play-button" type="button" aria-label="Play current clip" aria-keyshortcuts="p" title="Play clip / pause (P)">
+                    <svg class="ui-icon" fill="currentColor" aria-hidden="true" width="24" height="24"><use href="#icon-play"/></svg>
+                  </button>
                   <button id="forward-3" class="transport-small" type="button">+<span id="forward-label">5s</span></button>
                   <button id="play-full" class="quiet-button" type="button" title="Play full track" style="margin-left:8px; border: 1px solid var(--border); border-radius: 16px; padding: 4px 12px; height: 32px; font-size: 0.8em; font-weight: 500;">Play All</button>
                   <div class="speed-group" aria-label="Playback speed">
@@ -305,7 +313,9 @@
 
               <div id="recording-result" class="recording-result hidden">
                 <div class="attempt-player" role="group" aria-label="Your recording">
-                  <button id="attempt-play" class="icon-button" type="button" aria-label="Play your recording" disabled>▶</button>
+                  <button id="attempt-play" class="icon-button" type="button" aria-label="Play your recording" disabled>
+                    <svg class="ui-icon" fill="currentColor" aria-hidden="true" width="20" height="20"><use href="#icon-play"/></svg>
+                  </button>
                   <div class="attempt-track">
                     <div class="attempt-topline"><span>Your recording</span><span id="attempt-time">0:00 / 0:00</span></div>
                     <input id="attempt-seek" class="attempt-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Recording playback position" disabled />
@@ -351,7 +361,7 @@
                 <span class="selection-hint pop-only">Highlight a word. Ask your buddy. <span aria-hidden="true">↗</span></span>
                 <span class="selection-hint classic-only">Highlight a word to ask your companion <span aria-hidden="true">↗</span></span>
               </div>
-              <div class="sentence-footnote pop-only"><span aria-hidden="true">✳</span><p>Don’t just read it.<br><em>Feel how it sounds.</em></p></div>
+              <div class="sentence-footnote pop-only"><span aria-hidden="true"><svg class="ui-icon" width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#icon-asterisk"/></svg></span><p>Don’t just read it.<br><em>Feel how it sounds.</em></p></div>
             </div>
           </section>
 
@@ -433,7 +443,7 @@
 
     <!-- Floating Buddy Launcher Button (Pop mode only) -->
     <button id="buddy-open" class="buddy-launcher pop-only" type="button" aria-haspopup="dialog" aria-controls="buddy-dialog">
-      <span class="buddy-face" aria-hidden="true">✳</span>
+      <span class="buddy-face" aria-hidden="true"><svg class="ui-icon" width="1em" height="1em" fill="currentColor" aria-hidden="true"><use href="#icon-asterisk"/></svg></span>
       <span>A little help?<small>ASK YOUR LANGUAGE BUDDY</small></span>
       <span aria-hidden="true">↗</span>
     </button>
