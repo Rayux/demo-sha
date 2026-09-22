@@ -136,7 +136,7 @@ async function hybridChat(systemInstruction, userContent, jsonMode = false) {
 
     const response = await fetch(ollamaEndpoint, {
       method: "POST",
-      signal: AbortSignal.timeout(8000), // fail fast to fallback
+      signal: AbortSignal.timeout(60000), // Give local LLM 60s to think
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
