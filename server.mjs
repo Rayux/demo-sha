@@ -86,7 +86,8 @@ async function groqTranscribe(audioBytes, mimeType = "audio/wav", filename = "cl
     form.append("file", blob, filename);
     form.append("model", model);
     form.append("language", "ja");
-    form.append("response_format", "json");
+    form.append("response_format", "verbose_json");
+    form.append("timestamp_granularities[]", "word");
 
     const response = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
       method: "POST",
@@ -103,6 +104,8 @@ async function groqTranscribe(audioBytes, mimeType = "audio/wav", filename = "cl
     const data = await response.json();
     return {
       text: (data.text || "").trim(),
+      words: Array.isArray(data.words) ? data.words : [],
+      segments: Array.isArray(data.segments) ? data.segments : [],
       modelUsed: `Groq Whisper (${model})`,
       provider: "groq"
     };
@@ -112,39 +115,72 @@ async function groqTranscribe(audioBytes, mimeType = "audio/wav", filename = "cl
   }
 }
 
-async function groqChat(systemInstruction, userContent, jsonMode = false) {
-  const apiKey = process.env.GROQ_API_KEY?.trim();
-  if (!apiKey) throw new Error("GROQ_API_KEY is not configured.");
-  const model = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
+async function hybridChat(systemInstruction, userContent, jsonMode = false) {
+  const messages = [
+    { role: "system", content: systemInstruction },
+    { role: "user", content: userContent }
+  ];
+  
+  const ollamaEndpoint = "http://127.0.0.1:11434/v1/chat/completions";
+  const ollamaModel = process.env.OLLAMA_MODEL || "gemma2:9b";
 
-  const payload = {
-    model,
-    messages: [
-      { role: "system", content: systemInstruction },
-      { role: "user", content: userContent }
-    ],
-    temperature: 0.2
-  };
-  if (jsonMode) {
-    payload.response_format = { type: "json_object" };
+  try {
+    const payload = {
+      model: ollamaModel,
+      messages,
+      temperature: 0.2
+    };
+    if (jsonMode) {
+      payload.response_format = { type: "json_object" };
+    }
+
+    const response = await fetch(ollamaEndpoint, {
+      method: "POST",
+      signal: AbortSignal.timeout(8000), // fail fast to fallback
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama API error (${response.status})`);
+    }
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    return { content, provider: "ollama", modelUsed: `Ollama (${ollamaModel})` };
+  } catch (err) {
+    console.warn(`[Ollama] Request failed (${err.message}). Falling back to Groq...`);
+    
+    const apiKey = process.env.GROQ_API_KEY?.trim();
+    if (!apiKey) throw new Error("Ollama failed and GROQ_API_KEY is not configured.");
+    const model = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
+  
+    const payload = {
+      model,
+      messages,
+      temperature: 0.2
+    };
+    if (jsonMode) {
+      payload.response_format = { type: "json_object" };
+    }
+  
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+  
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Groq API error (${response.status}): ${errText}`);
+    }
+  
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    return { content, provider: "groq", modelUsed: `Groq (${model})` };
   }
-
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Groq API error (${response.status}): ${errText}`);
-  }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
 }
 
 function extractJSON(text) {
@@ -181,7 +217,8 @@ async function proxyTranscription(req, res) {
     if (groqResult) {
       return json(res, 200, {
         text: groqResult.text || "",
-        words: [],
+        words: groqResult.words || [],
+        segments: groqResult.segments || [],
         modelUsed: groqResult.modelUsed,
         provider: "groq",
         fallbackTriggered: false
@@ -191,6 +228,20 @@ async function proxyTranscription(req, res) {
     }
   } catch (error) {
     json(res, 500, { error: error.message || "Unable to transcribe this clip." });
+  }
+}
+
+async function compareTranscript(req, res) {
+  if (!process.env.GROQ_API_KEY?.trim()) return json(res, 503, { error: "AI is not configured." });
+  try {
+    const body = JSON.parse((await readBody(req, 256 * 1024)).toString("utf8"));
+    if (!body.storedJapanese || !body.freshJapanese) return json(res, 400, { error: "Both stored and fresh Japanese are required." });
+    const prompt = `Compare two Japanese transcripts of the same short audio clip. Return only JSON: {"sameMeaning":true,"confidence":"high|medium|low","notes":"brief Traditional Chinese note","suggestedJapanese":""}. Treat the stored transcript as the lesson's authoritative text. Only suggest a replacement when the fresh transcript clearly corrects an obvious recognition error; otherwise leave suggestedJapanese empty. Never invent missing dialogue. Use Traditional Chinese for notes.\nStored: ${body.storedJapanese}\nFresh: ${body.freshJapanese}\nNearby context: ${body.context || ""}`;
+    const reply = await hybridChat("You are a careful Japanese transcription reviewer. Return valid JSON only.", prompt, true);
+    const cleaned = extractJSON(reply.content);
+    return json(res, 200, { comparison: JSON.parse(cleaned), provider: reply.provider });
+  } catch (error) {
+    return json(res, 500, { error: error.message || "Comparison failed." });
   }
 }
 
@@ -208,15 +259,14 @@ async function askModel(req, res, kind) {
       ? `Target sentence: ${body.sentence}\nNearby context: ${body.context || "(not provided)"}`
       : `Target sentence: ${body.sentence}\nTraditional Chinese translation: ${body.translation || "(not available)"}\nGrammar notes: ${body.grammar || "(not available)"}\nLearner question: ${body.question}`;
 
-    const text = await groqChat(instructions, input, isExplain);
-    const groqModel = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
+    const reply = await hybridChat(instructions, input, isExplain);
     
     if (isExplain) {
-      const cleaned = extractJSON(text);
-      try { return json(res, 200, { analysis: JSON.parse(cleaned), modelUsed: `Groq (${groqModel})`, provider: "groq" }); }
-      catch { return json(res, 200, { analysis: { rubyText: "", translation: "", literal: "", raw: text }, modelUsed: `Groq (${groqModel})`, provider: "groq" }); }
+      const cleaned = extractJSON(reply.content);
+      try { return json(res, 200, { analysis: JSON.parse(cleaned), modelUsed: reply.modelUsed, provider: reply.provider }); }
+      catch { return json(res, 200, { analysis: { rubyText: "", translation: "", literal: "", raw: reply.content }, modelUsed: reply.modelUsed, provider: reply.provider }); }
     }
-    return json(res, 200, { answer: text, modelUsed: `Groq (${groqModel})`, provider: "groq" });
+    return json(res, 200, { answer: reply.content, modelUsed: reply.modelUsed, provider: reply.provider });
   } catch (error) {
     json(res, 500, { error: error.message || "The AI request could not be completed." });
   }
@@ -259,11 +309,10 @@ Scoring criteria:
 
     const userPrompt = `Target Sentence: ${target}\nTarget Duration: ${targetDuration}s\nLearner Recognized Speech: ${heard || "(unrecognized / silent)"}\nLearner Duration: ${recordedDuration}s`;
 
-    const reply = await groqChat(systemPrompt, userPrompt, true);
-    const evaluation = JSON.parse(extractJSON(reply));
-    const groqModel = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
+    const reply = await hybridChat(systemPrompt, userPrompt, true);
+    const evaluation = JSON.parse(extractJSON(reply.content));
 
-    json(res, 200, { evaluation, modelUsed: `Groq (${groqModel})` });
+    json(res, 200, { evaluation, modelUsed: reply.modelUsed, provider: reply.provider });
   } catch (error) {
     console.error("Speech evaluation error:", error);
     json(res, 500, { error: error.message || "Speech evaluation failed." });
@@ -328,6 +377,7 @@ const server = createServer(async (req, res) => {
   if (req.method === "GET" && url.pathname === "/api/transcript") return getTranscript(req, res, url.searchParams);
   if (req.method === "POST" && url.pathname === "/api/transcript") return saveTranscript(req, res);
   if (req.method === "POST" && url.pathname === "/api/transcribe") return proxyTranscription(req, res);
+  if (req.method === "POST" && url.pathname === "/api/compare-transcript") return compareTranscript(req, res);
   if (req.method === "POST" && url.pathname === "/api/explain") return askModel(req, res, "explain");
   if (req.method === "POST" && url.pathname === "/api/chat") return askModel(req, res, "chat");
   if (req.method === "POST" && url.pathname === "/api/evaluate-speech") return evaluateSpeech(req, res);
@@ -363,9 +413,19 @@ async function getTranscript(req, res, searchParams) {
   const file = searchParams.get("file");
   if (!file) return json(res, 400, { error: "Filename required" });
   const baseName = path.basename(file).replace(/\.[^.]+$/, "");
-  
+
+  // One-time imports are immutable to browser autosaves. Local copies also
+  // allow these lessons to load when the database is unavailable.
+  try {
+    const data = JSON.parse(await readFile(path.join(TRANSCRIPTS, 'overrides', `${baseName}.json`), 'utf8'));
+    if (data.protectedImport && data.clips?.length) return json(res, 200, { exists: true, data });
+  } catch (e) {
+    if (e.code !== 'ENOENT') console.warn('Could not read transcript override:', e.message);
+  }
   try {
     if (db) {
+      const override = await db.collection('transcriptOverrides').doc(baseName).get();
+      if (override.exists) return json(res, 200, { exists: true, data: override.data() });
       const doc = await db.collection("transcripts").doc(baseName).get();
       if (doc.exists) {
         return json(res, 200, { exists: true, data: doc.data() });
@@ -436,8 +496,8 @@ Output ONLY JSON:
 {"sentence_translation":"...","chunks":[{"japanese":"...","furigana":"...","translation":"..."}]}
 Break into natural words.`;
 
-    const reply = await groqChat(systemPrompt, body.text, true);
-    let content = extractJSON(reply);
+    const reply = await hybridChat(systemPrompt, body.text, true);
+    let content = extractJSON(reply.content);
     json(res, 200, JSON.parse(content));
   } catch (error) {
     console.error("Subtitle translate error:", error);
