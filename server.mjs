@@ -78,7 +78,7 @@ async function readBody(req, maxBytes = 42 * 1024 * 1024) {
 
 async function groqTranscribe(audioBytes, mimeType = "audio/wav", filename = "clip.wav") {
   const apiKey = process.env.GROQ_API_KEY?.trim();
-  if (!apiKey) return null;
+  if (!apiKey) throw new Error("GROQ_API_KEY is missing.");
   const model = process.env.GROQ_MODEL || "whisper-large-v3-turbo";
   try {
     const form = new FormData();
@@ -97,8 +97,7 @@ async function groqTranscribe(audioBytes, mimeType = "audio/wav", filename = "cl
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.warn(`[Groq Whisper] Request failed (${response.status}):`, errorText);
-      return null;
+      throw new Error(`Groq API error (${response.status}): ${errorText}`);
     }
 
     const data = await response.json();
@@ -111,7 +110,7 @@ async function groqTranscribe(audioBytes, mimeType = "audio/wav", filename = "cl
     };
   } catch (err) {
     console.warn("[Groq Whisper] Network/processing error:", err.message);
-    return null;
+    throw err; // Throw it so the frontend can display the exact reason!
   }
 }
 
