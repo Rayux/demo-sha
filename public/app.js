@@ -126,9 +126,19 @@ function getCacheKey(sourceName) {
   return `kage_cache_${encodeURIComponent(sourceName.trim().toLowerCase())}`;
 }
 
+function isPreparedClip(clip) {
+  return Boolean(clip && Number.isFinite(Number(clip.start)) && Number.isFinite(Number(clip.end)) && clip.end > clip.start && clip.japanese?.trim() && clip.rubyText?.trim() && clip.translation?.trim());
+}
+
+function hasPreparedTranscript(clips) {
+  return Array.isArray(clips) && clips.length > 0 && clips.every(isPreparedClip);
+}
+
 let saveDiskTimer = null;
 function saveClipCache() {
   if (!state.source?.name || !state.clips?.length) return;
+  if (state.source.prepared) return;
+  const filename = state.source.name;
   const key = getCacheKey(state.source.name);
   if (!key) return;
   const dataToSave = state.clips.map((clip) => ({
@@ -154,7 +164,7 @@ function saveClipCache() {
     fetch("/api/transcript", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename: state.source.name, clips: dataToSave })
+      body: JSON.stringify({ filename, clips: dataToSave })
     }).catch((e) => console.warn("Could not save to disk:", e));
   }, 400);
 }
@@ -417,7 +427,7 @@ function resetLesson() {
   stopAutoAnalyze();
 }
 
-function setSource({ name, url, file = null }) {
+async function setSource({ name, url, file = null }) {
   if (state.recorder?.state === "recording") return toast("Stop your recording before changing audio.");
   cancelPracticePlayback();
   if (state.loadedObjectUrl) URL.revokeObjectURL(state.loadedObjectUrl);
@@ -439,6 +449,54 @@ function setSource({ name, url, file = null }) {
   studio.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
   studio.focus({ preventScroll: true });
 
+  // Published imports take precedence over old browser caches. Do not autosave
+  // on load: an old tab must never replace the curated database collection.
+  try {
+    const baseName = name.replace(/\.[^.]+$/, "");
+    let imported = null;
+    const response = await fetch(`./transcripts/overrides/${encodeURIComponent(baseName)}.json`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
+    if (response.ok) imported = await response.json();
+    if (!imported?.protectedImport) {
+      const result = await fetch(`./api/transcript?file=${encodeURIComponent(name)}`, { signal: AbortSignal.timeout(5000) });
+      if (result.ok) imported = (await result.json()).data;
+    }
+    if (state.source?.url !== url) return;
+    if (imported?.protectedImport && imported.clips?.length) {
+      state.clips = imported.clips;
+      state.source.prepared = hasPreparedTranscript(state.clips);
+      state.active = 0;
+      try { localStorage.setItem(getCacheKey(name), JSON.stringify(imported.clips)); }
+      catch (e) { console.warn('Could not cache imported transcript:', e); }
+      ui.empty.classList.add('hidden');
+      ui.stage.classList.remove('hidden');
+      renderActiveClip();
+      updateAutoAnalyzeUI();
+      toast(`Loaded ${imported.clips.length} imported clips.`);
+      return;
+    }
+  } catch (e) {
+    console.warn('Could not load imported transcript:', e);
+  }
+  if (state.source?.url !== url) return;
+  // A prepared database transcript outranks any browser cache. This keeps an
+  // old tab from resurrecting stale clip text or stale boundaries.
+  try {
+    const result = await fetch(`./api/transcript?file=${encodeURIComponent(name)}`, { signal: AbortSignal.timeout(5000) });
+    const stored = result.ok ? (await result.json()).data : null;
+    if (hasPreparedTranscript(stored?.clips)) {
+      state.clips = stored.clips;
+      state.source.prepared = true;
+      state.active = 0;
+      ui.empty.classList.add("hidden");
+      ui.stage.classList.remove("hidden");
+      renderActiveClip();
+      updateAutoAnalyzeUI();
+      toast(`Loaded ${state.clips.length} database clips.`);
+      return;
+    }
+  } catch (e) {
+    console.warn("Could not check database transcript:", e);
+  }
   const cached = loadClipCache(name);
   if (cached && cached.length) {
     state.clips = cached;
@@ -456,6 +514,7 @@ function setSource({ name, url, file = null }) {
     const applyClips = (clips, sourceMsg) => {
       if (state.source?.url !== url) return;
       state.clips = repairClips(clips);
+      state.source.prepared = hasPreparedTranscript(state.clips);
       state.active = 0;
       ui.empty.classList.add("hidden");
       ui.stage.classList.remove("hidden");
@@ -474,7 +533,9 @@ function setSource({ name, url, file = null }) {
       })
       .then((res) => {
         if (res.exists && res.data?.clips?.length) {
+          const prepared = hasPreparedTranscript(res.data.clips);
           applyClips(res.data.clips, "from server");
+          state.source.prepared = prepared;
         } else {
           throw new Error("No transcript in API");
         }
@@ -671,7 +732,7 @@ function renderPills() {
 }
 
 function renderAnalyzeButton(clip) {
-  const label = clip.analyzed ? "Re-analyze clip" : (clip.failed ? "Retry analysis" : "Analyze this clip");
+  const label = clip.analyzed ? (state.source?.prepared ? "Compare with Groq" : "Re-analyze clip") : (clip.failed ? "Retry analysis" : "Analyze this clip");
   ui.analyze.innerHTML = `${sparkleIcon} ${label}`;
 }
 
@@ -693,7 +754,7 @@ function renderActiveClip(preventAudioInterrupt = false) {
     ui.translation.classList.toggle("empty", !clip.translation);
   }
   ui.literal.textContent = clip.literal ? `Literal: ${clip.literal}` : "";
-  ui.analysisState.textContent = clip.analyzed ? "AI analyzed" : (state.autoAnalyzing && state.analyzingIndex === state.active ? "Analyzing…" : (clip.failed ? (clip.error ? `Failed: ${clip.error}` : "Analysis failed") : "Local clip"));
+  ui.analysisState.textContent = clip.comparison ? "Prepared transcript · compared with Groq" : (clip.analyzed ? (state.source?.prepared ? "Prepared transcript" : "AI analyzed") : (state.autoAnalyzing && state.analyzingIndex === state.active ? "Analyzing…" : (clip.failed ? (clip.error ? `Failed: ${clip.error}` : "Analysis failed") : "Local clip")));
   renderAnalyzeButton(clip);
   ui.chatContext.textContent = clip.japanese || `Clip ${state.active + 1}: add a transcript or analyze this short audio clip.`;
   
@@ -1039,6 +1100,20 @@ async function analyzeSingleClip(index) {
     const buffer = await getDecodedAudio();
     const wav = encodeClipWav(buffer, clip.start, clip.end);
     const transcript = await transcribe(wav);
+    if (clip.prepared || isPreparedClip(clip)) {
+      clip.comparisonPending = true;
+      const response = await fetch("/api/compare-transcript", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storedJapanese: clip.japanese, freshJapanese: (transcript.text || "").trim(), context: [state.clips[index - 1]?.japanese, state.clips[index + 1]?.japanese].filter(Boolean).join(" / ") })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Transcript comparison failed.");
+      clip.comparison = result.comparison || null;
+      clip.comparisonPending = false;
+      clip.analyzed = true;
+      renderActiveClip();
+      return;
+    }
     clip.japanese = (transcript.text || "").trim();
     clip.words = transcript.words || [];
 
@@ -2017,4 +2092,3 @@ initSelectionTooltip();
 initLockScreen();
 loadLibrary();
 loadStatus();
-
