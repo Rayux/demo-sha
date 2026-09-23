@@ -48,7 +48,7 @@
       "start": 8.2,
       "end": 11.02,
       "japanese": "今探るべきこと",
-      "rubyText": "今[いま]探[さが]るべきこと",
+      "rubyText": "今[いま]探[さぐ]るべきこと",
       "translation": "現在要探查的事",
       "analyzed": true,
       "scanned": true,
@@ -118,7 +118,7 @@
       "start": 26.84,
       "end": 30.12,
       "japanese": "今第一段階までは目処が立った",
-      "rubyText": "今[いま]第[だい]一[いち]段階[だんかい]までは目処[めす]が立[た]った",
+      "rubyText": "今[いま]第一[だいいち]段階[だんかい]までは目処[めど]が立[た]った",
       "translation": "現在第一階段已經有了目標",
       "analyzed": true,
       "scanned": true,
@@ -2678,7 +2678,7 @@
       "start": 652.572,
       "end": 654.633,
       "japanese": "こんなの何使うんだ",
-      "rubyText": "こんなの何使[つか]うんだ",
+      "rubyText": "こんなの何[なに]使[つか]うんだ",
       "translation": "這種東西要幹嘛用？",
       "analyzed": true,
       "scanned": true,
@@ -3088,7 +3088,7 @@
       "start": 742.372,
       "end": 744.592,
       "japanese": "一足先に教えてあげる",
-      "rubyText": "一足先[いっそくさき]に教[おし]えてあげる",
+      "rubyText": "一足先[ひとあしさき]に教[おし]えてあげる",
       "translation": "先一步告訴你",
       "analyzed": true,
       "scanned": true,
@@ -3228,9 +3228,9 @@
   "provenance": {
     "transcription": "groq/whisper-large-v3-turbo; full MP3 plus gap rechecks and reviewed text corrections",
     "translation": "groq/openai/gpt-oss-120b with reviewed corrections",
-    "furigana": "local kuromoji dictionary with reviewed corrections",
+    "furigana": "All-season local kuromoji coverage audit and Codex contextual corrections; no new Groq calls",
     "humanVerified": false
   },
   "protectedImport": true,
-  "importedAt": "2026-09-23T16:57:52.342Z"
+  "importedAt": "2026-09-23T17:07:34.602Z"
 }

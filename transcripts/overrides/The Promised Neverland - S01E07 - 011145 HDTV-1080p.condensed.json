@@ -178,7 +178,7 @@
       "start": 49.9,
       "end": 53.12,
       "japanese": "一定以上の成績とママの推薦",
-      "rubyText": "一定以上[いちじょういじょう]の成績[せいせき]とママの推薦[すいせん]",
+      "rubyText": "一定以上[いっていいじょう]の成績[せいせき]とママの推薦[すいせん]",
       "translation": "成績達到一定以上以及媽媽的推薦",
       "analyzed": true,
       "scanned": true,
@@ -2188,7 +2188,7 @@
       "start": 576.967,
       "end": 581.308,
       "japanese": "決行日までは6日だが究極次の1月",
-      "rubyText": "決行[けっこう]日[び]までは6日[にち]だが究極[きゅうきょく]次[つぎ]の1月[つき]",
+      "rubyText": "決行日[けっこうび]までは6日[むいか]だが究極[きゅうきょく]次[つぎ]の1月[がつ]",
       "translation": "距離行動日還有六天，不過最晚到明年一月，",
       "analyzed": true,
       "scanned": true,
@@ -2688,9 +2688,9 @@
   "provenance": {
     "transcription": "groq/whisper-large-v3-turbo; full MP3 plus gap rechecks and reviewed text corrections",
     "translation": "Codex direct Traditional Chinese translation; initial 54 clips retain Groq draft translations",
-    "furigana": "local kuromoji dictionary with reviewed corrections",
+    "furigana": "All-season local kuromoji coverage audit and Codex contextual corrections; no new Groq calls",
     "humanVerified": false
   },
   "protectedImport": true,
-  "importedAt": "2026-09-23T16:57:52.366Z"
+  "importedAt": "2026-09-23T17:07:34.625Z"
 }
