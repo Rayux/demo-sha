@@ -1,0 +1,3235 @@
+{
+  "source": "The Promised Neverland - S01E06 - 311045 HDTV-1080p.condensed.mp3",
+  "duration": 801.19,
+  "sourceSha256": "e81eaca94af27991c07b3b7656aa0efee5630dbd94311797da904f8fe4489401",
+  "clipCount": 322,
+  "clips": [
+    {
+      "start": 0,
+      "end": 0.8,
+      "japanese": "フィル?",
+      "rubyText": "フィル?",
+      "translation": "菲爾?",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 1.5,
+      "end": 4,
+      "japanese": "ナイラとエウゲンとかくれんぼしてるんだ",
+      "rubyText": "ナイラとエウゲンとかくれんぼしてるんだ",
+      "translation": "娜伊拉和尤根在玩捉迷藏啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 4,
+      "end": 6.94,
+      "japanese": "そうなんだ",
+      "rubyText": "そうなんだ",
+      "translation": "是這樣啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 6.94,
+      "end": 8.2,
+      "japanese": "さて",
+      "rubyText": "さて",
+      "translation": "那麼",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 8.2,
+      "end": 11.02,
+      "japanese": "今探るべきこと",
+      "rubyText": "今[いま]探[さが]るべきこと",
+      "translation": "現在要探查的事",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 11.02,
+      "end": 11.9,
+      "japanese": "外",
+      "rubyText": "外[そと]",
+      "translation": "外面",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 11.9,
+      "end": 14.36,
+      "japanese": "ぶっちゃけ塀は越えられる",
+      "rubyText": "ぶっちゃけ塀[へい]は越[こ]えられる",
+      "translation": "說實話那圍牆可以跨過",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 14.36,
+      "end": 16.86,
+      "japanese": "その次は逃げ道の下見",
+      "rubyText": "その次[つぎ]は逃[に]げ道[みち]の下見[したみ]",
+      "translation": "接下來是偵查逃跑路線",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 16.86,
+      "end": 19.48,
+      "japanese": "1.塀を越えて脱獄",
+      "rubyText": "1.塀[へい]を越[こ]えて脱獄[だつごく]",
+      "translation": "1.跨過圍牆越獄",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 19.48,
+      "end": 22.82,
+      "japanese": "2.この農園を無事に離れ逃走",
+      "rubyText": "2.この農園[のうえん]を無事[ぶじ]に離[はな]れ逃走[とうそう]",
+      "translation": "2.安全離開這座農園逃走",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 22.82,
+      "end": 26.84,
+      "japanese": "3.外で安定した生活を築き自立",
+      "rubyText": "3.外[そと]で安定[あんてい]した生活[せいかつ]を築[きず]き自立[じりつ]",
+      "translation": "3.在外面建立穩定的生活並自立",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 26.84,
+      "end": 30.12,
+      "japanese": "今第一段階までは目処が立った",
+      "rubyText": "今[いま]第一段階[だんかい]までは目処[めす]が立[た]った",
+      "translation": "現在第一階段已經有了目標",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 30.12,
+      "end": 32.1,
+      "japanese": "次は第二段階",
+      "rubyText": "次[つぎ]は第二段階[だんかい]",
+      "translation": "接下來是第二階段",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 32.1,
+      "end": 34.54,
+      "japanese": "ここからは外だ",
+      "rubyText": "ここからは外[そと]だ",
+      "translation": "從這裡開始是外面",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 34.54,
+      "end": 37.2,
+      "japanese": "追手をかわし農園から無事に離れる",
+      "rubyText": "追手[おって]をかわし農園[のうえん]から無事[ぶじ]に離[はな]れる",
+      "translation": "躲開追兵安全離開農園",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 37.2,
+      "end": 39.6,
+      "japanese": "そのための下見下調べ",
+      "rubyText": "そのための下見[したみ]下調べ[したしらべ]",
+      "translation": "為此的偵查與調查",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 39.6,
+      "end": 42.44,
+      "japanese": "まずは農園周辺の情報だ",
+      "rubyText": "まずは農園[のうえん]周辺[しゅうへん]の情報[じょうほう]だ",
+      "translation": "首先是農園周邊的資訊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 42.44,
+      "end": 45.56,
+      "japanese": "木の上から塀の向こう森が見えたよ",
+      "rubyText": "木[き]の上[うえ]から塀[へい]の向[む]こう森[もり]が見[み]えたよ",
+      "translation": "從樹上看到圍牆那邊的森林",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 45.56,
+      "end": 48.18,
+      "japanese": "だからそういうのしっかり確かめるの",
+      "rubyText": "だからそういうのしっかり確かめる[たしかめる]の",
+      "translation": "所以要好好確認那個。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 48.18,
+      "end": 50.26,
+      "japanese": "明日以降早いうちに調べよう",
+      "rubyText": "明日[あした]以降[いこう]早いうちに調べよう[しらべよう]",
+      "translation": "明天以後盡早去調查吧。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 50.26,
+      "end": 50.68,
+      "japanese": "うん",
+      "rubyText": "うん",
+      "translation": "嗯。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 50.68,
+      "end": 53.92,
+      "japanese": "ねえ出てからの話もう一個いい?",
+      "rubyText": "ねえ出[で]てからの話[はなし]もう一個[いっこ]いい?",
+      "translation": "嘿，從出去之後的事還可以再說一件嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 54.44,
+      "end": 54.54,
+      "japanese": "ん?",
+      "rubyText": "ん?",
+      "translation": "嗯？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 54.54,
+      "end": 57.08,
+      "japanese": "紹介したい人がいます",
+      "rubyText": "紹介[しょうかい]したい人[ひと]がいます",
+      "translation": "有想介紹的人。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 57.08,
+      "end": 59.78,
+      "japanese": "ごめんママ急いでて",
+      "rubyText": "ごめんママ急いでて[いそいでて]",
+      "translation": "抱歉，媽媽，我很急。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 59.78,
+      "end": 61.36,
+      "japanese": "見てママ",
+      "rubyText": "見て[みて]ママ",
+      "translation": "看，媽媽。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 61.36,
+      "end": 63.54,
+      "japanese": "うまくいったぜ",
+      "rubyText": "うまくいったぜ",
+      "translation": "順利完成了。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 63.54,
+      "end": 64.72,
+      "japanese": "すごいでしょ",
+      "rubyText": "すごいでしょ",
+      "translation": "很厲害吧。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 64.72,
+      "end": 67.96,
+      "japanese": "紹介したい人っていうのは",
+      "rubyText": "紹介[しょうかい]したい人[ひと]っていうのは",
+      "translation": "所說的想介紹的人是",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 67.96,
+      "end": 69.76,
+      "japanese": "この人",
+      "rubyText": "この人[ひと]",
+      "translation": "這個人",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 69.76,
+      "end": 74.4,
+      "japanese": "ウィリアム・ミネルバさん",
+      "rubyText": "ウィリアム・ミネルバさん",
+      "translation": "威廉·米奈爾巴先生",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 74.4,
+      "end": 75.34,
+      "japanese": "うん",
+      "rubyText": "うん",
+      "translation": "嗯。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 75.34,
+      "end": 76.68,
+      "japanese": "誰",
+      "rubyText": "誰[だれ]",
+      "translation": "誰？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 76.68,
+      "end": 77.82,
+      "japanese": "わかんない",
+      "rubyText": "わかんない",
+      "translation": "不知道。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 77.82,
+      "end": 80.76,
+      "japanese": "わかるのはこの本の持ち主ってことだけ",
+      "rubyText": "わかるのはこの本[ほん]の持ち主[もちぬし]ってことだけ",
+      "translation": "我只知道的是這本書的持有人而已。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 80.76,
+      "end": 81.62,
+      "japanese": "でも",
+      "rubyText": "でも",
+      "translation": "但是。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 81.62,
+      "end": 84.64,
+      "japanese": "私たちの味方かもしれない人",
+      "rubyText": "私たち[わたしたち]の味方[みかた]かもしれない人[ひと]",
+      "translation": "可能是我們的盟友的人",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 84.64,
+      "end": 85.9,
+      "japanese": "どういうこと",
+      "rubyText": "どういうこと",
+      "translation": "這是什麼意思",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 85.9,
+      "end": 89.74,
+      "japanese": "この人本を通してあるメッセージを伝えてる",
+      "rubyText": "この人本[ひとほん]を通[とお]してあるメッセージを伝[つた]えてる",
+      "translation": "此人透過書本傳遞某個訊息",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 89.74,
+      "end": 91.5,
+      "japanese": "それも一冊じゃない",
+      "rubyText": "それも一冊[いっさつ]じゃない",
+      "translation": "而且不只一本",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 91.5,
+      "end": 93.2,
+      "japanese": "何冊も",
+      "rubyText": "何冊[なんさつ]も",
+      "translation": "好幾本",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 93.2,
+      "end": 95,
+      "japanese": "この印って",
+      "rubyText": "この印[しるし]って",
+      "translation": "這個印記",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 95,
+      "end": 95.98,
+      "japanese": "蔵書票",
+      "rubyText": "蔵書票[ぞうしょひょう]",
+      "translation": "藏書票",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 95.98,
+      "end": 99.14,
+      "japanese": "本がここへ来る前の持ち主を示す紙",
+      "rubyText": "本[ほん]がここへ来[く]る前[まえ]の持ち主[もちぬし]を示す紙[かみ]",
+      "translation": "顯示此書在來到這裡之前的持有人之紙",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 99.14,
+      "end": 101.6,
+      "japanese": "それであるメッセージって",
+      "rubyText": "それであるメッセージって",
+      "translation": "那就是訊息",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 101.6,
+      "end": 102.38,
+      "japanese": "よく見て",
+      "rubyText": "よく見[み]て",
+      "translation": "仔細看看",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 102.38,
+      "end": 106.38,
+      "japanese": "どれも同じフクロウにしか",
+      "rubyText": "どれも同じ[おなじ]フクロウにしか",
+      "translation": "全部都只有同一隻貓頭鷹",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 106.38,
+      "end": 108.3,
+      "japanese": "いや",
+      "rubyText": "いや",
+      "translation": "不",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 108.3,
+      "end": 110.46,
+      "japanese": "この円",
+      "rubyText": "この円[えん]",
+      "translation": "這個圓形",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 110.46,
+      "end": 112.54,
+      "japanese": "モールス符号",
+      "rubyText": "モールス符号[ふごう]",
+      "translation": "摩爾斯符號",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 112.54,
+      "end": 114.46,
+      "japanese": "正解",
+      "rubyText": "正解[せいかい]",
+      "translation": "正確答案",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 114.46,
+      "end": 115.62,
+      "japanese": "ラン",
+      "rubyText": "ラン",
+      "translation": "蘭",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 115.62,
+      "end": 117.02,
+      "japanese": "逃げろ",
+      "rubyText": "逃げろ[にげろ]",
+      "translation": "快逃！",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 117.02,
+      "end": 118.42,
+      "japanese": "ダウト",
+      "rubyText": "ダウト",
+      "translation": "懷疑",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 118.42,
+      "end": 119.82,
+      "japanese": "疑い",
+      "rubyText": "疑[うたが]い",
+      "translation": "疑慮",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 119.82,
+      "end": 121.1,
+      "japanese": "デンジャー",
+      "rubyText": "デンジャー",
+      "translation": "危險",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 121.1,
+      "end": 122,
+      "japanese": "危険",
+      "rubyText": "危[き]険[けん]",
+      "translation": "危險",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 122,
+      "end": 123.92,
+      "japanese": "トゥルース",
+      "rubyText": "トゥルース",
+      "translation": "真相",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 123.92,
+      "end": 125,
+      "japanese": "真実",
+      "rubyText": "真[しん]実[じつ]",
+      "translation": "真實",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 125,
+      "end": 129.1,
+      "japanese": "これは外から鬼や大人に隠して",
+      "rubyText": "これは外[そと]から鬼[おに]や大人[おとな]に隠[かく]して",
+      "translation": "這是從外面對鬼和大人隱藏的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 129.1,
+      "end": 130.82,
+      "japanese": "俺たちに向けたメッセージ",
+      "rubyText": "俺[おれ]たちに向[む]けたメッセージ",
+      "translation": "給我們的訊息",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 130.82,
+      "end": 133.78,
+      "japanese": "それはまず信じていいと思う",
+      "rubyText": "それはまず信[しん]じていいと思[おも]う",
+      "translation": "我覺得那件事先可以相信",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 133.78,
+      "end": 134.28,
+      "japanese": "それは",
+      "rubyText": "それは",
+      "translation": "那是",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 134.28,
+      "end": 137.54,
+      "japanese": "俺はこいつと違って疑り深いんでね",
+      "rubyText": "俺[おれ]はこいつと違[ちが]って疑[うたが]り深[ふか]いんでね",
+      "translation": "我跟這傢伙不一樣，較為多疑",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 137.54,
+      "end": 139.7,
+      "japanese": "このミネルバって男",
+      "rubyText": "このミネルバって男[おとこ]",
+      "translation": "這個叫米奈爾巴的男人",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 139.7,
+      "end": 142.18,
+      "japanese": "確かに味方かもしれん",
+      "rubyText": "確[たし]かに味方[みかた]かもしれん",
+      "translation": "確實可能是盟友",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 142.18,
+      "end": 145.3,
+      "japanese": "が生きてるか死んでるかもわからん相手だぞ",
+      "rubyText": "が生[い]きてるか死[し]んでるかもわからん相手[あいて]だぞ",
+      "translation": "那是個生死未卜的對手",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 145.3,
+      "end": 148.08,
+      "japanese": "期待しすぎるのはどうかと思うね",
+      "rubyText": "期待[きたい]しすぎるのはどうかと思[おも]うね",
+      "translation": "我覺得過度期待有點不妥",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 148.08,
+      "end": 149.56,
+      "japanese": "またそういう",
+      "rubyText": "またそういう",
+      "translation": "又是那樣",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 149.56,
+      "end": 151.14,
+      "japanese": "ウィリアム・ミネルバ",
+      "rubyText": "ウィリアム・ミネルバ",
+      "translation": "威廉·米奈爾巴",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 151.14,
+      "end": 153.08,
+      "japanese": "この人は外にいて",
+      "rubyText": "この人[ひと]は外[そと]にいて",
+      "translation": "這個人在外面",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 153.08,
+      "end": 155.16,
+      "japanese": "農園の存在を知っていて",
+      "rubyText": "農園[のうえん]の存在[そんざい]を知[し]っていて",
+      "translation": "知道農園的存在",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 155.16,
+      "end": 157.18,
+      "japanese": "間接的にではあるけれど",
+      "rubyText": "間接的[かんせつてき]にではあるけれど",
+      "translation": "雖然是間接的，但……",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 157.18,
+      "end": 159.36,
+      "japanese": "僕らを助けようとしてくれている",
+      "rubyText": "僕[ぼく]らを助[たす]けようとしてくれている",
+      "translation": "他正試著幫助我們",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 159.36,
+      "end": 160.04,
+      "japanese": "そうそう",
+      "rubyText": "そうそう",
+      "translation": "對對",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 160.04,
+      "end": 161.88,
+      "japanese": "外に味方がいた",
+      "rubyText": "外[そと]に味方[みかた]がいた",
+      "translation": "外面有盟友",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 161.88,
+      "end": 163.8,
+      "japanese": "今もいるかもしれない",
+      "rubyText": "今[いま]もいるかもしれない",
+      "translation": "現在也可能還在",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 163.8,
+      "end": 167.66,
+      "japanese": "もしそうなら外に人間の社会もあるかもしれない",
+      "rubyText": "もしそうなら外[そと]に人間[にんげん]の社会[しゃかい]もあるかもしれない",
+      "translation": "如果是這樣的話，外面也可能有人類社會",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 167.66,
+      "end": 169.1,
+      "japanese": "その通り",
+      "rubyText": "その通り[とおり]",
+      "translation": "正是如此",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 169.1,
+      "end": 172.76,
+      "japanese": "こんなメッセージミネルバって人の本にだけ",
+      "rubyText": "こんなメッセージミネルバって人[ひと]の本[ほん]にだけ",
+      "translation": "只有在人類的書本裡才會出現這樣的訊息「米奈爾瓦」",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 172.76,
+      "end": 176.22,
+      "japanese": "この印がいつ貼られたのかは分からないけど",
+      "rubyText": "この印[しるし]がいつ貼[は]られたのかは分[わ]からないけど",
+      "translation": "雖然不知道這個印記是什麼時候貼上的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 176.22,
+      "end": 180.8,
+      "japanese": "少なくともこの一枚は2015年以降に貼られたってこと",
+      "rubyText": "少なくともこの一枚[いちまい]は2015年以降[いこう]に貼[は]られたってこと",
+      "translation": "至少這張是2015年之後貼的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 180.8,
+      "end": 184.78,
+      "japanese": "なるほど他にも分かることはないの?",
+      "rubyText": "なるほど他[ほか]にも分[わ]かることはないの?",
+      "translation": "原來如此，還有其他可以瞭解的事嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 185.44,
+      "end": 187.62,
+      "japanese": "本の中身や傾向に共通点とか",
+      "rubyText": "本[ほん]の中身[なかみ]や傾向[けいこう]に共通点[きょうつうてん]とか",
+      "translation": "書的內容或傾向有沒有共通點之類的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 187.62,
+      "end": 192.54,
+      "japanese": "特にないかなジャンルも雑多出版社や出版年も",
+      "rubyText": "特に[とくに]ないかなジャンルも雑多[ざつた]出版社[しゅっぱんしゃ]や出版年[しゅっぱんねん]も",
+      "translation": "似乎沒有特別的，型別、出版社、出版年份也都雜亂",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 192.54,
+      "end": 195.14,
+      "japanese": "でもあれえっとどれだ?",
+      "rubyText": "でもあれえっとどれだ?",
+      "translation": "但是，那個…是哪一本？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 196.26,
+      "end": 202.637,
+      "japanese": "この二つだけモールスの意味が分からない中身はよくある冒険小説とよく分かんねえ",
+      "rubyText": "この二つ[ふたつ]だけモールスの意味[いみ]が分[わ]からない中身[なかみ]はよくある冒険小説[ぼうけんしょうせつ]とよく分[わ]かんねえ",
+      "translation": "只有這兩本的摩爾斯碼意義不明，內容大概是常見的冒險小說，還真不清楚",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 202.637,
+      "end": 206.417,
+      "japanese": "神話の本だったかなモールスがないマークと",
+      "rubyText": "神話[しんわ]の本[ほん]だったかなモールスがないマークと",
+      "translation": "好像是神話類的書，沒有摩爾斯碼的標記",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 206.417,
+      "end": 208.298,
+      "japanese": "もう一つは",
+      "rubyText": "もう一つ[ひとつ]は",
+      "translation": "另一個是",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 208.298,
+      "end": 210.977,
+      "japanese": "プロミス",
+      "rubyText": "プロミス",
+      "translation": "「約定」",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 210.977,
+      "end": 212.637,
+      "japanese": "約束",
+      "rubyText": "約束[やくそく]",
+      "translation": "約定",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 212.637,
+      "end": 216.238,
+      "japanese": "なんでここに",
+      "rubyText": "なんでここに[なんでここに]",
+      "translation": "為什麼會在這裡",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 216.238,
+      "end": 218.757,
+      "japanese": "やっぱり本当だったんだよ",
+      "rubyText": "やっぱり本当だったんだよ[やっぱりほんとうだったんだよ]",
+      "translation": "果然是真的啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 218.757,
+      "end": 220.118,
+      "japanese": "エマたちが言ってたこと",
+      "rubyText": "エマたちが言[い]ってたこと",
+      "translation": "艾瑪她們說的事",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 220.118,
+      "end": 222.537,
+      "japanese": "ママは嘘をついてた",
+      "rubyText": "ママは嘘[うそ]をついてた",
+      "translation": "媽媽在說謊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 222.537,
+      "end": 224.577,
+      "japanese": "誰も里子になんか出されてない",
+      "rubyText": "誰[だれ]も里子[さとご]になんか出[だ]されてない[ない]",
+      "translation": "沒有人被當作裡子送出去",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 224.577,
+      "end": 225.477,
+      "japanese": "どうして",
+      "rubyText": "どうして[どうして]",
+      "translation": "為什麼",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 225.477,
+      "end": 227.757,
+      "japanese": "だってもし里子に行ったなら",
+      "rubyText": "だってもし里子[さとご]に行[い]ったなら[なら]",
+      "translation": "因為如果真的去當裡子",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 227.757,
+      "end": 229.498,
+      "japanese": "ここにあるはずない",
+      "rubyText": "ここにあるはずない[はずない]",
+      "translation": "不應該在這裡",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 229.498,
+      "end": 232.657,
+      "japanese": "コニーにちゃんと届けてあげてるはず",
+      "rubyText": "コニーにちゃんと届[とど]けてあげてるはず",
+      "translation": "應該已經好好地交給康妮了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 232.657,
+      "end": 235.077,
+      "japanese": "リトルバーニーだけじゃない",
+      "rubyText": "リトルバーニーだけじゃない",
+      "translation": "不只是小兔兔",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 235.077,
+      "end": 238.077,
+      "japanese": "全部出て行くときに奪われたんだよ",
+      "rubyText": "全部[ぜんぶ]出て行くときに奪[うば]われたんだよ[だよ]",
+      "translation": "全部在離開的時候被奪走了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 238.077,
+      "end": 238.897,
+      "japanese": "ママに",
+      "rubyText": "ママに",
+      "translation": "被媽媽拿走的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 238.897,
+      "end": 242.537,
+      "japanese": "それでみんな悪い人に連れて行かれて",
+      "rubyText": "それでみんな悪い人[わるいひと]に連れて行かれて[つれていかれて]",
+      "translation": "結果大家都被壞人帶走了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 242.537,
+      "end": 244.597,
+      "japanese": "やめろよ",
+      "rubyText": "やめろよ[やめろよ]",
+      "translation": "住手",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 244.597,
+      "end": 248.137,
+      "japanese": "私これ意味あると思うんだよね",
+      "rubyText": "私[わたし]これ意味[いみ]あると思うんだよね[おもうんだよね]",
+      "translation": "我覺得這是有意義的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 248.137,
+      "end": 250.637,
+      "japanese": "一つだけモールスがないのとか",
+      "rubyText": "一[ひと]つだけモールスがないのとか",
+      "translation": "像是隻有一個沒有摩斯密碼",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 250.637,
+      "end": 252.537,
+      "japanese": "ページが破れてるのとか",
+      "rubyText": "ページが破[やぶ]れてるのとか[とか]",
+      "translation": "頁面破損之類的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 252.537,
+      "end": 254.897,
+      "japanese": "約束ってメッセージにも",
+      "rubyText": "約束[やくそく]ってメッセージにも",
+      "translation": "即使在訊息裡也有約定的意味",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 254.897,
+      "end": 257.058,
+      "japanese": "この2冊は特別ってこと",
+      "rubyText": "この2冊[にさつ]は特別[とくべつ]ってこと",
+      "translation": "這兩本是特別的意思",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 257.058,
+      "end": 258.038,
+      "japanese": "うん",
+      "rubyText": "うん",
+      "translation": "嗯",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 258.038,
+      "end": 259.697,
+      "japanese": "なんというか",
+      "rubyText": "なんというか",
+      "translation": "該怎麼說呢",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 259.697,
+      "end": 262.357,
+      "japanese": "私たちにとって何か",
+      "rubyText": "私[わたし]たちにとって何[なに]か",
+      "translation": "對我們而言是什麼",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 262.357,
+      "end": 265.238,
+      "japanese": "大切な道しるべになるような気がする",
+      "rubyText": "大切[たいせつ]な道しるべ[みちしるべ]になるような気[き]がする",
+      "translation": "感覺會成為重要的指引",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 265.238,
+      "end": 266.397,
+      "japanese": "根拠は",
+      "rubyText": "根拠[こんきょ]は",
+      "translation": "依據是",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 266.397,
+      "end": 267.417,
+      "japanese": "カン",
+      "rubyText": "カン",
+      "translation": "感覺",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 267.417,
+      "end": 269.317,
+      "japanese": "何その顔",
+      "rubyText": "何その顔[かお]",
+      "translation": "那是什麼表情",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 269.317,
+      "end": 271.158,
+      "japanese": "ママ",
+      "rubyText": "ママ",
+      "translation": "媽媽",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 271.158,
+      "end": 273.857,
+      "japanese": "誰と連絡取ってるんだ",
+      "rubyText": "誰[だれ]と連絡[れんらく]取[と]ってるんだ",
+      "translation": "在跟誰聯絡",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 273.857,
+      "end": 275.697,
+      "japanese": "レイが言ってた本部か",
+      "rubyText": "レイが言[い]ってた本部[ほんぶ]か",
+      "translation": "是雷說的總部嗎",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 275.697,
+      "end": 277.998,
+      "japanese": "そいつらが悪い人なのか",
+      "rubyText": "そいつらが悪[わる]い人[ひと]なのか",
+      "translation": "那些人是壞人嗎",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 277.998,
+      "end": 279.957,
+      "japanese": "あれもそうだ",
+      "rubyText": "あれもそうだ",
+      "translation": "那個也是如此",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 279.957,
+      "end": 282.317,
+      "japanese": "ママは俺が抑えてるけど",
+      "rubyText": "ママは俺[おれ]が抑[おさ]えてるけど",
+      "translation": "雖然媽媽是我在控制的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 282.317,
+      "end": 284.238,
+      "japanese": "シスターにバレたら即アウト",
+      "rubyText": "シスターにバレたら即[そく]アウト",
+      "translation": "如果被修女發現就會立刻被踢出",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 284.238,
+      "end": 286.357,
+      "japanese": "アウトってなんだよ",
+      "rubyText": "アウトってなんだよ",
+      "translation": "什麼叫「アウト」",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 286.357,
+      "end": 289.257,
+      "japanese": "バレたらママとシスターに何かされるってことか",
+      "rubyText": "バレたらママとシスターに何[なに]かされるってことか",
+      "translation": "被發現的話會被媽媽和修女做什麼嗎",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 289.257,
+      "end": 292.938,
+      "japanese": "本当はママはもっとヤバくて",
+      "rubyText": "本当[ほんとう]はママはもっとヤバくて",
+      "translation": "其實媽媽更危險",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 292.938,
+      "end": 294.377,
+      "japanese": "コニーたちはもう",
+      "rubyText": "コニーたちはもう",
+      "translation": "康妮她們已經",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 294.377,
+      "end": 298.197,
+      "japanese": "やめてコニーがどうなったかは分からないってノーマンが",
+      "rubyText": "やめてコニーがどうなったかは分から[わから]ないってノーマンが",
+      "translation": "別說了，諾曼說不知道康妮發生了什麼",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 298.197,
+      "end": 301.017,
+      "japanese": "いやあいつらは俺たちに隠してるだけで",
+      "rubyText": "いやあいつらは俺[おれ]たちに隠し[かくし]てるだけで",
+      "translation": "不，那些人只是對我們隱瞞而已",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 301.017,
+      "end": 303.417,
+      "japanese": "言えない事情があるんだよきっと",
+      "rubyText": "言え[いえ]ない事情[じじょう]があるんだよきっと",
+      "translation": "一定有說不出口的事情",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 303.417,
+      "end": 306.257,
+      "japanese": "俺はそんな風に信じられない",
+      "rubyText": "俺[おれ]はそんな風[かぜ]に信じ[しんじ]られない",
+      "translation": "我無法那樣相信",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 306.257,
+      "end": 310.477,
+      "japanese": "だってあいつらが俺たちを信じてないからな",
+      "rubyText": "だってあいつらが俺[おれ]たちを信じ[しんじ]てないからな",
+      "translation": "因為他們根本不相信我們",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 310.478,
+      "end": 313.798,
+      "japanese": "でも確かに調べてみる価値はある",
+      "rubyText": "でも確か[たしか]に調べ[しらべ]てみる価値[かち]はある",
+      "translation": "不過確實值得去調查",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 313.798,
+      "end": 315.938,
+      "japanese": "ミネルバさんとその本の謎",
+      "rubyText": "ミネルバさんとその本[ほん]の謎[なぞ]",
+      "translation": "米奈爾瓦女士與那本書的謎團",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 315.938,
+      "end": 317.678,
+      "japanese": "ただ逃げるんじゃない",
+      "rubyText": "ただ逃げる[にげる]んじゃない",
+      "translation": "不是隻會逃跑",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 317.678,
+      "end": 318.877,
+      "japanese": "見つけよう",
+      "rubyText": "見つけよ[みつけよ]う",
+      "translation": "一起找出來吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 318.877,
+      "end": 322.118,
+      "japanese": "この世界で私たちが生き残る方法",
+      "rubyText": "この世界[せかい]で私[わたし]たちが生き残る[いきのこる]方法[ほうほう]",
+      "translation": "在這個世界裡我們活下去的方法",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 322.118,
+      "end": 323.837,
+      "japanese": "うん逃げよう",
+      "rubyText": "うん逃げよ[にげよ]う",
+      "translation": "嗯，逃吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 323.837,
+      "end": 325.817,
+      "japanese": "生きよう",
+      "rubyText": "生きよ[いきよ]う",
+      "translation": "活下去吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 325.817,
+      "end": 329.357,
+      "japanese": "たとえ世界がどんなでも",
+      "rubyText": "たとえ世界[せかい]がどんなでも",
+      "translation": "即使世界如何",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 329.357,
+      "end": 331.257,
+      "japanese": "待っててフィル",
+      "rubyText": "待っ[まっ]ててフィル",
+      "translation": "等著我，菲爾",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 331.257,
+      "end": 332.757,
+      "japanese": "すぐに行くわ",
+      "rubyText": "すぐに行く[いく]わ",
+      "translation": "馬上就去",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 332.757,
+      "end": 334.777,
+      "japanese": "でも驚いたな",
+      "rubyText": "でも驚い[おどろい]たな",
+      "translation": "不過真讓人吃驚",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 334.777,
+      "end": 338.137,
+      "japanese": "常日頃本を読んでいるレイはともかく",
+      "rubyText": "常[つね]日頃[ひごろ]本[ほん]を読[よ]んでいるレイはともかく",
+      "translation": "雷平時常讀書的事就不說了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 338.137,
+      "end": 340.678,
+      "japanese": "エマがあの蔵書票に気づいていたとは",
+      "rubyText": "エマがあの蔵書票[ぞうしょひょう]に気[き]づいていたとは",
+      "translation": "竟然是艾瑪注意到了那張藏書票",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 340.678,
+      "end": 342.817,
+      "japanese": "あれ気づいたの私じゃないよ",
+      "rubyText": "あれ気[き]づいたの私[わたし]じゃないよ",
+      "translation": "那個注意到的不是我",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 342.817,
+      "end": 343.197,
+      "japanese": "え?",
+      "rubyText": "え?",
+      "translation": "嗯？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 343.837,
+      "end": 345.757,
+      "japanese": "フィルが見つけて教えてくれたの",
+      "rubyText": "フィルが見[み]つけて教[おし]えてくれたの",
+      "translation": "是菲爾發現後告訴我的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 345.757,
+      "end": 346.558,
+      "japanese": "フィルが?",
+      "rubyText": "フィルが?",
+      "translation": "菲爾？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 346.977,
+      "end": 347.257,
+      "japanese": "うん",
+      "rubyText": "うん",
+      "translation": "嗯",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 347.257,
+      "end": 350.377,
+      "japanese": "フィルが読んでた絵本がミネルバさんの本で",
+      "rubyText": "フィルが読[よ]んでた絵本[えほん]がミネルバさんの本[ほん]で",
+      "translation": "菲爾在讀的繪本是米奈爾巴小姐的書",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 350.377,
+      "end": 353.317,
+      "japanese": "ちょうどモールス符号が出てくるお話で",
+      "rubyText": "ちょうどモールス符号[ふごう]が出[で]てくるお話[はなし]で",
+      "translation": "正好是出現摩爾斯符號的故事",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 353.317,
+      "end": 358.357,
+      "japanese": "ドンとギルダは",
+      "rubyText": "ドンとギルダは",
+      "translation": "唐和吉爾達",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 358.357,
+      "end": 359.877,
+      "japanese": "こっちにもいない",
+      "rubyText": "こっちにもいない",
+      "translation": "這邊也不在",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 359.877,
+      "end": 362.077,
+      "japanese": "まさか",
+      "rubyText": "まさか",
+      "translation": "難道說",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 362.077,
+      "end": 363.158,
+      "japanese": "ママ",
+      "rubyText": "ママ",
+      "translation": "媽媽",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 363.158,
+      "end": 366.678,
+      "japanese": "あらどうしたのエウゲン",
+      "rubyText": "あらどうしたのエウゲン",
+      "translation": "啊，尤根怎麼了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 366.678,
+      "end": 367.998,
+      "japanese": "これ落ちてた",
+      "rubyText": "これ落[お]ちてた",
+      "translation": "這個掉了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 367.998,
+      "end": 369.077,
+      "japanese": "ありがとう",
+      "rubyText": "ありがとう",
+      "translation": "謝謝",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 369.077,
+      "end": 371.498,
+      "japanese": "ドン ギルダ",
+      "rubyText": "ドン ギルダ",
+      "translation": "唐、吉爾達",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 371.498,
+      "end": 374.058,
+      "japanese": "よかった てっきり",
+      "rubyText": "よかった てっきり",
+      "translation": "太好了，我還以為…",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 374.058,
+      "end": 375.817,
+      "japanese": "どこ行ってた",
+      "rubyText": "どこ行[い]ってた",
+      "translation": "你去哪裡了？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 375.817,
+      "end": 376.897,
+      "japanese": "んで",
+      "rubyText": "んで",
+      "translation": "然後呢",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 376.897,
+      "end": 380.458,
+      "japanese": "入ってきたよ ママの秘密の部屋",
+      "rubyText": "入[はい]ってきたよ ママの秘密[ひみつ]の部屋[へや]",
+      "translation": "我進來了，媽媽的秘密房間",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 380.458,
+      "end": 381.178,
+      "japanese": "どうやって",
+      "rubyText": "どうやって",
+      "translation": "怎麼做的？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 381.178,
+      "end": 384.217,
+      "japanese": "ドンが鍵を盗んで",
+      "rubyText": "ドンが鍵[かぎ]を盗[ぬす]んで",
+      "translation": "唐偷了鑰匙",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 384.217,
+      "end": 385.058,
+      "japanese": "ママから",
+      "rubyText": "ママから",
+      "translation": "從媽媽那裡",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 385.058,
+      "end": 386.938,
+      "japanese": "それでママには",
+      "rubyText": "それでママには",
+      "translation": "那樣對媽媽來說",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 386.938,
+      "end": 389.178,
+      "japanese": "気づかれてないと思う",
+      "rubyText": "気[き]づかれてないと思[おも]う",
+      "translation": "我覺得沒被發現",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 389.178,
+      "end": 390.798,
+      "japanese": "鍵ももう返したし",
+      "rubyText": "鍵[かぎ]ももう返[かえ]したし",
+      "translation": "鑰匙也已經還了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 390.798,
+      "end": 391.917,
+      "japanese": "たぶん",
+      "rubyText": "たぶん",
+      "translation": "大概",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 391.917,
+      "end": 394.217,
+      "japanese": "バカなことをしてくれたな",
+      "rubyText": "バカなことをしてくれたな",
+      "translation": "真是幹了蠢事啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 394.217,
+      "end": 402.015,
+      "japanese": "もしカメラ 盗聴器 警報どれか一つでもあの部屋についてたらどうするママやシスターにバレたら",
+      "rubyText": "もしカメラ 盗聴器[とうちょうき] 警報[けいほう]どれか一つ[ひとつ]でもあの部屋[へや]についてたらどうするママやシスターにバレたら",
+      "translation": "如果那個房間裡安了攝影機、竊聽器或警報哪怕只安一個，該怎麼辦？如果被媽媽或修女發現的話",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 402.015,
+      "end": 408.435,
+      "japanese": "お前らいや俺たち全員どうなるか言ってみろよ殺されるか",
+      "rubyText": "お前らいや俺たち全員[ぜんいん]どうなるか言っ[いっ]てみろよ殺さ[ころさ]れるか",
+      "translation": "你們還是我們全部會怎樣，說說看吧，是會被殺嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 408.435,
+      "end": 413.555,
+      "japanese": "秘密の部屋で見つけたよコニーのリトルバーニー",
+      "rubyText": "秘密[ひみつ]の部屋[へや]で見つけ[みつけ]たよコニーのリトルバーニー",
+      "translation": "在秘密房間裡找到了康妮的Little Barney",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 413.555,
+      "end": 416.655,
+      "japanese": "何がわからない助けに行こうだ",
+      "rubyText": "何[なに]がわからない助け[たすけ]に行こ[いこ]うだ",
+      "translation": "什麼不明白？我們去救她吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 416.655,
+      "end": 419.295,
+      "japanese": "助けになんて行けないんじゃないか",
+      "rubyText": "助け[たすけ]になんて行け[いけ]ないんじゃないか",
+      "translation": "不是說我們根本無法去救她嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 419.295,
+      "end": 423.535,
+      "japanese": "だってコニーはコニーたちはもう",
+      "rubyText": "だってコニーはコニーたちはもう",
+      "translation": "可是康妮、康妮她們已經…",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 423.535,
+      "end": 426.935,
+      "japanese": "ごめんごめんなさい",
+      "rubyText": "ごめんごめんなさい",
+      "translation": "對不起，真的很抱歉",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 426.935,
+      "end": 429.195,
+      "japanese": "じゃあ本当に",
+      "rubyText": "じゃあ本当[ほんとう]に",
+      "translation": "那麼真的嗎",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 429.195,
+      "end": 433.135,
+      "japanese": "ほらなギルダやっぱりこいつら嘘ついてたんだよ",
+      "rubyText": "ほらなギルダやっぱりこいつら嘘[うそ]ついてたんだよ",
+      "translation": "看吧，吉爾達果然這些傢伙在說謊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 433.135,
+      "end": 435.895,
+      "japanese": "何隠してる",
+      "rubyText": "何[なに]隠[かく]してる",
+      "translation": "在隱瞞什麼",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 435.895,
+      "end": 437.995,
+      "japanese": "全部話せよ",
+      "rubyText": "全部[ぜんぶ]話[はな]せよ",
+      "translation": "全部說出來",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 437.995,
+      "end": 438.675,
+      "japanese": "鬼?",
+      "rubyText": "鬼[おに]?",
+      "translation": "鬼？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 439.815,
+      "end": 440.415,
+      "japanese": "農園?",
+      "rubyText": "農園[のうえん]?",
+      "translation": "農園？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 441.415,
+      "end": 441.935,
+      "japanese": "そんな",
+      "rubyText": "そんな",
+      "translation": "那樣的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 441.935,
+      "end": 443.175,
+      "japanese": "みんな",
+      "rubyText": "みんな",
+      "translation": "大家",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 443.175,
+      "end": 445.155,
+      "japanese": "食べられるために",
+      "rubyText": "食[た]べられるために",
+      "translation": "為了能吃",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 445.155,
+      "end": 446.355,
+      "japanese": "お前が",
+      "rubyText": "お前[おまえ]が",
+      "translation": "是你",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 446.355,
+      "end": 447.615,
+      "japanese": "スパイ?",
+      "rubyText": "スパイ?",
+      "translation": "間諜？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 448.355,
+      "end": 448.795,
+      "japanese": "ずっと?",
+      "rubyText": "ずっと?",
+      "translation": "一直嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 449.135,
+      "end": 450.255,
+      "japanese": "僕らのためにね",
+      "rubyText": "僕[ぼく]らのためにね",
+      "translation": "為了我們啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 450.255,
+      "end": 451.435,
+      "japanese": "じゃあレイは",
+      "rubyText": "じゃあレイは",
+      "translation": "那麼雷呢",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 451.435,
+      "end": 454.215,
+      "japanese": "あの日コニーがどうなるのか分かってたのか",
+      "rubyText": "あの日[ひ]コニーがどうなるのか分[わ]かってたのか",
+      "translation": "那天康妮會怎樣，你知道嗎",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 454.215,
+      "end": 457.235,
+      "japanese": "エマとノーマンは",
+      "rubyText": "エマとノーマンは",
+      "translation": "艾瑪和諾曼",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 457.235,
+      "end": 459.215,
+      "japanese": "俺たちを敵だらけの世界へ",
+      "rubyText": "俺[おれ]たちを敵[てき]だらけの世界[せかい]へ",
+      "translation": "把我們帶到充滿敵人的世界裡",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 459.215,
+      "end": 461.435,
+      "japanese": "騙して連れて行こうとしていたってわけか",
+      "rubyText": "騙[だま]して連[つ]れて行[い]こうとしていたってわけか",
+      "translation": "原來是想騙我們帶走",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 461.435,
+      "end": 463.155,
+      "japanese": "ふざけんな",
+      "rubyText": "ふざけんな",
+      "translation": "別開玩笑了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 463.155,
+      "end": 464.355,
+      "japanese": "おいドン",
+      "rubyText": "おいドン",
+      "translation": "喂，唐",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 464.355,
+      "end": 465.475,
+      "japanese": "ドン",
+      "rubyText": "ドン",
+      "translation": "唐",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 465.475,
+      "end": 468.515,
+      "japanese": "そんなに荷物なのかよ",
+      "rubyText": "そんなに荷物[にもつ]なのかよ",
+      "translation": "真的那麼沉重嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 468.515,
+      "end": 471.395,
+      "japanese": "そんなにお前らにとって俺たちは",
+      "rubyText": "そんなにお前らにとって俺[おれ]たちは",
+      "translation": "對你們來說，我們真的那麼……",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 471.395,
+      "end": 475.195,
+      "japanese": "守ってあげなきゃ何もできない雑魚なのかよ",
+      "rubyText": "守[まも]ってあげなきゃ何[なに]もできない雑魚[ざこ]なのかよ",
+      "translation": "要是不能保護你們，我就是什麼都做不了的渣滓嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 475.195,
+      "end": 480.315,
+      "japanese": "あの時お願い助けてって頼ってくれたんじゃねえのかよ",
+      "rubyText": "あの時[とき]お願い[おねがい]助け[たすけ]てって頼っ[たよっ]てくれたんじゃねえのかよ",
+      "translation": "那時不是已經拜託過你幫忙了嗎？」",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 480.315,
+      "end": 482.215,
+      "japanese": "あれは嘘だったのか",
+      "rubyText": "あれは嘘[うそ]だったのか",
+      "translation": "那是謊言嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 482.215,
+      "end": 486.095,
+      "japanese": "俺たちお前らみたいに出来は良くない",
+      "rubyText": "俺[おれ]たちお前らみたいに出来[でき]は良[よ]くない",
+      "translation": "我們不像你們那樣厲害",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 486.095,
+      "end": 487.975,
+      "japanese": "良くないけど",
+      "rubyText": "良[よ]くないけど",
+      "translation": "雖然不行",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 487.975,
+      "end": 490.795,
+      "japanese": "家族だろ",
+      "rubyText": "家族[かぞく]だろ",
+      "translation": "我們是家人吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 490.795,
+      "end": 493.415,
+      "japanese": "兄弟だろ",
+      "rubyText": "兄弟[きょうだい]だろ",
+      "translation": "我們是兄弟吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 493.415,
+      "end": 496.415,
+      "japanese": "少しは信じてほしいんだよ",
+      "rubyText": "少し[すこし]は信じ[しんじ]てほしいんだよ",
+      "translation": "希望你能稍微相信我",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 496.415,
+      "end": 499.195,
+      "japanese": "ごめん俺ちょっと変だ",
+      "rubyText": "ごめん俺[おれ]ちょっと変[へん]だ",
+      "translation": "抱歉，我有點怪",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 499.195,
+      "end": 501.615,
+      "japanese": "頭冷やしてくる",
+      "rubyText": "頭[あたま]冷やし[ひやし]てくる",
+      "translation": "我要去冷靜一下",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 501.615,
+      "end": 505.455,
+      "japanese": "私間違ってた",
+      "rubyText": "私[わたし]間違っ[まちがっ]てた",
+      "translation": "我錯了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 505.455,
+      "end": 506.895,
+      "japanese": "違うんだ",
+      "rubyText": "違[ちが]うんだ",
+      "translation": "不是那樣的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 506.895,
+      "end": 509.895,
+      "japanese": "全部八つ当たりだ",
+      "rubyText": "全部[ぜんぶ]八つ当たり[やっつあたり]だ",
+      "translation": "全都是發洩罷了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 509.895,
+      "end": 512.995,
+      "japanese": "雑魚扱いが悔しいんじゃない",
+      "rubyText": "雑魚[ざこ]扱[あつか]いが悔[く]しいんじゃない",
+      "translation": "不是因為被當成雜魚而感到懊惱",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 512.995,
+      "end": 515.495,
+      "japanese": "あいつらに嘘をつかせた",
+      "rubyText": "あいつらに嘘[うそ]をつかせた",
+      "translation": "讓他們說了謊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 515.495,
+      "end": 519.115,
+      "japanese": "コニーたちに何もしてやれなかった",
+      "rubyText": "コニーたちに何[なに]もしてやれなかった",
+      "translation": "沒能對康妮她們做任何事",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 519.115,
+      "end": 522.475,
+      "japanese": "無知で無力な俺が",
+      "rubyText": "無知[むち]で無力[むりょく]な俺[おれ]が",
+      "translation": "無知且無力的我",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 522.475,
+      "end": 526.375,
+      "japanese": "自分が本当に雑魚なのが悔しい",
+      "rubyText": "自分[じぶん]が本当[ほんとう]に雑魚[ざこ]なのが悔[く]しい",
+      "translation": "真的被當成雜魚的自己讓人懊惱",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 526.375,
+      "end": 528.835,
+      "japanese": "悔しい",
+      "rubyText": "悔[く]しい",
+      "translation": "懊惱",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 528.835,
+      "end": 531.095,
+      "japanese": "強くなりたい",
+      "rubyText": "強[つよ]くなりたい",
+      "translation": "想變強",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 531.095,
+      "end": 532.955,
+      "japanese": "強くなりたい",
+      "rubyText": "強[つよ]くなりたい",
+      "translation": "想變強",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 532.955,
+      "end": 536.395,
+      "japanese": "ドン、ギルダ",
+      "rubyText": "ドン、ギルダ",
+      "translation": "唐、吉爾達",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 536.395,
+      "end": 537.615,
+      "japanese": "エマ",
+      "rubyText": "エマ",
+      "translation": "艾瑪",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 537.615,
+      "end": 540.995,
+      "japanese": "ごめん、私分かってなかった",
+      "rubyText": "ごめん、私[わたし]分かっ[わかっ]てなかった",
+      "translation": "對不起，我沒弄懂",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 540.995,
+      "end": 544.015,
+      "japanese": "恨まれる覚悟ばっかで",
+      "rubyText": "恨[うら]まれる覚悟[かくご]ばっかで",
+      "translation": "只顧著被恨的覺悟",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 544.015,
+      "end": 546.155,
+      "japanese": "（語音不清）覚悟が足りてなかった",
+      "rubyText": "（語音不清）覚悟[かくご]が足[た]りてなかった",
+      "translation": "（語音不清）覺悟不夠",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 546.155,
+      "end": 550.875,
+      "japanese": "僕からも、ごめん",
+      "rubyText": "僕[ぼく]からも、ごめん",
+      "translation": "我也很抱歉",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 550.875,
+      "end": 556.995,
+      "japanese": "いやその俺もつい殴ったりしてごめん",
+      "rubyText": "いやその俺[おれ]もつい殴[なぐ]ったりしてごめん",
+      "translation": "不，那個我也不小心揍了人，抱歉",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 556.995,
+      "end": 559.335,
+      "japanese": "大丈夫じゃないよな",
+      "rubyText": "大丈夫[だいじょうぶ]じゃないよな",
+      "translation": "沒事吧？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 559.335,
+      "end": 563.975,
+      "japanese": "平気平気勝手な行動を取ったこともごめんなさい",
+      "rubyText": "平気[へいき]平気勝手[かって]な行動[こうどう]を取[と]ったこともごめんなさい",
+      "translation": "對於隨意的行為也很抱歉",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 563.975,
+      "end": 566.875,
+      "japanese": "レイが怒るのも当然だ",
+      "rubyText": "レイが怒[おこ]るのも当然[とうぜん]だ",
+      "translation": "雷生氣也是理所當然",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 566.875,
+      "end": 569.195,
+      "japanese": "その本当に",
+      "rubyText": "その本当[ほんとう]に",
+      "translation": "那個，真的……",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 569.195,
+      "end": 572.035,
+      "japanese": "ほらレイ",
+      "rubyText": "ほらレイ",
+      "translation": "看，雷",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 572.035,
+      "end": 577.275,
+      "japanese": "もういいよ万が一の場合は全部俺が何とかするから",
+      "rubyText": "もういいよ万が一[まんがいち]の場合[ばあい]は全部[ぜんぶ]俺[おれ]が何とか[なんとか]するから",
+      "translation": "已經好啦，萬一的話全部由我想辦法",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 577.275,
+      "end": 580.055,
+      "japanese": "俺もいろいろ悪かった",
+      "rubyText": "俺[おれ]もいろいろ悪[わる]かった",
+      "translation": "我也有很多錯",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 580.055,
+      "end": 582.475,
+      "japanese": "ごめん",
+      "rubyText": "ごめん",
+      "translation": "對不起",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 582.475,
+      "end": 586.495,
+      "japanese": "ドン ギルダ もう嘘はなしだから改めて聞かせて",
+      "rubyText": "ドン ギルダ もう嘘[うそ]はなしだから改めて[あらためて]聞か[きか]せて",
+      "translation": "唐 吉爾達，已經不說謊了，請再說一次",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 586.495,
+      "end": 591.295,
+      "japanese": "しくじれば死ぬ 外は最悪鬼の世界",
+      "rubyText": "しくじれば死ぬ[しぬ] 外[そと]は最悪[さいあく]鬼[おに]の世界[せかい]",
+      "translation": "失敗就會死，外面是最糟的鬼的世界",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 591.295,
+      "end": 594.655,
+      "japanese": "それでも一緒に逃げてくれる",
+      "rubyText": "それでも一緒[いっしょ]に逃[に]げてくれる",
+      "translation": "即使如此也會一起逃走",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 594.655,
+      "end": 597.255,
+      "japanese": "当たり前だろ",
+      "rubyText": "当たり前[あたりまえ]だろ",
+      "translation": "那是理所當然的吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 597.255,
+      "end": 600.455,
+      "japanese": "なんか正直に話せてスッキリした",
+      "rubyText": "なんか正直[しょうじき]に話[はな]せてスッキリした",
+      "translation": "總算說實話後感到很舒暢",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 600.455,
+      "end": 603.733,
+      "japanese": "うん私なりに考えたんだ",
+      "rubyText": "うん私[わたし]なりに考[かんが]えたんだ",
+      "translation": "嗯，我是這樣想的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 603.733,
+      "end": 606.192,
+      "japanese": "全員を連れ出す方法",
+      "rubyText": "全員[ぜんいん]を連[つ]れ出す方法[ほうほう]",
+      "translation": "把全員帶出去的方法",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 606.192,
+      "end": 607.312,
+      "japanese": "無茶かな",
+      "rubyText": "無茶[むちゃ]かな",
+      "translation": "是不是太冒險了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 607.312,
+      "end": 608.773,
+      "japanese": "無茶だね",
+      "rubyText": "無茶[むちゃ]だね",
+      "translation": "真是冒險啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 608.773,
+      "end": 611.673,
+      "japanese": "でもそれでママの隙はつけると思うし",
+      "rubyText": "でもそれでママの隙[すき]はつけると思う[おもう]し",
+      "translation": "但是這樣我覺得能給媽媽留下空檔",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 611.673,
+      "end": 613.473,
+      "japanese": "本当に全員で逃げるには",
+      "rubyText": "本当[ほんとう]に全員[ぜんいん]で逃[に]げるには",
+      "translation": "真要全員一起逃走的話",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 613.473,
+      "end": 615.653,
+      "japanese": "これしかないと思う",
+      "rubyText": "これしかないと思う[おもう]",
+      "translation": "我只想到這個",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 615.653,
+      "end": 615.973,
+      "japanese": "うん",
+      "rubyText": "うん",
+      "translation": "嗯",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 615.973,
+      "end": 618.133,
+      "japanese": "レイには話す?",
+      "rubyText": "レイ[れい]には話[はな]す?",
+      "translation": "要跟雷說嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 618.733,
+      "end": 618.933,
+      "japanese": "いや",
+      "rubyText": "いや",
+      "translation": "不",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 618.933,
+      "end": 622.812,
+      "japanese": "レイ本当に全員で逃げてくれるかな",
+      "rubyText": "レイ[れい]本当[ほんとう]に全員[ぜんいん]で逃[に]げてくれるかな",
+      "translation": "雷真的會全員一起逃嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 622.812,
+      "end": 624.332,
+      "japanese": "もちろんだよ",
+      "rubyText": "もちろんだよ",
+      "translation": "當然啦",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 624.332,
+      "end": 628.053,
+      "japanese": "レイはずっと僕たちのことを考えて動いてくれてたんだ",
+      "rubyText": "レイ[れい]はずっと僕[ぼく]たちのことを考[かんが]えて動[うご]いてくれてたんだ",
+      "translation": "雷一直在為我們著想並且行動著。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 628.053,
+      "end": 631.092,
+      "japanese": "いつだって僕たち2人のこと",
+      "rubyText": "いつだって僕[ぼく]たち2人[にん]のこと",
+      "translation": "無論何時都是為了我們兩個。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 631.092,
+      "end": 632.092,
+      "japanese": "2人?",
+      "rubyText": "2人[にん]?",
+      "translation": "兩個？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 632.092,
+      "end": 634.033,
+      "japanese": "いや大丈夫",
+      "rubyText": "いや大丈夫[だいじょうぶ]",
+      "translation": "不，沒問題",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 634.033,
+      "end": 636.653,
+      "japanese": "レイにはそのうち僕から話しておくよ",
+      "rubyText": "レイ[れい]にはそのうち僕[ぼく]から話[はな]しておくよ",
+      "translation": "之後我會跟雷說的。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 636.653,
+      "end": 638.553,
+      "japanese": "うん",
+      "rubyText": "うん",
+      "translation": "嗯",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 638.553,
+      "end": 641.913,
+      "japanese": "お前ら二人を殺させないため",
+      "rubyText": "お前[まえ]ら二人[にん]を殺[ころ]させないため",
+      "translation": "為了不讓你們兩個被殺。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 641.913,
+      "end": 644.513,
+      "japanese": "なるほどね",
+      "rubyText": "なるほどね",
+      "translation": "原來如此啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 644.513,
+      "end": 646.973,
+      "japanese": "さすがだよレイ",
+      "rubyText": "さすがだよレイ[れい]",
+      "translation": "不愧是雷啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 646.973,
+      "end": 649.692,
+      "japanese": "言われた通り取ってきたぜ",
+      "rubyText": "言[い]われた通[とお]り取[と]ってきたぜ",
+      "translation": "照說的拿來了。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 649.692,
+      "end": 652.572,
+      "japanese": "洗剤に除草剤",
+      "rubyText": "洗剤[せんざい]に除草剤[じょそうざい]",
+      "translation": "洗衣劑加除草劑",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 652.572,
+      "end": 654.633,
+      "japanese": "こんなの何使うんだ",
+      "rubyText": "こんなの何使[つか]うんだ",
+      "translation": "這種東西要幹嘛用？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 654.633,
+      "end": 657.212,
+      "japanese": "下見の時役立つ",
+      "rubyText": "下見[したみ]の時[とき]役立[やくだ]つ",
+      "translation": "事先檢視的時候很有用。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 657.212,
+      "end": 659.592,
+      "japanese": "下見って柵の先",
+      "rubyText": "下見[したみ]って柵[さく]の先[さき]",
+      "translation": "事先檢視就是指柵欄的前端。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 659.592,
+      "end": 661.853,
+      "japanese": "塀に登って外を見るんだよね",
+      "rubyText": "塀[へい]に登[のぼ]って外[そと]を見る[みる]んだよね",
+      "translation": "爬上圍牆去看外面，對吧？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 661.853,
+      "end": 664.592,
+      "japanese": "発信機どうするの",
+      "rubyText": "発信機[はっしんき]どうするの",
+      "translation": "發信機要怎麼處理？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 664.592,
+      "end": 667.393,
+      "japanese": "それは確認させなければいい",
+      "rubyText": "それは確認[かくにん]させなければいい",
+      "translation": "那就讓他確認吧。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 667.393,
+      "end": 674.633,
+      "japanese": "ママとシスターそれぞれ目を他へ向けて確実にコンパクトを見ない状況を作り出すでも",
+      "rubyText": "ママとシスターそれぞれ目[め]を他[た]へ向[む]けて確実[かくじつ]にコンパクトを見[み]ない状況[じょうきょう]を作り出す[つくりだす]でも",
+      "translation": "即使讓媽媽和修女各自把目光轉向別處，仍要確保不讓他們看到那個緊湊的情況。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 674.633,
+      "end": 680.992,
+      "japanese": "どうやってママはレイに足止めしてもらう偽の情報を流してもらうんだ",
+      "rubyText": "どうやってママはレイに足止め[あしどめ]してもらう偽[にせ]の情報[じょうほう]を流[なが]してもらうんだ",
+      "translation": "要怎麼讓媽媽向雷提供假情報，讓他幫忙阻止對方呢？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 680.992,
+      "end": 687.133,
+      "japanese": "あのノーマンとケンカねちょっとした方針の違いでね",
+      "rubyText": "あのノーマンとケンカねちょっとした方針[ほうしん]の違[ちが]いでね",
+      "translation": "那是因為和諾曼的爭執，只是些小小的方針差異罷了。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 687.133,
+      "end": 692.312,
+      "japanese": "それで話ってノーマンがママを殺そうとしている",
+      "rubyText": "それで話[はなし]ってノーマンがママを殺[ころ]そうとしている",
+      "translation": "結果是諾曼打算殺了媽媽。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 692.312,
+      "end": 695.312,
+      "japanese": "全員で逃げるとなればそうも考えるでしょう",
+      "rubyText": "全員[ぜんいん]で逃[に]げるとなればそうも考[かんが]えるでしょう",
+      "translation": "如果全員一起逃跑的話，也會這樣考慮吧。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 695.312,
+      "end": 696.492,
+      "japanese": "それで",
+      "rubyText": "それで",
+      "translation": "於是……",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 696.492,
+      "end": 698.173,
+      "japanese": "道具を集めてる",
+      "rubyText": "道具[どうぐ]を集[あつ]めてる",
+      "translation": "正在收集道具。",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 698.173,
+      "end": 699.053,
+      "japanese": "金槌",
+      "rubyText": "金槌[かなづち]",
+      "translation": "鐵錘",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 699.053,
+      "end": 699.853,
+      "japanese": "洗剤",
+      "rubyText": "洗剤[せんざい]",
+      "translation": "清潔劑",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 699.853,
+      "end": 700.793,
+      "japanese": "除草剤",
+      "rubyText": "除草剤[じょそうざい]",
+      "translation": "除草劑",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 700.793,
+      "end": 702.592,
+      "japanese": "他にも使えそうなもの",
+      "rubyText": "他[ほか]にも使[つか]えそうなもの",
+      "translation": "還有其他看起來能用的東西",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 702.592,
+      "end": 703.492,
+      "japanese": "片っ端から",
+      "rubyText": "片っ端から[かたっぺから]",
+      "translation": "從頭到尾全部",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 703.492,
+      "end": 705.673,
+      "japanese": "あの短すぎるロープも",
+      "rubyText": "あの短[みじか]すぎるロープも",
+      "translation": "那條太短的繩子也行",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 705.673,
+      "end": 706.113,
+      "japanese": "ああ",
+      "rubyText": "ああ",
+      "translation": "啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 706.113,
+      "end": 707.793,
+      "japanese": "俺は止めたんだぜ",
+      "rubyText": "俺[おれ]は止[と]めたんだぜ",
+      "translation": "我已經阻止了，懂嗎",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 707.793,
+      "end": 708.872,
+      "japanese": "やばすぎる",
+      "rubyText": "やばすぎる",
+      "translation": "太過危險",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 708.872,
+      "end": 709.832,
+      "japanese": "間違ってるって",
+      "rubyText": "間違[まちが]ってるって",
+      "translation": "你說錯了吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 709.832,
+      "end": 711.572,
+      "japanese": "それでそのざま",
+      "rubyText": "それでそのざま",
+      "translation": "那樣的下場",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 711.572,
+      "end": 713.053,
+      "japanese": "毒殺",
+      "rubyText": "毒殺[どくさつ]",
+      "translation": "毒殺",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 713.053,
+      "end": 715.372,
+      "japanese": "薬剤が厄介ね",
+      "rubyText": "薬剤[やくざい]が厄介[やっかい]ね",
+      "translation": "藥劑真麻煩呢",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 715.372,
+      "end": 715.793,
+      "japanese": "ああ",
+      "rubyText": "ああ",
+      "translation": "嗯",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 715.793,
+      "end": 718.053,
+      "japanese": "途中出荷なんてごめんだ",
+      "rubyText": "途中[とちゅう]出荷[しゅっか]なんてごめんだ",
+      "translation": "抱歉，不能途中出貨",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 718.053,
+      "end": 719.893,
+      "japanese": "あいつらには最後まで",
+      "rubyText": "あいつらには最後[さいご]まで",
+      "translation": "那些傢伙要做到最後",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 719.893,
+      "end": 721.753,
+      "japanese": "12歳まで生きてほしい",
+      "rubyText": "12歳[じゅうにさい]まで生き[いき]てほしい",
+      "translation": "希望活到12歲",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 721.753,
+      "end": 724.473,
+      "japanese": "何不自由ないこのハウスで",
+      "rubyText": "何不自由[なんふじゆう]ないこのハウスで",
+      "translation": "在這個毫無不自由的家裡",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 724.473,
+      "end": 727.872,
+      "japanese": "だからすり替えようぜ",
+      "rubyText": "だからすり替[すりか]えようぜ",
+      "translation": "所以來換掉吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 727.872,
+      "end": 730.253,
+      "japanese": "薬剤中身を偽物に",
+      "rubyText": "薬剤[やくざい]中身[なかみ]を偽物[にせもの]に",
+      "translation": "把藥劑內容換成偽造的",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 730.253,
+      "end": 731.712,
+      "japanese": "場所は分かってるの?",
+      "rubyText": "場所[ばしょ]は分かっ[わかっ]てるの?",
+      "translation": "你知道地點嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 732.092,
+      "end": 732.273,
+      "japanese": "ああ",
+      "rubyText": "ああ",
+      "translation": "嗯",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 732.273,
+      "end": 734.413,
+      "japanese": "では明日にでも対処しましょう",
+      "rubyText": "では明日[あす]にでも対処[たいしょ]しましょう",
+      "translation": "那麼明天就處理吧",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 734.413,
+      "end": 735.812,
+      "japanese": "報告は以上?",
+      "rubyText": "報告[ほうこく]は以上[いじょう]?",
+      "translation": "報告就這樣嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 736.353,
+      "end": 738.733,
+      "japanese": "ああ他に何か気になることでも?",
+      "rubyText": "ああ他[た]に何[なに]か気[き]になることでも?",
+      "translation": "嗯，還有什麼在意的事嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 739.413,
+      "end": 739.993,
+      "japanese": "いいえ",
+      "rubyText": "いいえ",
+      "translation": "沒有",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 739.993,
+      "end": 741.413,
+      "japanese": "そうだ",
+      "rubyText": "そうだ",
+      "translation": "是啊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 741.413,
+      "end": 741.933,
+      "japanese": "ん?",
+      "rubyText": "ん?",
+      "translation": "嗯？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 742.372,
+      "end": 744.592,
+      "japanese": "一足先に教えてあげる",
+      "rubyText": "一足先[いっそくさき]に教[おし]えてあげる",
+      "translation": "先一步告訴你",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 744.592,
+      "end": 748.072,
+      "japanese": "昨日の定時連絡で上から通達があった",
+      "rubyText": "昨日[きのう]の定時[ていじ]連絡[れんらく]で上[うえ]から通達[つうたつ]があった",
+      "translation": "昨天的定時聯絡中，上面傳達了指示",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 748.072,
+      "end": 750.233,
+      "japanese": "次の出荷が決まったわ",
+      "rubyText": "次[つぎ]の出荷[しゅっか]が決[き]まったわ",
+      "translation": "下一批出貨已決定",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 750.233,
+      "end": 759.053,
+      "japanese": "来月の定例出荷はないじゃあ次は1月俺の12歳の誕生日",
+      "rubyText": "来月[らいげつ]の定例[ていれい]出荷[しゅっか]はないじゃあ次[つぎ]は1月[いちがつ]俺[おれ]の12歳[じゅうにさい]の誕生[たんじょう]日[び]",
+      "translation": "下個月沒有例行出貨，那麼下次就是一月我十二歲的生日",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 759.053,
+      "end": 763.312,
+      "japanese": "次の出荷はいよいよ俺か",
+      "rubyText": "次[つぎ]の出荷[しゅっか]はいよいよ俺[おれ]か",
+      "translation": "下一批出貨……終於輪到我了嗎",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 763.312,
+      "end": 767.393,
+      "japanese": "けどよママはレイに任せていいとしてシスターは?",
+      "rubyText": "けどよママはレイに任せ[まかせ]ていいとしてシスターは?",
+      "translation": "不過，媽媽說可以交給雷，修女呢？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 767.393,
+      "end": 775.233,
+      "japanese": "そうよシスターにこそバレたら即出荷なんでしょ大丈夫考えてある何の用ですか?",
+      "rubyText": "そうよシスターにこそバレたら即出荷[そくしゅっか]なんでしょ大丈夫考えてある何[なん]の用[よう]ですか?",
+      "translation": "對啊，如果被修女發現就會立刻出貨，沒問題，我已經想好要幹什麼了，你有什麼事嗎？",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 775.233,
+      "end": 778.733,
+      "japanese": "見ちゃった",
+      "rubyText": "見[み]ちゃった",
+      "translation": "我看到了",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 778.733,
+      "end": 783.692,
+      "japanese": "ぜーんぶ見てたのよ",
+      "rubyText": "ぜーんぶ見[み]てたのよ",
+      "translation": "全部都看到了喔",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 783.692,
+      "end": 788.733,
+      "japanese": "ゆうべ食堂でのあなたたち",
+      "rubyText": "ゆうべ食堂[しょくどう]でのあなたたち",
+      "translation": "昨晚在食堂的你們",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 788.733,
+      "end": 792.013,
+      "japanese": "このハウスの秘密を知っているのは",
+      "rubyText": "このハウスの秘密[ひみつ]を知[し]っているのは",
+      "translation": "知道這個屋子的秘密的是",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 792.013,
+      "end": 795.353,
+      "japanese": "ノーマン エマ レイ ギルダ ドン",
+      "rubyText": "ノーマン エマ レイ ギルダ ドン",
+      "translation": "諾曼、艾瑪、雷、吉爾達、唐",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 795.353,
+      "end": 796.832,
+      "japanese": "あなたたち5人",
+      "rubyText": "あなたたち5人[ごにん]",
+      "translation": "你們五個人",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    },
+    {
+      "start": 796.832,
+      "end": 800.692,
+      "japanese": "ねえ 私と組まない",
+      "rubyText": "ねえ 私[わたし]と組[く]まない",
+      "translation": "嘿，要不要跟我組隊",
+      "analyzed": true,
+      "scanned": true,
+      "prepared": true
+    }
+  ],
+  "provenance": {
+    "transcription": "groq/whisper-large-v3-turbo; full MP3 plus gap rechecks and reviewed text corrections",
+    "translation": "groq/openai/gpt-oss-120b; Traditional Chinese",
+    "humanVerified": false
+  },
+  "protectedImport": true,
+  "importedAt": "2026-09-23T11:55:36.118Z"
+}
