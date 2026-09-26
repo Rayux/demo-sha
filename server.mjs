@@ -375,6 +375,8 @@ const server = createServer(async (req, res) => {
   if (req.method === "GET" && url.pathname === "/api/library") return listLibrary(res);
   if (req.method === "GET" && url.pathname === "/api/transcript") return getTranscript(req, res, url.searchParams);
   if (req.method === "POST" && url.pathname === "/api/transcript") return saveTranscript(req, res);
+  if (req.method === "GET" && url.pathname === "/api/progress") return getProgress(req, res, url.searchParams);
+  if (req.method === "POST" && url.pathname === "/api/progress") return saveProgress(req, res);
   if (req.method === "POST" && url.pathname === "/api/transcribe") return proxyTranscription(req, res);
   if (req.method === "POST" && url.pathname === "/api/compare-transcript") return compareTranscript(req, res);
   if (req.method === "POST" && url.pathname === "/api/explain") return askModel(req, res, "explain");
@@ -480,6 +482,50 @@ async function saveTranscript(req, res) {
     });
   } catch (err) {
     json(res, 500, { error: err.message });
+  }
+}
+
+function transcriptBaseName(filename) {
+  return path.basename(String(filename || "")).replace(/\.[^.]+$/, "");
+}
+
+async function getProgress(req, res, searchParams) {
+  const file = searchParams.get("file");
+  if (!file) return json(res, 400, { error: "Filename required" });
+  if (!db) return json(res, 200, { available: false, masteredKeys: [] });
+
+  try {
+    const snapshot = await db.collection("progress").doc(transcriptBaseName(file)).get();
+    const data = snapshot.exists ? snapshot.data() : {};
+    const mastered = data?.mastered && typeof data.mastered === "object" ? data.mastered : {};
+    return json(res, 200, { available: true, masteredKeys: Object.keys(mastered).filter((key) => mastered[key] === true) });
+  } catch (error) {
+    console.warn("Error fetching Firebase progress:", error.message);
+    return json(res, 200, { available: false, masteredKeys: [] });
+  }
+}
+
+async function saveProgress(req, res) {
+  try {
+    const body = JSON.parse((await readBody(req, 256 * 1024)).toString("utf8"));
+    const { filename, masteredKeys } = body;
+    if (!filename || !Array.isArray(masteredKeys)) return json(res, 400, { error: "Invalid progress payload" });
+    const keys = [...new Set(masteredKeys.filter((key) => typeof key === "string" && key.length <= 80))];
+    if (!db) return json(res, 200, { saved: false, available: false });
+
+    const ref = db.collection("progress").doc(transcriptBaseName(filename));
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(ref);
+      const existing = snapshot.exists && snapshot.data()?.mastered && typeof snapshot.data().mastered === "object"
+        ? { ...snapshot.data().mastered }
+        : {};
+      keys.forEach((key) => { existing[key] = true; });
+      transaction.set(ref, { source: filename, updatedAt: new Date().toISOString(), mastered: existing }, { merge: true });
+    });
+    return json(res, 200, { saved: true, available: true });
+  } catch (error) {
+    console.warn("Error saving Firebase progress:", error.message);
+    return json(res, 500, { error: "Progress could not be saved." });
   }
 }
 

@@ -126,6 +126,71 @@ function getCacheKey(sourceName) {
   return `kage_cache_${encodeURIComponent(sourceName.trim().toLowerCase())}`;
 }
 
+function getMasteryCacheKey(sourceName) {
+  if (!sourceName) return null;
+  return `kage_mastery_${encodeURIComponent(sourceName.trim().toLowerCase())}`;
+}
+
+function getClipProgressKey(clip) {
+  return `${Number(clip?.start || 0).toFixed(3)}-${Number(clip?.end || 0).toFixed(3)}`;
+}
+
+function getMasteredKeys() {
+  return state.clips.filter((clip) => clip.mastered).map(getClipProgressKey);
+}
+
+function applyMasteredKeys(keys = []) {
+  const mastered = new Set(keys);
+  state.clips.forEach((clip) => {
+    clip.mastered = Boolean(clip.mastered || mastered.has(getClipProgressKey(clip)));
+  });
+}
+
+function readLocalMasteredKeys(sourceName) {
+  try {
+    const raw = localStorage.getItem(getMasteryCacheKey(sourceName));
+    const keys = raw ? JSON.parse(raw) : [];
+    return Array.isArray(keys) ? keys.filter((key) => typeof key === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function cacheMasteredKeys(sourceName, keys) {
+  try { localStorage.setItem(getMasteryCacheKey(sourceName), JSON.stringify([...new Set(keys)])); }
+  catch (e) { console.warn("Could not cache clip mastery locally:", e); }
+}
+
+async function syncMastery(sourceName, keys = getMasteredKeys()) {
+  if (!sourceName) return;
+  cacheMasteredKeys(sourceName, keys);
+  try {
+    await fetch("./api/progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename: sourceName, masteredKeys: keys })
+    });
+  } catch (error) {
+    console.warn("Could not sync clip mastery:", error.message);
+  }
+}
+
+async function hydrateMastery(sourceName) {
+  const localKeys = readLocalMasteredKeys(sourceName);
+  applyMasteredKeys(localKeys);
+  try {
+    const response = await fetch(`./api/progress?file=${encodeURIComponent(sourceName)}`, { signal: AbortSignal.timeout(5000) });
+    if (!response.ok) return;
+    const data = await response.json();
+    const mergedKeys = [...new Set([...localKeys, ...(data.masteredKeys || [])])];
+    applyMasteredKeys(mergedKeys);
+    cacheMasteredKeys(sourceName, mergedKeys);
+    if (data.available && mergedKeys.some((key) => !localKeys.includes(key))) await syncMastery(sourceName, mergedKeys);
+  } catch (error) {
+    console.warn("Could not load synced clip mastery:", error.message);
+  }
+}
+
 function isPreparedClip(clip) {
   return Boolean(clip && Number.isFinite(Number(clip.start)) && Number.isFinite(Number(clip.end)) && clip.end > clip.start && clip.japanese?.trim() && clip.rubyText?.trim() && clip.translation?.trim());
 }
@@ -151,6 +216,7 @@ function saveClipCache() {
     analyzed: Boolean(clip.analyzed),
     scanned: Boolean(clip.scanned),
     failed: Boolean(clip.failed),
+    mastered: Boolean(clip.mastered),
     error: clip.error || ""
   }));
   try {
@@ -465,6 +531,7 @@ async function setSource({ name, url, file = null }) {
       state.clips = imported.clips;
       state.source.prepared = hasPreparedTranscript(state.clips);
       state.active = 0;
+      await hydrateMastery(name);
       try { localStorage.setItem(getCacheKey(name), JSON.stringify(imported.clips)); }
       catch (e) { console.warn('Could not cache imported transcript:', e); }
       ui.empty.classList.add('hidden');
@@ -487,6 +554,7 @@ async function setSource({ name, url, file = null }) {
       state.clips = stored.clips;
       state.source.prepared = true;
       state.active = 0;
+      await hydrateMastery(name);
       ui.empty.classList.add("hidden");
       ui.stage.classList.remove("hidden");
       renderActiveClip();
@@ -501,6 +569,7 @@ async function setSource({ name, url, file = null }) {
   if (cached && cached.length) {
     state.clips = cached;
     state.active = 0;
+    await hydrateMastery(name);
     ui.empty.classList.add("hidden");
     ui.stage.classList.remove("hidden");
     renderActiveClip();
@@ -511,11 +580,12 @@ async function setSource({ name, url, file = null }) {
     if (readyCount < cached.length) startAutoAnalyze();
   } else {
     const baseName = name.replace(/\.[^.]+$/, "");
-    const applyClips = (clips, sourceMsg) => {
+    const applyClips = async (clips, sourceMsg) => {
       if (state.source?.url !== url) return;
       state.clips = repairClips(clips);
       state.source.prepared = hasPreparedTranscript(state.clips);
       state.active = 0;
+      await hydrateMastery(name);
       ui.empty.classList.add("hidden");
       ui.stage.classList.remove("hidden");
       renderActiveClip();
@@ -531,10 +601,10 @@ async function setSource({ name, url, file = null }) {
         if (!r.ok) throw new Error("API not available");
         return r.json();
       })
-      .then((res) => {
+      .then(async (res) => {
         if (res.exists && res.data?.clips?.length) {
           const prepared = hasPreparedTranscript(res.data.clips);
-          applyClips(res.data.clips, "from server");
+          await applyClips(res.data.clips, "from server");
           state.source.prepared = prepared;
         } else {
           throw new Error("No transcript in API");
@@ -547,9 +617,9 @@ async function setSource({ name, url, file = null }) {
             if (!r.ok) throw new Error("Static transcript not found");
             return r.json();
           })
-          .then((data) => {
+          .then(async (data) => {
             if (data && data.clips && data.clips.length) {
-              applyClips(data.clips, "from transcripts");
+              await applyClips(data.clips, "from transcripts");
             }
           })
           .catch(() => {});
@@ -1590,7 +1660,10 @@ function showAdvancedFeedback(evalData, heard, target) {
 
   const clip = currentClip();
   if (clip) {
-    clip.mastered = evalData.recommendation === "move_on";
+    if (evalData.recommendation === "move_on") {
+      clip.mastered = true;
+      syncMastery(state.source?.name);
+    }
     saveClipCache();
     renderPills();
   }
