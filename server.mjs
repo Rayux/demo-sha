@@ -303,7 +303,7 @@ Scoring criteria:
 - Pronunciation (0-100): Mora accuracy, phonetic fidelity, glottal stops (促音), long vowels (長音), and devoicing (無聲化).
 - Rhythm & Pace (0-100): Focus on internal pacing, pauses, and smooth mora flow within the spoken sentence. Do NOT penalize the score if the total Learner Duration (${recordedDuration}s) is longer than the Target Duration (${targetDuration}s), as the user may have paused before or after speaking.
 - Intonation (0-100): Particle tone (e.g. rising ↗ for questions/agreement, falling ↘ for statements), pitch accent (頭高/中高/尾高/平板) stability.
-- Recommendation: Based on the overall score and the user's progress, recommend either "move_on" (ready for next clip) or "keep_practicing".
+- Recommendation: Set "move_on" when the average of the available pronunciation, rhythm, and intonation scores is 70 or higher; otherwise set "keep_practicing".
 - Visual Cues: Split the target sentence into words/particles. Mark status as "perfect", "warning" (slight accent/timing hesitation), or "missed". Provide a short note in Traditional Chinese for any non-perfect item.`;
 
     const userPrompt = `Target Sentence: ${target}\nTarget Duration: ${targetDuration}s\nLearner Recognized Speech: ${heard || "(unrecognized / silent)"}\nLearner Duration: ${recordedDuration}s`;
