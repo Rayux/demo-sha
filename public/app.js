@@ -1649,6 +1649,13 @@ function renderEmptyFeedback() {
     <div class="feedback-invitation"><span class="feedback-spark" aria-hidden="true">${sparkleIcon}</span><p><strong>Small adjustments. Noticeable progress.</strong>Record a take to get personalised feedback and a clear next step.</p></div>`;
 }
 
+function applyMoveOnThreshold(evaluation) {
+  const values = Object.values(evaluation?.scores || {})
+    .filter((value) => typeof value === "number" && Number.isFinite(value));
+  const average = values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+  return { ...evaluation, recommendation: average >= 70 ? "move_on" : "keep_practicing" };
+}
+
 function showAdvancedFeedback(evalData, heard, target) {
   ui.feedback.className = "feedback";
   ui.feedbackStatus.textContent = "Take reviewed";
@@ -1749,7 +1756,7 @@ function computeLocalFeedback(target, heard, targetDuration, recordedDuration) {
   const speedRatio = (recordedDuration / targetDuration).toFixed(2);
   return {
     scores: { pronunciation: pronScore, rhythm: timingScore, intonation: null },
-    recommendation: pronScore >= 80 && timingScore >= 80 ? "move_on" : "keep_practicing",
+    recommendation: (pronScore + timingScore) / 2 >= 70 ? "move_on" : "keep_practicing",
     visualCues,
     rhythmFeedback: durationDiff < -0.5 ? "語速有點太快，可以稍微放慢，讓每個音拍都清楚完整。" : "本機模式不評估整體長度，請專注於發音與語調即可。",
     intonationFeedback: "仔細聽每個語句結尾的音高起伏。目前的本機文字比對無法判斷實際音高，因此不提供語調分數。",
@@ -1788,7 +1795,7 @@ async function gradeAttempt() {
       });
       if (evalRes.ok) {
         const { evaluation } = await evalRes.json();
-        showAdvancedFeedback(evaluation, heard, clip.japanese);
+        showAdvancedFeedback(applyMoveOnThreshold(evaluation), heard, clip.japanese);
         toast("Evaluation complete! Review your scores and visual cues below.");
         return;
       }
@@ -1797,7 +1804,7 @@ async function gradeAttempt() {
     }
 
     const fallback = computeLocalFeedback(clip.japanese, heard, targetDuration, recordedDuration);
-    showAdvancedFeedback(fallback, heard, clip.japanese);
+    showAdvancedFeedback(applyMoveOnThreshold(fallback), heard, clip.japanese);
     toast("Speech comparison complete.");
   } catch (error) {
     ui.feedback.className = "feedback empty-feedback";
