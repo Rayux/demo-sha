@@ -38,10 +38,10 @@ async function upload(client, text = 'hello') {
   assert.equal(uploaded.status, 200);
   return id;
 }
-async function waitJob(client, id, desired = ['complete', 'error', 'translation_error', 'cancelled']) {
+async function waitJob(client, id, desired = ['complete', 'error', 'translation_error', 'cancelled'], ready = () => true) {
   for (let count = 0; count < 200; count++) {
     const result = await client.call(`/jobs/${id}`);
-    if (desired.includes(result.value.state)) return result.value;
+    if (desired.includes(result.value.state) && ready(result.value)) return result.value;
     await new Promise(resolve => setTimeout(resolve, 20));
   }
   assert.fail('Fixture job timed out.');
@@ -623,7 +623,8 @@ test('silent initial sections remain active and do not stop preparation of later
   const client = await start(t, { worker: streamingFixture, fetchImpl: async (_url, init) => translatedResponse(requestedItems(init)) });
   const id = await downloadJob(client, 'https://www.bilibili.com/video/BVsilent');
   await client.call(`/jobs/${id}/start`, { method: 'POST', json: { translation } });
-  const early = await waitJob(client, id, ['preparing']);
+  // Metadata enters preparing before the worker publishes its first section.
+  const early = await waitJob(client, id, ['preparing'], job => job.processedThrough === 60);
   assert.deepEqual(early.cues, []);
   const job = await waitJob(client, id);
   assert.equal(job.state, 'complete');
