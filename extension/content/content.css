@@ -1,0 +1,187 @@
+/* The source caption is hidden only after our replacement is mounted. */
+body.kage-has-subtitle .player-timedtext-text-container,
+body.kage-has-subtitle .ytp-caption-window-container,
+body.kage-has-subtitle .bpx-player-subtitle-panel-text,
+body.kage-has-subtitle .bilibili-player-video-subtitle { opacity: 0 !important; }
+.kage-subtitle-container { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); width: min(90%, 1100px); z-index: 2147483600; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: auto; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans JP', sans-serif; }
+.kage-pills-wrapper { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; width: fit-content; max-width: 100%; }
+.kage-pill { box-sizing: border-box; padding: 9px 16px; border-radius: 10px; background: rgba(15, 19, 25, .5); color: #fff; max-width: 100%; box-shadow: 0 3px 18px #0003; }
+/* Japanese sets the shared box width; longer Chinese wraps within that width. */
+.kage-chinese-pill, .kage-pills-wrapper > .kage-reading-status { contain: inline-size; overflow-wrap: anywhere; }
+.kage-subtitle-container .kage-japanese { display: block; text-align: center; font-size: clamp(20px, 2vw, 28px); line-height: 1.5; font-weight: 500; color: #fafafa; letter-spacing: normal; word-spacing: normal; }
+.kage-subtitle-container .kage-chunk { position: relative; display: inline; white-space: pre-wrap; padding: 0; margin: 0; letter-spacing: normal; word-spacing: normal; }
+.kage-subtitle-container .kage-chunk ruby { ruby-align: center; ruby-position: over; ruby-overhang: auto; }
+.kage-subtitle-container .kage-chunk rt { font-size: 18px; color: #e5d6b4; line-height: 1; font-weight: 400; letter-spacing: normal; }
+.kage-chunk:hover { color: #edcf90; }
+.kage-translation { font-size: 20px; line-height: 1.55; color: #eaeef3; text-align: center; }
+.kage-reading-status, .kage-translation-status { font-size: 13px; line-height: 1.5; color: #cad0d8; }
+.kage-tooltip { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 14px); left: 50%; transform: translateX(-50%); min-width: 160px; max-width: 300px; padding: 14px; border: 1px solid #3c4551; border-radius: 10px; background: #17202a; color: #f0f3f6; font-size: 14px; line-height: 1.6; white-space: normal; pointer-events: none; box-shadow: 0 8px 30px #0005; }
+.kage-chunk:hover .kage-tooltip { visibility: visible; opacity: 1; }
+.kage-tooltip-headword { display: block; font-size: 18px; margin-bottom: 4px; }
+.kage-japanese-row { position: relative; min-width: 0; }
+.kage-japanese-row .kage-japanese { text-align: center; }
+.kage-subtitle-controls { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; padding-left: 6px; opacity: 0; pointer-events: none; }
+.kage-subtitle-container:hover .kage-subtitle-controls, .kage-subtitle-controls:has(:focus-visible), .kage-subtitle-container.kage-dragging .kage-subtitle-controls { opacity: 1; pointer-events: auto; }
+.kage-drag-handle, .kage-subtitle-container .kage-chinese-toggle { display: grid; place-items: center; background: rgba(25, 35, 46, .75); border: 1px solid #4b5563; color: #eee; width: 24px; height: 24px; padding: 0; margin: 0; box-sizing: border-box; border-radius: 5px; }
+.kage-drag-handle { cursor: grab; touch-action: none; user-select: none; }
+.kage-dragging, .kage-dragging .kage-drag-handle { cursor: grabbing; user-select: none; }
+.kage-subtitle-container .kage-chinese-toggle { appearance: none; cursor: pointer; opacity: .8; }
+.kage-subtitle-container .kage-chinese-toggle:hover, .kage-subtitle-container .kage-chinese-toggle:focus-visible { opacity: 1; border-color: #c9b7f5; }
+.kage-subtitle-container .kage-chinese-toggle:focus-visible { outline: 2px solid #c9b7f5; outline-offset: 2px; }
+.kage-subtitle-container .kage-chinese-toggle[aria-pressed="true"] { color: #c9b7f5; opacity: 1; }
+.kage-subtitle-container.kage-hide-chinese .kage-chinese-pill { display: none !important; }
+
+/* iOS-inspired grouped surfaces. Keep all panel styling isolated from the player. */
+#kage-study {
+  --kage-bg: #f2f2f7; --kage-raised: #e9e9ef; --kage-edge: #dedee5;
+  --kage-muted: #6d6d76; --kage-ink: #1c1c1e; --kage-accent: #007aff;
+  position: fixed; z-index: 2147483640; right: 20px; top: 20px;
+  font: 14px/1.45 -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  color: var(--kage-ink); color-scheme: light; text-align: left;
+  -webkit-font-smoothing: antialiased;
+}
+#kage-study *, #kage-study *::before, #kage-study *::after { box-sizing: border-box; }
+#kage-study [hidden] { display: none !important; }
+#kage-study button, #kage-study textarea, #kage-study input, #kage-study select { font: inherit; color: inherit; letter-spacing: normal; text-transform: none; margin: 0; }
+#kage-study button { appearance: none; cursor: pointer; border: 0; box-shadow: none; line-height: 1.4; transition: background .15s, border-color .15s, color .15s; }
+#kage-study button:disabled { opacity: .4; cursor: default; }
+#kage-study :is(button, summary, input, select, a):focus-visible { outline: 2px solid var(--kage-accent); outline-offset: 3px; }
+#kage-study h2, #kage-study h3, #kage-study p { margin: 0; color: inherit; font-family: inherit; }
+#kage-study svg { flex-shrink: 0; display: block; }
+#kage-study .kage-launcher { display: flex; align-items: center; gap: 9px; padding: 11px 17px; border: 1px solid #ffffffb3; border-radius: 99px; background: #fffffff5; color: var(--kage-accent); font-size: 13px; font-weight: 600; box-shadow: 0 4px 20px #0002; }
+#kage-study .kage-launcher:hover { background: #f2f6ff; }
+#kage-study .kage-launcher[aria-expanded='true'] { visibility: hidden; }
+#kage-study .kage-chat-panel { position: fixed; right: 16px; top: 16px; bottom: 16px; width: min(410px, calc(100vw - 32px)); display: flex; flex-direction: column; overflow: hidden; background: var(--kage-bg); border: 1px solid #ffffffb3; border-radius: 24px; box-shadow: 0 20px 64px #0003, 0 2px 8px #0001; }
+#kage-study .kage-chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 20px 16px; }
+#kage-study .kage-brand { display: flex; align-items: center; gap: 12px; }
+#kage-study .kage-brand-mark { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0; border: 1px solid #006be0; border-radius: 10px; background: #007aff; color: #ffffff; font: 23px/1 -apple-system, BlinkMacSystemFont, sans-serif; }
+#kage-study h2 { font-size: 22px; font-weight: 700; letter-spacing: -.5px; line-height: 1.3; }
+#kage-study .kage-brand-caption { display: block; margin-top: 3px; color: var(--kage-muted); font-size: 11px; }
+#kage-study .kage-eyebrow { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0; line-height: 1.4; text-transform: none; color: var(--kage-muted); }
+#kage-study .kage-icon-button { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; background: #e5e5ea; color: var(--kage-muted); }
+#kage-study .kage-icon-button:hover { background: var(--kage-raised); color: var(--kage-ink); }
+#kage-study .kage-tabs { display: flex; flex-shrink: 0; margin: 0 20px 4px; padding: 3px; border: 0; border-radius: 10px; background: #e5e5ea; gap: 4px; }
+#kage-study .kage-tabs button { display: flex; justify-content: center; align-items: center; gap: 8px; flex: 1; background: transparent; padding: 8px 12px; border-radius: 7px; font-size: 13px; font-weight: 600; color: var(--kage-muted); }
+#kage-study .kage-tabs svg { width: 16px; height: 16px; }
+#kage-study .kage-tabs button:hover { color: var(--kage-ink); }
+#kage-study .kage-tabs button[aria-selected='true'] { color: var(--kage-ink); background: #ffffff; box-shadow: 0 2px 5px #0002, 0 0 1px #0001; }
+#kage-study .kage-tutor-view { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+#kage-study .kage-context-card { margin: 18px 20px 0; padding: 16px; border: 0; border-radius: 16px; box-shadow: 0 1px 3px #00000006; background: #ffffff; flex-shrink: 0; max-height: min(230px, 30vh); overflow: auto; }
+#kage-study .kage-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+#kage-study .kage-context-card .kage-eyebrow { color: #6d6d76; font-size: 11px; }
+#kage-study .kage-text-button { display: inline-flex; align-items: center; gap: 5px; background: transparent; padding: 4px 0; color: var(--kage-accent); font-size: 11px; text-decoration: none; }
+#kage-study .kage-text-button svg { width: 13px; height: 13px; }
+#kage-study .kage-text-button:hover { color: #005ec4; text-decoration: underline; }
+#kage-study .kage-context-jp { font-size: 21px; line-height: 1.65; font-weight: 500; overflow-wrap: anywhere; }
+#kage-study .kage-context-jp rt { font-size: 10px; color: #6d6d76; line-height: 1; font-weight: 400; }
+#kage-study .kage-context-jp ruby { ruby-position: over; ruby-align: center; }
+#kage-study .kage-context-zh { font-size: 14px; line-height: 1.45; margin-top: 6px; color: #63636b; }
+#kage-study .kage-context-meta { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #e5e5ea; padding-top: 9px; margin-top: 12px; font-size: 10px; color: #767680; }
+#kage-study .kage-context-source { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#kage-study .kage-context-pinned { white-space: nowrap; }
+#kage-study .kage-chat-body { flex: 1; min-height: 70px; overflow-y: auto; overscroll-behavior: contain; padding: 20px 22px 4px; }
+#kage-study :is(.kage-chat-body, #kageSubtitleView, .kage-context-card) { scrollbar-width: thin; scrollbar-color: #c7c7cc transparent; }
+#kage-study .kage-chat-empty { padding: 16px 0; }
+#kage-study .kage-chat-empty h3 { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
+#kage-study .kage-chat-empty p { color: var(--kage-muted); font-size: 14px; line-height: 1.45; }
+#kage-study .kage-chat-message { margin-bottom: 16px; font-size: 15px; line-height: 1.45; }
+#kage-study .kage-chat-message.user { margin-left: 26px; padding: 11px 14px; background: #e5efff; border: 0; border-radius: 16px 16px 4px 16px; }
+#kage-study .kage-chat-message.ai { padding: 0 2px; }
+#kage-study .kage-message-label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--kage-muted); margin-bottom: 6px; }
+#kage-study .ai .kage-message-label { color: var(--kage-muted); }
+
+#kage-study .kage-message-text { font-size: inherit; line-height: 1.45; letter-spacing: normal; white-space: pre-wrap; overflow-wrap: anywhere; }
+#kage-study .kage-message-context { color: var(--kage-muted); font-size: 11px; margin-bottom: 8px; border-left: 2px solid #b9cff3; padding-left: 10px; }
+#kage-study .kage-message-error { color: #c9342b; }
+#kage-study .kage-quick-actions { display: flex; flex-wrap: wrap; flex-shrink: 0; gap: 7px; padding: 12px 20px; }
+#kage-study .kage-quick-actions button { padding: 8px 13px; border: 0; border-radius: 99px; background: #e6eefa; font-size: 12px; color: #0066d6; }
+#kage-study .kage-quick-actions button:hover { background: #e5efff; border-color: #b8d2fa; color: #005ec4; }
+#kage-study .kage-chat-input-area { flex-shrink: 0; margin: 0 20px 16px; border: 1px solid #d8d8df; border-radius: 18px; background: #ffffff; padding: 13px 14px 10px; transition: border-color .15s; }
+#kage-study .kage-chat-input-area:focus-within { border-color: #007aff; box-shadow: 0 0 0 2px #007aff12; }
+#kage-study textarea { display: block; width: 100%; min-height: 46px; max-height: 100px; resize: vertical; border: 0; border-radius: 0; padding: 0; background: transparent; color: var(--kage-ink); font-size: 14px; line-height: 1.45; outline: none; }
+#kage-study textarea::placeholder { color: #767680; opacity: 1; }
+#kage-study .kage-composer-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+#kage-study .kage-composer-footer > span { font-size: 9px; color: var(--kage-muted); }
+#kage-study #kageChatSend { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--kage-accent); color: #ffffff; }
+#kage-study #kageChatSend:hover { background: #0066d6; }
+#kage-study #kageSubtitleView { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 22px 20px; }
+#kage-study .kage-view-heading { margin-bottom: 20px; }
+#kage-study .kage-view-heading h3 { font-size: 23px; font-weight: 700; letter-spacing: -.5px; }
+#kage-study .kage-view-heading p { margin-top: 5px; color: var(--kage-muted); font-size: 12px; }
+#kage-study :is(.kage-source-card, .kage-reading-card, .kage-preparation) { padding: 16px; border: 0; border-radius: 16px; margin-bottom: 12px; background: #ffffff; }
+#kage-study :is(.kage-source-card, .kage-reading-card) h3 { font-size: 16px; font-weight: 500; letter-spacing: -.2px; margin: 7px 0; }
+#kage-study :is(.kage-source-card, .kage-reading-card, .kage-preparation) p { font-size: 13px; color: #63636b; line-height: 1.45; margin-top: 8px; overflow-wrap: anywhere; }
+#kage-study #kageDictionaryStatus { display: block; margin-top: 12px; font-size: 11px; color: var(--kage-accent); }
+#kage-study .kage-preparation strong { font-size: 15px; font-weight: 500; }
+#kage-study .kage-preparation > div { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+#kage-study :is(.kage-preparation, .kage-import-card) button { border: 1px solid #e8e8ed; padding: 9px 12px; border-radius: 9px; background: #f2f2f7; color: #0066d6; font-size: 12px; }
+#kage-study :is(.kage-preparation, .kage-import-card) button:hover:not(:disabled) { background: #e5efff; border-color: #c5d8f5; }
+#kage-study .kage-panel-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid var(--kage-edge); padding: 10px 22px; font-size: 10px; color: var(--kage-muted); flex-shrink: 0; background: #f2f2f7; }
+#kage-study #kageModelStatus { overflow-wrap: anywhere; }
+#kage-study #kageSettings { flex-shrink: 0; color: var(--kage-muted); font-size: 10px; }
+#kage-study .kage-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+#kage-study .kage-import-card { border-color: #e5e5ea; background: #ffffff; }
+#kage-study .kage-import-card > .kage-eyebrow { color: var(--kage-accent); }
+#kage-study .kage-import-card .kage-import-source { border-left: 2px solid #007aff; padding-left: 10px; margin-top: 16px; color: #63636b; font-size: 11px; }
+#kage-study .kage-import-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+#kage-study .kage-import-card .kage-primary-action { width: 100%; background: var(--kage-accent); border-color: var(--kage-accent); color: #ffffff; font-weight: 600; padding: 11px; }
+#kage-study .kage-import-card .kage-primary-action:hover:not(:disabled) { background: #0066d6; border-color: #0066d6; }
+#kage-study .kage-import-card .kage-danger-action { color: #c9342b; border-color: transparent; background: transparent; margin-top: 12px; padding-left: 0; }
+#kage-study .kage-import-card input, #kage-study .kage-import-card select { color: var(--kage-ink); background: #f2f2f7; border: 1px solid #d8d8df; border-radius: 6px; padding: 7px; min-width: 0; max-width: 100%; }
+#kage-study .kage-import-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: 13px; color: #3a3a3c; }
+#kage-study .kage-import-row input[type='number'] { width: 86px; }
+#kage-study .kage-import-toggle { display: flex; flex-direction: row-reverse; justify-content: space-between; gap: 12px; align-items: center; border-top: 1px solid #e5e5ea; padding-top: 16px; margin-top: 16px; font-size: 13px; }
+#kage-study .kage-import-toggle input { appearance: none; position: relative; width: 38px; height: 24px; padding: 0; border-radius: 99px; cursor: pointer; flex-shrink: 0; background: #e5e5ea; }
+#kage-study .kage-import-toggle input::before { content: ''; position: absolute; width: 18px; height: 18px; top: 2px; left: 2px; border-radius: 50%; background: #ffffff; transition: transform .15s; }
+#kage-study .kage-import-toggle input:checked { background: #34c759; border-color: #34c759; }
+#kage-study .kage-import-toggle input:checked::before { transform: translateX(14px); background: #ffffff; }
+#kage-study .kage-import-hint { font-size: 11px; color: var(--kage-muted); }
+#kage-study .kage-import-status { white-space: pre-wrap; }
+#kage-study .kage-import-status.kage-import-error { color: #c9342b; }
+#kage-study :is(.kage-import-setup, .kage-import-queue, .kage-import-timings, .kage-import-adjust) { margin-top: 16px; border-top: 1px solid #e5e5ea; padding-top: 13px; }
+#kage-study summary { cursor: pointer; font-size: 13px; color: #1c1c1e; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+#kage-study summary::-webkit-details-marker { display: none; }
+#kage-study summary::after { content: ''; width: 6px; height: 6px; border-right: 1px solid #8e8e93; border-bottom: 1px solid #8e8e93; transform: rotate(45deg); margin: 0 3px 3px; flex-shrink: 0; }
+#kage-study details[open] > summary::after { transform: rotate(225deg); margin-bottom: -3px; }
+#kage-study .kage-queue-jobs { margin-top: 12px; }
+#kage-study .kage-queue-job { border: 0; border-radius: 10px; background: #f2f2f7; padding: 12px; margin-bottom: 8px; }
+#kage-study .kage-queue-job p { margin: 0 0 6px; overflow-wrap: anywhere; }
+#kage-study .kage-queue-job .kage-queue-title { font-weight: 500; color: #1c1c1e; }
+#kage-study .kage-queue-job a { display: inline-flex; margin-right: 12px; }
+#kage-study .kage-queue-job button { padding: 4px 9px; background: transparent; }
+#kage-study .kage-import-setup code { display: inline-block; margin-top: 8px; color: #3a3a3c; font-size: 11px; user-select: text; }
+#kage-study .kage-import-card progress { display: block; width: 100%; height: 4px; margin-top: 16px; accent-color: var(--kage-accent); border: 0; border-radius: 4px; overflow: hidden; }
+#kage-study .kage-import-card progress::-webkit-progress-bar { background: #e5e5ea; }
+#kage-study .kage-import-card progress::-webkit-progress-value { background: var(--kage-accent); }
+#kage-study .kage-import-adjust > button { margin-top: 12px; }
+#kage-study .kage-import-editor { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--kage-edge); }
+#kage-study .kage-import-editor textarea { min-height: 68px; border: 1px solid #d8d8df; border-radius: 6px; padding: 8px; margin-top: 6px; }
+#kage-study .kage-import-editor textarea:focus-visible { outline: 2px solid var(--kage-accent); outline-offset: 2px; }
+@media (min-width: 1000px) { body.kage-panel-open .kage-subtitle-container { width: calc(100% - 480px); left: calc((100% - 440px) / 2); } }
+@media (max-width: 600px) { #kage-study .kage-chat-panel { right: 8px; width: calc(100vw - 16px); } }
+@media (max-height: 740px) {
+  #kage-study .kage-chat-panel { top: 8px; bottom: 8px; border-radius: 20px; }
+  #kage-study .kage-chat-header { padding: 14px 20px; }
+  #kage-study .kage-context-card { margin-top: 12px; padding: 12px 15px; max-height: 160px; }
+  #kage-study .kage-card-top { margin-bottom: 12px; }
+  #kage-study .kage-context-meta { margin-top: 10px; padding-top: 8px; }
+  #kage-study .kage-context-jp { font-size: 20px; }
+  #kage-study .kage-chat-body { padding-top: 16px; }
+  #kage-study .kage-chat-input-area { margin-bottom: 12px; }
+  #kage-study textarea { min-height: 36px; }
+}
+@media (max-height: 540px) {
+  #kage-study .kage-tutor-view { overflow-y: auto; }
+  #kage-study .kage-chat-body { flex: 1 0 120px; }
+  #kage-study .kage-context-card { max-height: 140px; }
+}
+@media (max-height: 640px) {
+  #kage-study .kage-chat-header { padding: 12px 20px; }
+  #kage-study .kage-brand-mark { width: 32px; height: 34px; font-size: 22px; }
+  #kage-study .kage-brand-caption { display: none; }
+  #kage-study .kage-context-card { max-height: 140px; }
+  #kage-study .kage-context-jp { font-size: 18px; line-height: 1.6; }
+  #kage-study .kage-card-top { margin-bottom: 8px; }
+  #kage-study .kage-chat-input-area textarea { height: 36px; min-height: 36px; }
+}
+@media (prefers-reduced-motion: reduce) { #kage-study *, #kage-study *::before { transition: none !important; } }
