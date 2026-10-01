@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Screenshot Learner settings</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="settings-page">
+  <main class="settings-card">
+    <p class="eyebrow">SCREENSHOT LEARNER</p>
+    <h1>Local model settings</h1>
+    <p class="muted">Use a vision-capable model. Ollama users can try qwen2.5vl:7b or another model that accepts images.</p>
+    <label>OpenAI-compatible endpoint
+      <input id="endpoint" type="url" autocomplete="off">
+    </label>
+    <label>Vision model name
+      <input id="model" type="text" autocomplete="off">
+    </label>
+    <label>API key <span class="muted">optional for local servers</span>
+      <input id="apiKey" type="password" autocomplete="off">
+    </label>
+    <button id="save" class="primary">Save settings</button>
+    <p id="status" class="status" role="status"></p>
+    <p class="shortcut-note">Clipboard: Command + Shift + 7 on Mac (Control + Shift + 7 on Windows/Linux). Screenshot: the capture shortcut. Check or change bindings at <code>chrome://extensions/shortcuts</code>.</p>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

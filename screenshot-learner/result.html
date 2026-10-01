@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Screenshot study</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="side-panel">
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">QUICK STUDY</p>
+        <h1>Japanese study</h1>
+        <p class="subtitle">Read alongside the page.</p>
+      </div>
+      <button id="settings" class="text-button">Settings</button>
+    </header>
+    <div class="mode-tabs" role="tablist" aria-label="Study source">
+      <button id="captureTab" role="tab" aria-selected="true" aria-controls="capturePanel">Screenshot</button>
+      <button id="textTab" role="tab" aria-selected="false" aria-controls="textPanel" tabindex="-1">Clipboard</button>
+    </div>
+    <div id="capturePanel" role="tabpanel" aria-labelledby="captureTab">
+    <button id="recapture" class="primary capture-tab">Capture current tab</button>
+    <section class="workspace">
+      <div class="capture-card">
+        <div class="section-label">01 / Your capture</div>
+        <h2 id="sourceTitle">Captured page</h2>
+        <p id="regionHint" class="muted">Drag around text in this preview. Release to read it automatically.</p>
+        <div id="imageWrap" class="image-wrap"><div class="loading">Loading capture...</div><div id="selection" hidden></div></div>
+        <div class="capture-actions"><button id="analyze" class="primary" disabled>Read full capture</button><button id="resetCrop" class="text-button" hidden>Use full page</button></div>
+
+      </div>
+      <div class="study-card">
+        <div class="section-label">02 / Understand</div>
+        <h2>Your study notes</h2>
+        <div id="state" class="state" role="status" aria-live="polite">Preparing your page study...</div>
+        <div id="recovery" class="recovery" hidden><h3>Let’s take a closer look.</h3><p>This does not necessarily mean there is no Japanese. Small characters or a busy page can be hard for the model to read.</p><p>Drag around the text in the preview above and release to read it automatically. You can also zoom in on the source page and capture again.</p><p class="muted">If a clear, close-up region still fails, check that Settings uses a vision-capable model.</p></div>
+        <details id="transcription" class="transcription" hidden open>
+          <summary>Check recognized Japanese</summary>
+          <label for="recognizedText">Correct any mistakes before translating again. One text block per line.</label>
+          <textarea id="recognizedText" lang="ja" rows="4" spellcheck="false"></textarea>
+          <button id="translateEdited" class="secondary">Translate corrected text → 繁體中文</button>
+        </details>
+        <div id="answer" class="answer" hidden>
+          <div class="result-heading"><span class="result-label">Recognized text</span><span id="itemCount" class="item-count"></span></div>
+          <div id="items" class="items"></div>
+        </div>
+        <div id="chat" class="chat" hidden>
+          <div class="section-label">Ask about this page</div>
+          <div id="chatLog" class="chat-log" aria-live="polite"></div>
+          <div class="quick-pills" aria-label="Suggested questions">
+            <button class="pill" data-question="有日語省略、慣用語或敬語嗎？">省略・慣用語・敬語</button>
+            <button class="pill" data-question="請解釋這些句子中的助詞用法。">助詞用法</button>
+            <button class="pill" data-question="請分析這些句子中的動詞變化形。">動詞變化</button>
+          </div>
+          <form id="chatForm" class="chat-form">
+            <input id="chatInput" aria-label="Ask about the recognized Japanese" type="text" placeholder="Ask about this page..." autocomplete="off">
+            <button class="ask-button" type="submit">Ask</button>
+          </form>
+        </div>
+        <div id="error" class="error" role="alert" hidden></div>
+      </div>
+    </section>
+    </div>
+    <section id="textPanel" role="tabpanel" aria-labelledby="textTab" hidden>
+      <p class="muted">Keep this tab open and copy Japanese text from a webpage, PDF, or another app. New copied text is translated automatically.</p>
+      <label class="clipboard-toggle"><input id="autoClipboard" type="checkbox" checked> Auto-translate copied text</label>
+      <p id="watchStatus" class="muted" role="status">Connecting to clipboard…</p>
+      <p class="muted">Shortcut when the panel is closed: <kbd id="clipboardShortcut">checking…</kbd></p>
+      <button id="translateClipboard" class="primary capture-tab" disabled>Translate clipboard</button>
+      <button id="shortcutSettings" class="text-button">Keyboard shortcuts</button>
+      <p id="clipboardStatus" role="status" class="muted"></p>
+      <details class="transcription">
+        <summary>Or paste text here</summary>
+        <form id="pasteForm">
+          <label for="pastedText">Japanese text</label>
+          <textarea id="pastedText" lang="ja" rows="4" maxlength="12000" placeholder="Paste copied text…"></textarea>
+          <button class="secondary" type="submit">Translate → 繁體中文</button>
+        </form>
+      </details>
+      <div class="study-card">
+        <div class="section-label">Copied Japanese</div>
+        <p id="textSource" class="muted"></p>
+        <div id="selectedOriginal" class="japanese" lang="ja"></div>
+        <p id="textState" role="status">Copy text and use the shortcut to begin.</p>
+        <div id="textReading" class="furigana-top" lang="ja"></div>
+        <div id="textTranslation" class="item-translation" lang="zh-TW"></div>
+        <button id="retryText" class="text-button" hidden>Retry translation</button>
+        <div id="textChat" class="chat" hidden>
+          <div class="section-label">Ask about this text</div>
+          <div id="textChatLog" class="chat-log" aria-live="polite"></div>
+          <form id="textChatForm" class="chat-form">
+            <input id="textChatInput" aria-label="Question about selected text" placeholder="Ask a follow-up…" autocomplete="off">
+            <button id="textAsk" class="ask-button" type="submit">Ask</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="vendor/opencc.js"></script>
+  <script src="result.js"></script>
+  <script src="selected-text.js"></script>
+</body>
+</html>

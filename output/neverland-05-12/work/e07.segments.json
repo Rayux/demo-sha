@@ -1,0 +1,2682 @@
+[
+  {
+    "start": 0,
+    "end": 3,
+    "text": "手を組む",
+    "originalSegment": 0,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "手を組む",
+    "id": 0
+  },
+  {
+    "start": 3,
+    "end": 6.3,
+    "text": "みんな大丈夫だ問題ない",
+    "originalSegment": 1,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "みんな大丈夫だ問題ない",
+    "id": 1
+  },
+  {
+    "start": 6.3,
+    "end": 8.74,
+    "text": "話を聞こう",
+    "originalSegment": 2,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "話を聞こう",
+    "id": 2
+  },
+  {
+    "start": 8.74,
+    "end": 13.8,
+    "text": "そうよお互いの目的のために協力しましょう",
+    "originalSegment": 3,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "そうよお互いの目的のために協力しましょう",
+    "id": 3
+  },
+  {
+    "start": 13.8,
+    "end": 16.36,
+    "text": "あなたたちは脱走したい",
+    "originalSegment": 4,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "あなたたちは脱走したい",
+    "id": 4
+  },
+  {
+    "start": 16.36,
+    "end": 20,
+    "text": "私はこのハウスのママになりたい",
+    "originalSegment": 5,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "私はこのハウスのママになりたい",
+    "id": 5
+  },
+  {
+    "start": 20,
+    "end": 24.02,
+    "text": "イザベラをママの座から引きずり下ろして",
+    "originalSegment": 6,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "イザベラをママの座から引きずり下ろして",
+    "id": 6
+  },
+  {
+    "start": 24.02,
+    "end": 26.66,
+    "text": "その地位奪いたいのよ",
+    "originalSegment": 7,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "その地奪いたいのよ",
+    "id": 7
+  },
+  {
+    "start": 26.66,
+    "end": 27.6,
+    "text": "ママの座",
+    "originalSegment": 8,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママの座",
+    "id": 8
+  },
+  {
+    "start": 27.6,
+    "end": 29.44,
+    "text": "言っとくけど本心よ",
+    "originalSegment": 9,
+    "avg_logprob": -0.1998399,
+    "no_speech_prob": 0,
+    "originalJapanese": "言っとくけど本心よ",
+    "id": 9
+  },
+  {
+    "start": 29.44,
+    "end": 32.82,
+    "text": "私も抜け出したいの今の境遇から",
+    "originalSegment": 10,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "私も抜け出したいの今の境遇から",
+    "id": 10
+  },
+  {
+    "start": 32.82,
+    "end": 35.66,
+    "text": "ここの管理システムをご存知",
+    "originalSegment": 11,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "ここの管理システムをご存知",
+    "id": 11
+  },
+  {
+    "start": 35.66,
+    "end": 41.34,
+    "text": "ある条件を満たして12歳まで生き残った女子には",
+    "originalSegment": 12,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "ある条件を満たして12歳まで生き残った女子には",
+    "id": 12
+  },
+  {
+    "start": 41.34,
+    "end": 44.72,
+    "text": "出荷時2つの道が示される",
+    "originalSegment": 13,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "出荷時2つの道が示される",
+    "id": 13
+  },
+  {
+    "start": 44.72,
+    "end": 46.6,
+    "text": "このまま死ぬか",
+    "originalSegment": 14,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "このまま死ぬか",
+    "id": 14
+  },
+  {
+    "start": 46.6,
+    "end": 48.94,
+    "text": "ママを目指すか",
+    "originalSegment": 15,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママを目指すか",
+    "id": 15
+  },
+  {
+    "start": 48.94,
+    "end": 49.9,
+    "text": "条件って",
+    "originalSegment": 16,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "条件って",
+    "id": 16
+  },
+  {
+    "start": 49.9,
+    "end": 53.12,
+    "text": "一定以上の成績とママの推薦",
+    "originalSegment": 17,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "一定以上の成績とママの推薦",
+    "id": 17
+  },
+  {
+    "start": 53.12,
+    "end": 55.56,
+    "text": "それらさえ手に入れれば",
+    "originalSegment": 18,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "それらさえ手に入れれば",
+    "id": 18
+  },
+  {
+    "start": 55.56,
+    "end": 58.48,
+    "text": "脱走しなくても生き延びることはできるのよ",
+    "originalSegment": 19,
+    "avg_logprob": -0.13415727,
+    "no_speech_prob": 0,
+    "originalJapanese": "脱走しなくても生き延びることはできるのよ",
+    "id": 19
+  },
+  {
+    "start": 58.48,
+    "end": 60.08,
+    "text": "女子はね",
+    "originalSegment": 20,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "ジョシーはね",
+    "id": 20
+  },
+  {
+    "start": 60.08,
+    "end": 61.72,
+    "text": "女子",
+    "originalSegment": 21,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "ジョシー",
+    "id": 21
+  },
+  {
+    "start": 61.72,
+    "end": 64.3,
+    "text": "でもやめた方がいい",
+    "originalSegment": 22,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "でもやめた方がいい",
+    "id": 22
+  },
+  {
+    "start": 64.3,
+    "end": 68.12,
+    "text": "二度と敷地の外へ出られない体になる",
+    "originalSegment": 23,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "二度と敷地の外へ出られない体になる",
+    "id": 23
+  },
+  {
+    "start": 68.12,
+    "end": 69.56,
+    "text": "何それ",
+    "originalSegment": 24,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "何それ",
+    "id": 24
+  },
+  {
+    "start": 69.56,
+    "end": 71.08,
+    "text": "チップが入ってる",
+    "originalSegment": 25,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "チップが入ってる",
+    "id": 25
+  },
+  {
+    "start": 71.08,
+    "end": 72.9,
+    "text": "大人はね",
+    "originalSegment": 26,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "大人はね",
+    "id": 26
+  },
+  {
+    "start": 72.9,
+    "end": 75.3,
+    "text": "一歩でも農園の外へ出たら",
+    "originalSegment": 27,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "一歩でも農園の外へ出たら",
+    "id": 27
+  },
+  {
+    "start": 75.3,
+    "end": 77.28,
+    "text": "これに電気を流されて",
+    "originalSegment": 28,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "これに電気を流されて",
+    "id": 28
+  },
+  {
+    "start": 77.28,
+    "end": 79.62,
+    "text": "心臓を止められちゃうの",
+    "originalSegment": 29,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "心臓を止められちゃうの",
+    "id": 29
+  },
+  {
+    "start": 79.62,
+    "end": 82.96,
+    "text": "そしてこれは同時に",
+    "originalSegment": 30,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "そしてこれは同時に",
+    "id": 30
+  },
+  {
+    "start": 82.96,
+    "end": 85.34,
+    "text": "何か別の要因で心臓が止まると",
+    "originalSegment": 31,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "何か別の要因で心臓が止まると",
+    "id": 31
+  },
+  {
+    "start": 85.34,
+    "end": 87.66,
+    "text": "上に通報する送信機でもある",
+    "originalSegment": 32,
+    "avg_logprob": -0.20566654,
+    "no_speech_prob": 0,
+    "originalJapanese": "上に通報する送信機でもある",
+    "id": 32
+  },
+  {
+    "start": 87.66,
+    "end": 91.48,
+    "text": "やはり大人は殺せないってことか",
+    "originalSegment": 33,
+    "avg_logprob": -0.1415619,
+    "no_speech_prob": 0,
+    "originalJapanese": "やはり大人は殺せないってことか",
+    "id": 33
+  },
+  {
+    "start": 91.48,
+    "end": 95.54,
+    "text": "私は農園の中でしか生きられない",
+    "originalSegment": 34,
+    "avg_logprob": -0.1415619,
+    "no_speech_prob": 0,
+    "originalJapanese": "私は農園の中でしか生きられない",
+    "id": 34
+  },
+  {
+    "start": 95.54,
+    "end": 99.72,
+    "text": "だからその中で一番いい暮らしがしたいのよ",
+    "originalSegment": 35,
+    "avg_logprob": -0.1415619,
+    "no_speech_prob": 0,
+    "originalJapanese": "だからその中で一番いい暮らしがしたいのよ",
+    "id": 35
+  },
+  {
+    "start": 99.72,
+    "end": 104.04,
+    "text": "ママとして偽りでも人間の暮らしよ",
+    "originalSegment": 36,
+    "avg_logprob": -0.1415619,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママとして偽りでも人間の暮らしよ",
+    "id": 36
+  },
+  {
+    "start": 104.04,
+    "end": 107.72,
+    "text": "そのためにはイザベラが邪魔なのよ",
+    "originalSegment": 37,
+    "avg_logprob": -0.1415619,
+    "no_speech_prob": 0,
+    "originalJapanese": "そのためにはイザベラが邪魔なのよ",
+    "id": 37
+  },
+  {
+    "start": 107.72,
+    "end": 111.86,
+    "text": "あなたたちが逃げれば奴が罪に問われるわ",
+    "originalSegment": 38,
+    "avg_logprob": -0.1415619,
+    "no_speech_prob": 0,
+    "originalJapanese": "あなたたちが逃げれば奴が罪に問われるわ",
+    "id": 38
+  },
+  {
+    "start": 111.86,
+    "end": 115.18,
+    "text": "私は邪魔しない",
+    "originalSegment": 39,
+    "avg_logprob": -0.1415619,
+    "no_speech_prob": 0,
+    "originalJapanese": "私は邪魔しない",
+    "id": 39
+  },
+  {
+    "start": 115.18,
+    "end": 119.18,
+    "text": "逃げなさいそれが私の利益になる",
+    "originalSegment": 40,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "逃げなさいそれが私の利益になる",
+    "id": 40
+  },
+  {
+    "start": 119.18,
+    "end": 120.94,
+    "text": "出荷しないの",
+    "originalSegment": 41,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "出荷しないの",
+    "id": 41
+  },
+  {
+    "start": 120.94,
+    "end": 122.12,
+    "text": "しないわ",
+    "originalSegment": 42,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "しないわ",
+    "id": 42
+  },
+  {
+    "start": 122.12,
+    "end": 124.06,
+    "text": "協力しましょう",
+    "originalSegment": 43,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "協力しましょう",
+    "id": 43
+  },
+  {
+    "start": 124.06,
+    "end": 125.64,
+    "text": "組みましょう",
+    "originalSegment": 44,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "組みましょう",
+    "id": 44
+  },
+  {
+    "start": 125.64,
+    "end": 127.02,
+    "text": "待って",
+    "originalSegment": 45,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "待って",
+    "id": 45
+  },
+  {
+    "start": 127.02,
+    "end": 131.04,
+    "text": "一つだけシスターに確認させて",
+    "originalSegment": 46,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "一つだけシスターに確認させて",
+    "id": 46
+  },
+  {
+    "start": 131.04,
+    "end": 131.68,
+    "text": "何",
+    "originalSegment": 47,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "何",
+    "id": 47
+  },
+  {
+    "start": 131.68,
+    "end": 135.68,
+    "text": "あなたが私たちを裏切らない保証は",
+    "originalSegment": 48,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "あなたが私たちを裏切らない保証は",
+    "id": 48
+  },
+  {
+    "start": 135.68,
+    "end": 138.02,
+    "text": "信用してくれないのね",
+    "originalSegment": 49,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "信用してくれないのね",
+    "id": 49
+  },
+  {
+    "start": 138.02,
+    "end": 138.74,
+    "text": "いいから",
+    "originalSegment": 50,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "いいから",
+    "id": 50
+  },
+  {
+    "start": 138.74,
+    "end": 140.34,
+    "text": "レイよ",
+    "originalSegment": 51,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイよ",
+    "id": 51
+  },
+  {
+    "start": 140.34,
+    "end": 142.82,
+    "text": "レイがこのことをママにちくれば",
+    "originalSegment": 52,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイがこのことをママにちくれば",
+    "id": 52
+  },
+  {
+    "start": 142.82,
+    "end": 144.34,
+    "text": "私を潰せる",
+    "originalSegment": 53,
+    "avg_logprob": -0.23087816,
+    "no_speech_prob": 0,
+    "originalJapanese": "私を潰せる",
+    "id": 53
+  },
+  {
+    "start": 144.34,
+    "end": 150.32,
+    "text": "でもレイが二重スパイだってことを私がちくれば私はレイをつぶせるわ",
+    "originalSegment": 54,
+    "avg_logprob": -0.054760292,
+    "no_speech_prob": 0,
+    "originalJapanese": "でもレイが二重スパイだってことを私がちくれば私はレイをつぶせるわ",
+    "id": 54
+  },
+  {
+    "start": 150.32,
+    "end": 154.7,
+    "text": "だからお互い裏切らないし裏切れない",
+    "originalSegment": 54,
+    "avg_logprob": -0.054760292,
+    "no_speech_prob": 0,
+    "originalJapanese": "だからお互い裏切らないし裏切れない",
+    "id": 55
+  },
+  {
+    "start": 154.7,
+    "end": 156.8,
+    "text": "これでいいでしょ",
+    "originalSegment": 54,
+    "avg_logprob": -0.054760292,
+    "no_speech_prob": 0,
+    "originalJapanese": "これでいいでしょ",
+    "id": 56
+  },
+  {
+    "start": 156.8,
+    "end": 157.84,
+    "text": "分かった",
+    "originalSegment": 54,
+    "avg_logprob": -0.054760292,
+    "no_speech_prob": 0,
+    "originalJapanese": "分かった",
+    "id": 57
+  },
+  {
+    "start": 157.84,
+    "end": 160.24,
+    "text": "交渉成立ね",
+    "originalSegment": 54,
+    "avg_logprob": -0.054760292,
+    "no_speech_prob": 0,
+    "originalJapanese": "交渉成立ね",
+    "id": 58
+  },
+  {
+    "start": 160.24,
+    "end": 164.38,
+    "text": "他にも私にしか教えられない情報",
+    "originalSegment": 54,
+    "avg_logprob": -0.054760292,
+    "no_speech_prob": 0,
+    "originalJapanese": "他にも私にしか教えられない情報",
+    "id": 59
+  },
+  {
+    "start": 164.38,
+    "end": 166.38,
+    "text": "何でも教えてあげる",
+    "originalSegment": 54,
+    "avg_logprob": -0.054760292,
+    "no_speech_prob": 0,
+    "originalJapanese": "何でも教えてあげる",
+    "id": 60
+  },
+  {
+    "start": 166.38,
+    "end": 168.06,
+    "text": "友好の証よ",
+    "originalSegment": 54,
+    "avg_logprob": -0.054760292,
+    "no_speech_prob": 0,
+    "originalJapanese": "有効の証よ",
+    "id": 61
+  },
+  {
+    "start": 168.06,
+    "end": 172,
+    "text": "今夜にでも私の部屋にいらっしゃいな",
+    "originalSegment": 54,
+    "avg_logprob": -0.054760292,
+    "no_speech_prob": 0,
+    "originalJapanese": "今夜にでも私の部屋にいらっしゃいな",
+    "id": 62
+  },
+  {
+    "start": 172,
+    "end": 174.82,
+    "text": "いい暮らしがしたいだって",
+    "originalSegment": 55,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "いい暮らしがしたいだって",
+    "id": 63
+  },
+  {
+    "start": 174.82,
+    "end": 176.22,
+    "text": "自分だってそうだったのに",
+    "originalSegment": 55,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "自分だってそうだったのに",
+    "id": 64
+  },
+  {
+    "start": 176.22,
+    "end": 181.442,
+    "text": "あの人私たちの命なんて本当に何とも思ってない",
+    "originalSegment": 55,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "あの人私たちの命なんて本当に何とも思ってない",
+    "id": 65
+  },
+  {
+    "start": 181.442,
+    "end": 183.282,
+    "text": "で出荷はしないって",
+    "originalSegment": 55,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "で出荷はしないって",
+    "id": 66
+  },
+  {
+    "start": 183.282,
+    "end": 186.343,
+    "text": "しないんじゃないできないだけだ",
+    "originalSegment": 55,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "しないんじゃないできないだけだ",
+    "id": 67
+  },
+  {
+    "start": 186.343,
+    "end": 187.542,
+    "text": "本当に逃がしたいなら",
+    "originalSegment": 55,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "本当に逃がしたいなら",
+    "id": 68
+  },
+  {
+    "start": 187.542,
+    "end": 190.143,
+    "text": "然るべき時に黙って手を貸せばいい",
+    "originalSegment": 56,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "叱るべき時に黙って手を貸せばいい",
+    "id": 69
+  },
+  {
+    "start": 190.143,
+    "end": 192.762,
+    "text": "手の内をベラベラ喋るのは",
+    "originalSegment": 57,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "手の内をベラベラ喋るのは",
+    "id": 70
+  },
+  {
+    "start": 192.762,
+    "end": 194.942,
+    "text": "僕らの信用をつかみたいから",
+    "originalSegment": 58,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "僕らの信用をつかみたいから",
+    "id": 71
+  },
+  {
+    "start": 194.942,
+    "end": 197.243,
+    "text": "なんで俺たちの信用を",
+    "originalSegment": 59,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "なんで俺たちの信用を",
+    "id": 72
+  },
+  {
+    "start": 197.243,
+    "end": 200.862,
+    "text": "僕らの反逆を示す物証が欲しい",
+    "originalSegment": 60,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "僕らの反逆を示す物証が欲しい",
+    "id": 73
+  },
+  {
+    "start": 200.862,
+    "end": 204.482,
+    "text": "言い換えれば確実な物証がなければ",
+    "originalSegment": 61,
+    "avg_logprob": -0.1352881,
+    "no_speech_prob": 0,
+    "originalJapanese": "言い換えれば確実な物証がなければ",
+    "id": 74
+  },
+  {
+    "start": 204.482,
+    "end": 206.642,
+    "text": "上に信用してもらえない立場にいる",
+    "originalSegment": 62,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "上に信用してもらえない立場にいる",
+    "id": 75
+  },
+  {
+    "start": 206.642,
+    "end": 210.782,
+    "text": "ママと違って出荷する権限すらないんだろ",
+    "originalSegment": 63,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママたちがって出荷する権限すらないんだろ",
+    "id": 76
+  },
+  {
+    "start": 210.782,
+    "end": 211.702,
+    "text": "物証",
+    "originalSegment": 64,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "物証",
+    "id": 77
+  },
+  {
+    "start": 211.702,
+    "end": 212.843,
+    "text": "おい",
+    "originalSegment": 65,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "おい",
+    "id": 78
+  },
+  {
+    "start": 212.843,
+    "end": 215.822,
+    "text": "もし木に隠したロープが見つかったら",
+    "originalSegment": 66,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "もし木に隠したロープが見つかったら",
+    "id": 79
+  },
+  {
+    "start": 215.822,
+    "end": 216.582,
+    "text": "大丈夫",
+    "originalSegment": 67,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "大丈夫",
+    "id": 80
+  },
+  {
+    "start": 216.582,
+    "end": 219.302,
+    "text": "ロープなんて何とでも言い逃れできるよ",
+    "originalSegment": 68,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "ロープなんて何とでも言い逃れできるよ",
+    "id": 81
+  },
+  {
+    "start": 219.302,
+    "end": 220.922,
+    "text": "遊びで使うとかね",
+    "originalSegment": 69,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "遊びで使うとかね",
+    "id": 82
+  },
+  {
+    "start": 220.922,
+    "end": 224.222,
+    "text": "でも発信機壊す装置が見つかったら",
+    "originalSegment": 70,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "でも発信機壊す装置が見つかったら",
+    "id": 83
+  },
+  {
+    "start": 224.222,
+    "end": 225.262,
+    "text": "即アウトだな",
+    "originalSegment": 71,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "即アウトだな",
+    "id": 84
+  },
+  {
+    "start": 225.262,
+    "end": 228.843,
+    "text": "言い逃れできない確実な物証だ",
+    "originalSegment": 72,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "言い逃れできない確実な物証だ",
+    "id": 85
+  },
+  {
+    "start": 228.843,
+    "end": 231.442,
+    "text": "心配するな",
+    "originalSegment": 73,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "心配するな",
+    "id": 86
+  },
+  {
+    "start": 231.442,
+    "end": 233.062,
+    "text": "そんなヘマはしない",
+    "originalSegment": 74,
+    "avg_logprob": -0.20213531,
+    "no_speech_prob": 0,
+    "originalJapanese": "そんなヘマはしない",
+    "id": 87
+  },
+  {
+    "start": 233.062,
+    "end": 235.602,
+    "text": "だいたいまだ完成してないしな",
+    "originalSegment": 75,
+    "avg_logprob": -0.1555295,
+    "no_speech_prob": 0,
+    "originalJapanese": "だいたいまだ完成してないしな",
+    "id": 88
+  },
+  {
+    "start": 235.602,
+    "end": 240.743,
+    "text": "僕らは発信機の場所も壊し方も知らないって思わせておけば問題ない",
+    "originalSegment": 76,
+    "avg_logprob": -0.1555295,
+    "no_speech_prob": 0,
+    "originalJapanese": "僕らは発信機の場所も壊し方も知らないって思わせておけば問題ない",
+    "id": 89
+  },
+  {
+    "start": 240.743,
+    "end": 245.542,
+    "text": "あのシスターなら誘導次第ですぐに信じ込んでくれるよ",
+    "originalSegment": 77,
+    "avg_logprob": -0.1555295,
+    "no_speech_prob": 0,
+    "originalJapanese": "あのシスターなら誘導次第ですぐに信じ込んでくれるよ",
+    "id": 90
+  },
+  {
+    "start": 245.542,
+    "end": 247.123,
+    "text": "本当に行くの?",
+    "originalSegment": 78,
+    "avg_logprob": -0.1555295,
+    "no_speech_prob": 0,
+    "originalJapanese": "本当に行くの?",
+    "id": 91
+  },
+  {
+    "start": 248.123,
+    "end": 250.142,
+    "text": "相手あのシスターだよ",
+    "originalSegment": 79,
+    "avg_logprob": -0.1555295,
+    "no_speech_prob": 0,
+    "originalJapanese": "相手あのシスターだよ",
+    "id": 92
+  },
+  {
+    "start": 250.142,
+    "end": 253.463,
+    "text": "何でも教えてくれるって聞こえはいいけど",
+    "originalSegment": 80,
+    "avg_logprob": -0.1555295,
+    "no_speech_prob": 0,
+    "originalJapanese": "何でも教えてくれるって聞こえはいいけど",
+    "id": 93
+  },
+  {
+    "start": 253.463,
+    "end": 255.922,
+    "text": "つか何であいつと組むんだよ",
+    "originalSegment": 81,
+    "avg_logprob": -0.1555295,
+    "no_speech_prob": 0,
+    "originalJapanese": "つか何であいつと組むんだよ",
+    "id": 94
+  },
+  {
+    "start": 255.922,
+    "end": 257.642,
+    "text": "俺たちにメリットあるのか",
+    "originalSegment": 82,
+    "avg_logprob": -0.1555295,
+    "no_speech_prob": 0,
+    "originalJapanese": "俺たちにメリットあるのか",
+    "id": 95
+  },
+  {
+    "start": 257.642,
+    "end": 261.642,
+    "text": "うまく使えば何か情報を手に入れられるかもしれないし",
+    "originalSegment": 83,
+    "avg_logprob": -0.1555295,
+    "no_speech_prob": 0,
+    "originalJapanese": "うまく使えば何か情報を手に入れられるかもしれないし",
+    "id": 96
+  },
+  {
+    "start": 261.642,
+    "end": 266.942,
+    "text": "余計な邪魔をされずに済むこれで下見に集中できるよ",
+    "originalSegment": 84,
+    "avg_logprob": -0.05960633,
+    "no_speech_prob": 0,
+    "originalJapanese": "余計な邪魔をされずに済むこれで下見に集中できるよ",
+    "id": 97
+  },
+  {
+    "start": 266.942,
+    "end": 272.183,
+    "text": "大丈夫使えるチャンスは全て使わないと",
+    "originalSegment": 85,
+    "avg_logprob": -0.05960633,
+    "no_speech_prob": 0,
+    "originalJapanese": "大丈夫使えるチャンスは全て使わないと",
+    "id": 98
+  },
+  {
+    "start": 272.183,
+    "end": 274.423,
+    "text": "レイちょっといいかな",
+    "originalSegment": 85,
+    "avg_logprob": -0.05960633,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイちょっといいかな",
+    "id": 99
+  },
+  {
+    "start": 274.423,
+    "end": 276.923,
+    "text": "下見の段取りを相談しておきたい",
+    "originalSegment": 85,
+    "avg_logprob": -0.05960633,
+    "no_speech_prob": 0,
+    "originalJapanese": "下見の段取りを相談しておきたい",
+    "id": 100
+  },
+  {
+    "start": 276.923,
+    "end": 278.623,
+    "text": "ああ",
+    "originalSegment": 85,
+    "avg_logprob": -0.05960633,
+    "no_speech_prob": 0,
+    "originalJapanese": "ああ",
+    "id": 101
+  },
+  {
+    "start": 278.623,
+    "end": 281.042,
+    "text": "二人にお願いがあるんだけど",
+    "originalSegment": 86,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "二人にお願いがあるんだけど",
+    "id": 102
+  },
+  {
+    "start": 281.042,
+    "end": 283.102,
+    "text": "何が知りたい?",
+    "originalSegment": 87,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "何が知りたい?",
+    "id": 103
+  },
+  {
+    "start": 283.662,
+    "end": 285.262,
+    "text": "ほら何でも聞いて",
+    "originalSegment": 88,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "ほら何でも聞いて",
+    "id": 104
+  },
+  {
+    "start": 285.262,
+    "end": 286.623,
+    "text": "本当に何でも",
+    "originalSegment": 89,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "本当に何でも",
+    "id": 105
+  },
+  {
+    "start": 286.623,
+    "end": 291.042,
+    "text": "ええ農園のことでも本部のことでも",
+    "originalSegment": 90,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "ええ農園のことでも本部のことでも",
+    "id": 106
+  },
+  {
+    "start": 291.042,
+    "end": 292.262,
+    "text": "じゃあ",
+    "originalSegment": 91,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "じゃあ",
+    "id": 107
+  },
+  {
+    "start": 292.262,
+    "end": 293.442,
+    "text": "あれ見せて",
+    "originalSegment": 92,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "あれ見せて",
+    "id": 108
+  },
+  {
+    "start": 293.442,
+    "end": 296.423,
+    "text": "発信機の信号を確認するモニター",
+    "originalSegment": 93,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "発信機の信号を確認するモニター",
+    "id": 109
+  },
+  {
+    "start": 296.423,
+    "end": 299.602,
+    "text": "ええどうぞ",
+    "originalSegment": 94,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "ええどうぞ",
+    "id": 110
+  },
+  {
+    "start": 299.602,
+    "end": 302.402,
+    "text": "どうシンプルでしょ",
+    "originalSegment": 95,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "どうシンプルでしょ",
+    "id": 111
+  },
+  {
+    "start": 302.402,
+    "end": 306.322,
+    "text": "現在地だけで個人の特定はできないの",
+    "originalSegment": 96,
+    "avg_logprob": -0.24682957,
+    "no_speech_prob": 0,
+    "originalJapanese": "現在地だけで個人の特定はできないの",
+    "id": 112
+  },
+  {
+    "start": 306.322,
+    "end": 309.482,
+    "text": "発信機があることは知ってたのね",
+    "originalSegment": 97,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "発信機があることは知ってたのね",
+    "id": 113
+  },
+  {
+    "start": 309.482,
+    "end": 312.062,
+    "text": "ええママに見せられて",
+    "originalSegment": 98,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "ええママに見せられて",
+    "id": 114
+  },
+  {
+    "start": 312.062,
+    "end": 315.602,
+    "text": "でもその場所と壊し方が分からない",
+    "originalSegment": 99,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "でもその場所と壊し方が分からない",
+    "id": 115
+  },
+  {
+    "start": 315.602,
+    "end": 317.062,
+    "text": "シスターは知ってる?",
+    "originalSegment": 100,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "シスターは知ってる?",
+    "id": 116
+  },
+  {
+    "start": 317.722,
+    "end": 319.762,
+    "text": "ええ場所は耳よ",
+    "originalSegment": 101,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "ええ場所は耳よ",
+    "id": 117
+  },
+  {
+    "start": 319.762,
+    "end": 322.683,
+    "text": "左耳この辺り",
+    "originalSegment": 102,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "左耳この辺り",
+    "id": 118
+  },
+  {
+    "start": 322.683,
+    "end": 324.322,
+    "text": "壊し方は知らないわ",
+    "originalSegment": 103,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "壊し方は知らないわ",
+    "id": 119
+  },
+  {
+    "start": 324.322,
+    "end": 326.442,
+    "text": "でも壊すと通知される",
+    "originalSegment": 104,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "でも壊すと通知される",
+    "id": 120
+  },
+  {
+    "start": 326.442,
+    "end": 329.542,
+    "text": "そこにも本部にも",
+    "originalSegment": 105,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "そこにも本部にも",
+    "id": 121
+  },
+  {
+    "start": 329.542,
+    "end": 331.243,
+    "text": "取り出すしかないわ",
+    "originalSegment": 106,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "取り出すしかないわ",
+    "id": 122
+  },
+  {
+    "start": 331.243,
+    "end": 332.962,
+    "text": "もしくは切り落とすか",
+    "originalSegment": 107,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "もしくは切り落とすか",
+    "id": 123
+  },
+  {
+    "start": 332.962,
+    "end": 335.882,
+    "text": "でもハウスにはろくな刃物がない",
+    "originalSegment": 108,
+    "avg_logprob": -0.18855119,
+    "no_speech_prob": 0,
+    "originalJapanese": "でもハウスにはろくな刃物がない",
+    "id": 124
+  },
+  {
+    "start": 335.882,
+    "end": 337.882,
+    "text": "メスがあるわ 医療用メス",
+    "originalSegment": 109,
+    "avg_logprob": -0.2589522,
+    "no_speech_prob": 0,
+    "originalJapanese": "メスがあるわ 医療用メス",
+    "id": 125
+  },
+  {
+    "start": 338.423,
+    "end": 340.423,
+    "text": "外へ出たら薬もない",
+    "originalSegment": 110,
+    "avg_logprob": -0.2589522,
+    "no_speech_prob": 0,
+    "originalJapanese": "外へ出たら薬もない",
+    "id": 126
+  },
+  {
+    "start": 340.423,
+    "end": 343.762,
+    "text": "出て行く時から出血や感染症のリスクまで負いたくない",
+    "originalSegment": 111,
+    "avg_logprob": -0.2589522,
+    "no_speech_prob": 0,
+    "originalJapanese": "出て行く時から出血や感染症のリスクまで追いたくない",
+    "id": 127
+  },
+  {
+    "start": 343.762,
+    "end": 347.423,
+    "text": "医務室には薬も道具も備えてある",
+    "originalSegment": 112,
+    "avg_logprob": -0.2589522,
+    "no_speech_prob": 0,
+    "originalJapanese": "医務室には薬も道具も備えてある",
+    "id": 128
+  },
+  {
+    "start": 347.423,
+    "end": 349.002,
+    "text": "麻酔もね",
+    "originalSegment": 113,
+    "avg_logprob": -0.2589522,
+    "no_speech_prob": 0,
+    "originalJapanese": "麻酔もね",
+    "id": 129
+  },
+  {
+    "start": 349.002,
+    "end": 350.363,
+    "text": "まあ",
+    "originalSegment": 114,
+    "avg_logprob": -0.2589522,
+    "no_speech_prob": 0,
+    "originalJapanese": "まあ",
+    "id": 130
+  },
+  {
+    "start": 350.363,
+    "end": 353.142,
+    "text": "5人くらいなら足りるでしょ",
+    "originalSegment": 115,
+    "avg_logprob": -0.2589522,
+    "no_speech_prob": 0,
+    "originalJapanese": "5人くらいなら足りるでしょ",
+    "id": 131
+  },
+  {
+    "start": 353.142,
+    "end": 355.303,
+    "text": "使い方も教えてあげる",
+    "originalSegment": 116,
+    "avg_logprob": -0.2589522,
+    "no_speech_prob": 0,
+    "originalJapanese": "使い方も教えてあげる",
+    "id": 132
+  },
+  {
+    "start": 355.303,
+    "end": 357.303,
+    "text": "鍵も貸してあげる",
+    "originalSegment": 117,
+    "avg_logprob": -0.2589522,
+    "no_speech_prob": 0,
+    "originalJapanese": "鍵も貸してあげる",
+    "id": 133
+  },
+  {
+    "start": 357.303,
+    "end": 359.022,
+    "text": "これで解決",
+    "originalSegment": 118,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "これで解決",
+    "id": 134
+  },
+  {
+    "start": 359.022,
+    "end": 361.002,
+    "text": "さっ次はシスター",
+    "originalSegment": 118,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "さっ次はシスター",
+    "id": 135
+  },
+  {
+    "start": 361.002,
+    "end": 361.803,
+    "text": "今いくつ",
+    "originalSegment": 118,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "今いくつ",
+    "id": 136
+  },
+  {
+    "start": 361.803,
+    "end": 364.505,
+    "text": "生まれた時から家畜なの?",
+    "originalSegment": 118,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "生まれた時から家畜なの?",
+    "id": 137
+  },
+  {
+    "start": 364.505,
+    "end": 365.445,
+    "text": "ふんふん…",
+    "originalSegment": 118,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "ふんふん…",
+    "id": 138
+  },
+  {
+    "start": 365.445,
+    "end": 369.085,
+    "text": "大人の女性に年齢を聞くなんて…",
+    "originalSegment": 118,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "大人の女性に年齢を聞くなんて…",
+    "id": 139
+  },
+  {
+    "start": 369.085,
+    "end": 371.085,
+    "text": "と 言いたいところだけど…",
+    "originalSegment": 119,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "と 言いたいところだけど…",
+    "id": 140
+  },
+  {
+    "start": 372.085,
+    "end": 376.085,
+    "text": "26よ 生まれも育ちもこのハウス",
+    "originalSegment": 120,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "26よ 生まれも育ちもこのハウス",
+    "id": 141
+  },
+  {
+    "start": 376.085,
+    "end": 378.085,
+    "text": "ここ 第三プラントじゃないけどね",
+    "originalSegment": 121,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "ここ 第三プラントじゃないけどね",
+    "id": 142
+  },
+  {
+    "start": 378.085,
+    "end": 379.085,
+    "text": "第三プラント?",
+    "originalSegment": 122,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "第三プラント?",
+    "id": 143
+  },
+  {
+    "start": 379.085,
+    "end": 384.085,
+    "text": "ちなみにイザベラは31歳 そう記録で見たわ",
+    "originalSegment": 123,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "ちなみにイザベラは31歳 そう記録で見たわ",
+    "id": 144
+  },
+  {
+    "start": 384.085,
+    "end": 386.085,
+    "text": "外は? 見たことあるんでしょ?",
+    "originalSegment": 124,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "外は? 見たことあるんでしょ?",
+    "id": 145
+  },
+  {
+    "start": 386.085,
+    "end": 387.085,
+    "text": "ないわ",
+    "originalSegment": 125,
+    "avg_logprob": -0.17888837,
+    "no_speech_prob": 0,
+    "originalJapanese": "ないわ",
+    "id": 146
+  },
+  {
+    "start": 388.085,
+    "end": 391.025,
+    "text": "あら、嘘でもあるって言うと思った?",
+    "originalSegment": 126,
+    "avg_logprob": -0.20000736,
+    "no_speech_prob": 0,
+    "originalJapanese": "あら、嘘でもあるって言うと思った?",
+    "id": 147
+  },
+  {
+    "start": 391.965,
+    "end": 393.205,
+    "text": "ないわよ",
+    "originalSegment": 127,
+    "avg_logprob": -0.20000736,
+    "no_speech_prob": 0,
+    "originalJapanese": "ないわよ",
+    "id": 148
+  },
+  {
+    "start": 393.205,
+    "end": 396.425,
+    "text": "でも外に人間はいる",
+    "originalSegment": 128,
+    "avg_logprob": -0.20000736,
+    "no_speech_prob": 0,
+    "originalJapanese": "でも外に人間はいる",
+    "id": 149
+  },
+  {
+    "start": 396.425,
+    "end": 400.305,
+    "text": "あなたたちの食料は上と私たちで作っている",
+    "originalSegment": 129,
+    "avg_logprob": -0.20000736,
+    "no_speech_prob": 0,
+    "originalJapanese": "あなたたちの食料は上と私たちで作っている",
+    "id": 150
+  },
+  {
+    "start": 400.305,
+    "end": 404.845,
+    "text": "でも服や道具は外から運んでくる人間がいるのよ",
+    "originalSegment": 130,
+    "avg_logprob": -0.20000736,
+    "no_speech_prob": 0,
+    "originalJapanese": "でも服や道具は外から運んでくる人間がいるのよ",
+    "id": 151
+  },
+  {
+    "start": 404.845,
+    "end": 407.445,
+    "text": "一度だけ本部で見たわ",
+    "originalSegment": 131,
+    "avg_logprob": -0.20000736,
+    "no_speech_prob": 0,
+    "originalJapanese": "一度だけ本部で見たわ",
+    "id": 152
+  },
+  {
+    "start": 407.445,
+    "end": 411.265,
+    "text": "その人間たちは奴らと対等だった",
+    "originalSegment": 132,
+    "avg_logprob": -0.20000736,
+    "no_speech_prob": 0,
+    "originalJapanese": "その人間たちは奴らと対等だった",
+    "id": 153
+  },
+  {
+    "start": 411.265,
+    "end": 414.445,
+    "text": "食われてない人間も外にはいる",
+    "originalSegment": 133,
+    "avg_logprob": -0.20000736,
+    "no_speech_prob": 0,
+    "originalJapanese": "食われてない人間も外にはいる",
+    "id": 154
+  },
+  {
+    "start": 414.445,
+    "end": 416.325,
+    "text": "そこに紛れなさい",
+    "originalSegment": 134,
+    "avg_logprob": -0.20000736,
+    "no_speech_prob": 0,
+    "originalJapanese": "そこに紛れなさい",
+    "id": 155
+  },
+  {
+    "start": 416.325,
+    "end": 422.725,
+    "text": "じゃあシスターは鬼がいつからいるとか",
+    "originalSegment": 135,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "じゃあシスターは鬼がいつからいるとか",
+    "id": 156
+  },
+  {
+    "start": 422.725,
+    "end": 425.645,
+    "text": "鬼?ああ奴らのことね",
+    "originalSegment": 136,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "鬼?ああ奴らのことね",
+    "id": 157
+  },
+  {
+    "start": 425.645,
+    "end": 429.705,
+    "text": "世界がどうしてこうなったとか知らないの?",
+    "originalSegment": 137,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "世界がどうしてこうなったとか知らないの?",
+    "id": 158
+  },
+  {
+    "start": 430.125,
+    "end": 430.825,
+    "text": "知らないわ",
+    "originalSegment": 138,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "知らないわ",
+    "id": 159
+  },
+  {
+    "start": 430.825,
+    "end": 433.425,
+    "text": "このハウスはどこにあるの?",
+    "originalSegment": 139,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "このハウスはどこにあるの?",
+    "id": 160
+  },
+  {
+    "start": 433.625,
+    "end": 434.305,
+    "text": "知らない",
+    "originalSegment": 140,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "知らない",
+    "id": 161
+  },
+  {
+    "start": 434.305,
+    "end": 435.905,
+    "text": "周辺のセキュリティは?",
+    "originalSegment": 141,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "周辺のセキュリティは?",
+    "id": 162
+  },
+  {
+    "start": 436.145,
+    "end": 438.665,
+    "text": "それは知ってる大したことないわ",
+    "originalSegment": 142,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "それは知ってる大したことないわ",
+    "id": 163
+  },
+  {
+    "start": 438.665,
+    "end": 442.165,
+    "text": "発信機に頼ってろくな人数配置してないし",
+    "originalSegment": 143,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "発信機に頼ってろくな人数配置してないし",
+    "id": 164
+  },
+  {
+    "start": 442.165,
+    "end": 444.565,
+    "text": "巡回すらしていないはずよ",
+    "originalSegment": 144,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "巡回すらしていないはずよ",
+    "id": 165
+  },
+  {
+    "start": 444.565,
+    "end": 445.925,
+    "text": "ありがとうございました",
+    "originalSegment": 145,
+    "avg_logprob": -0.20171645,
+    "no_speech_prob": 0,
+    "originalJapanese": "ありがとうございました",
+    "id": 166
+  },
+  {
+    "start": 445.925,
+    "end": 447.785,
+    "text": "もういいの",
+    "originalSegment": 146,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "もういいの",
+    "id": 167
+  },
+  {
+    "start": 447.785,
+    "end": 448.845,
+    "text": "はい",
+    "originalSegment": 147,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "はい",
+    "id": 168
+  },
+  {
+    "start": 448.845,
+    "end": 450.805,
+    "text": "おやすみなさい",
+    "originalSegment": 148,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "おやすみなさい",
+    "id": 169
+  },
+  {
+    "start": 450.805,
+    "end": 455.225,
+    "text": "そう発信機の場所も壊し方も突き止めてたの",
+    "originalSegment": 149,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "そう発信機の場所も壊し方も突き止めてたの",
+    "id": 170
+  },
+  {
+    "start": 455.225,
+    "end": 457.225,
+    "text": "やるじゃない",
+    "originalSegment": 150,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "やるじゃない",
+    "id": 171
+  },
+  {
+    "start": 457.225,
+    "end": 458.745,
+    "text": "なるほどね",
+    "originalSegment": 151,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "なるほどね",
+    "id": 172
+  },
+  {
+    "start": 458.745,
+    "end": 461.165,
+    "text": "いろいろとよくわかったわ",
+    "originalSegment": 152,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "いろいろとよくわかったわ",
+    "id": 173
+  },
+  {
+    "start": 461.165,
+    "end": 464.385,
+    "text": "言葉だけじゃないのよ",
+    "originalSegment": 153,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "言葉だけじゃないのよ",
+    "id": 174
+  },
+  {
+    "start": 464.385,
+    "end": 465.425,
+    "text": "情報は",
+    "originalSegment": 154,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "情報は",
+    "id": 175
+  },
+  {
+    "start": 465.425,
+    "end": 466.865,
+    "text": "人間はね",
+    "originalSegment": 155,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "人間はね",
+    "id": 176
+  },
+  {
+    "start": 466.865,
+    "end": 468.605,
+    "text": "その場に立っているだけで",
+    "originalSegment": 156,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "その場に立っているだけで",
+    "id": 177
+  },
+  {
+    "start": 468.605,
+    "end": 470.425,
+    "text": "情報の塊なの",
+    "originalSegment": 157,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "情報の塊なの",
+    "id": 178
+  },
+  {
+    "start": 470.425,
+    "end": 471.545,
+    "text": "態度",
+    "originalSegment": 158,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "態度",
+    "id": 179
+  },
+  {
+    "start": 471.545,
+    "end": 472.485,
+    "text": "目線",
+    "originalSegment": 159,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "目線",
+    "id": 180
+  },
+  {
+    "start": 472.485,
+    "end": 473.705,
+    "text": "瞬き",
+    "originalSegment": 160,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "瞬き",
+    "id": 181
+  },
+  {
+    "start": 473.705,
+    "end": 474.145,
+    "text": "汗",
+    "originalSegment": 161,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "汗",
+    "id": 182
+  },
+  {
+    "start": 474.145,
+    "end": 475.105,
+    "text": "しぐさ",
+    "originalSegment": 162,
+    "avg_logprob": -0.2720006,
+    "no_speech_prob": 0,
+    "originalJapanese": "しぐさ",
+    "id": 183
+  },
+  {
+    "start": 475.105,
+    "end": 479.885,
+    "text": "瞳孔、脈拍、全てが相手を探るヒントなのよ",
+    "originalSegment": 163,
+    "avg_logprob": -0.17132677,
+    "no_speech_prob": 0,
+    "originalJapanese": "どこ、脈拍、全てが相手を探るヒントなのよ",
+    "id": 184
+  },
+  {
+    "start": 479.885,
+    "end": 484.505,
+    "text": "なのに、あなたたちと来たら耳にあるってわかったのに",
+    "originalSegment": 164,
+    "avg_logprob": -0.17132677,
+    "no_speech_prob": 0,
+    "originalJapanese": "なのに、あなたたちと来たら耳にあるってわかったのに",
+    "id": 185
+  },
+  {
+    "start": 484.505,
+    "end": 486.665,
+    "text": "触って確かめようとすらしないし",
+    "originalSegment": 165,
+    "avg_logprob": -0.17132677,
+    "no_speech_prob": 0,
+    "originalJapanese": "触って確かめようとすらしないし",
+    "id": 186
+  },
+  {
+    "start": 486.665,
+    "end": 489.025,
+    "text": "取り出せる段取りついたってのに",
+    "originalSegment": 166,
+    "avg_logprob": -0.17132677,
+    "no_speech_prob": 0,
+    "originalJapanese": "取り出せる段取りついたってのに",
+    "id": 187
+  },
+  {
+    "start": 489.025,
+    "end": 491.265,
+    "text": "全然嬉しそうにしてないんだもの",
+    "originalSegment": 167,
+    "avg_logprob": -0.17132677,
+    "no_speech_prob": 0,
+    "originalJapanese": "全然嬉しそうにしてないんだもの",
+    "id": 188
+  },
+  {
+    "start": 491.265,
+    "end": 498.345,
+    "text": "ねえ、なぜわざわざ聞く必要のない発信機について聞いたの",
+    "originalSegment": 168,
+    "avg_logprob": -0.17132677,
+    "no_speech_prob": 0,
+    "originalJapanese": "ねえ、なぜわざわざ聞く必要のない発信機について聞いたの",
+    "id": 189
+  },
+  {
+    "start": 498.345,
+    "end": 501.805,
+    "text": "私に何か隠したい",
+    "originalSegment": 169,
+    "avg_logprob": -0.17132677,
+    "no_speech_prob": 0,
+    "originalJapanese": "私に何か隠したい",
+    "id": 190
+  },
+  {
+    "start": 501.805,
+    "end": 505.165,
+    "text": "内緒にしたいことでもあるのかしら",
+    "originalSegment": 170,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "内緒にしたいことでもあるのかしら",
+    "id": 191
+  },
+  {
+    "start": 505.165,
+    "end": 506.305,
+    "text": "まあいいわ",
+    "originalSegment": 171,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "まあいいわ",
+    "id": 192
+  },
+  {
+    "start": 506.305,
+    "end": 507.945,
+    "text": "あの方って知ってる?",
+    "originalSegment": 172,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "あの方って知ってる?",
+    "id": 193
+  },
+  {
+    "start": 508.885,
+    "end": 509.985,
+    "text": "知らないわね",
+    "originalSegment": 173,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "知らないわね",
+    "id": 194
+  },
+  {
+    "start": 509.985,
+    "end": 511.645,
+    "text": "知りたいでしょ",
+    "originalSegment": 174,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "知りたいでしょ",
+    "id": 195
+  },
+  {
+    "start": 511.645,
+    "end": 515.185,
+    "text": "次来た時教えてあげる",
+    "originalSegment": 175,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "次来た時教えてあげる",
+    "id": 196
+  },
+  {
+    "start": 515.185,
+    "end": 517.605,
+    "text": "またいつでもいらっしゃい",
+    "originalSegment": 176,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "またいつでもいらっしゃい",
+    "id": 197
+  },
+  {
+    "start": 517.605,
+    "end": 520.105,
+    "text": "今日よりもっとお話ししましょう",
+    "originalSegment": 177,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "今日よりもっとお話ししましょう",
+    "id": 198
+  },
+  {
+    "start": 520.105,
+    "end": 521.505,
+    "text": "ママ",
+    "originalSegment": 178,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママ",
+    "id": 199
+  },
+  {
+    "start": 521.505,
+    "end": 523.005,
+    "text": "へえ",
+    "originalSegment": 179,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "へえ",
+    "id": 200
+  },
+  {
+    "start": 523.005,
+    "end": 525.625,
+    "text": "最初は何も写ってないんだ",
+    "originalSegment": 180,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "最初は何も写ってないんだ",
+    "id": 201
+  },
+  {
+    "start": 525.625,
+    "end": 528.225,
+    "text": "最後の報酬がカメラね",
+    "originalSegment": 181,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "最後の報酬がカメラね",
+    "id": 202
+  },
+  {
+    "start": 528.225,
+    "end": 530.545,
+    "text": "写真って現象に興味があったんだ",
+    "originalSegment": 182,
+    "avg_logprob": -0.2300073,
+    "no_speech_prob": 0,
+    "originalJapanese": "写真って現象に興味があったんだ",
+    "id": 203
+  },
+  {
+    "start": 530.545,
+    "end": 534.345,
+    "text": "写真もカメラも本でしか見たことなかったし",
+    "originalSegment": 183,
+    "avg_logprob": -0.25702366,
+    "no_speech_prob": 0,
+    "originalJapanese": "写真もカメラも本でしか見たことなかったし",
+    "id": 204
+  },
+  {
+    "start": 534.345,
+    "end": 538.085,
+    "text": "欲を言えば現像まで自分でしたかった",
+    "originalSegment": 184,
+    "avg_logprob": -0.25702366,
+    "no_speech_prob": 0,
+    "originalJapanese": "欲を言えば現像まで自分でしたかった",
+    "id": 205
+  },
+  {
+    "start": 538.085,
+    "end": 544.005,
+    "text": "すごいな本当に時間を切り取ったみたいだ",
+    "originalSegment": 185,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "すごいな本当に時間を切り取ったみたいだ",
+    "id": 206
+  },
+  {
+    "start": 544.005,
+    "end": 547.487,
+    "text": "例の件だけど昼飯の後でいい?",
+    "originalSegment": 185,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "例の件だけど昼飯の後でいい?",
+    "id": 207
+  },
+  {
+    "start": 547.487,
+    "end": 549.867,
+    "text": "ええいいわよ",
+    "originalSegment": 185,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "ええいいわよ",
+    "id": 208
+  },
+  {
+    "start": 549.867,
+    "end": 553.347,
+    "text": "さてそろそろ頃合いかしら",
+    "originalSegment": 185,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "さてそろそろ頃合いかしら",
+    "id": 209
+  },
+  {
+    "start": 553.347,
+    "end": 554.788,
+    "text": "確認するぞ",
+    "originalSegment": 186,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "確認するぞ",
+    "id": 210
+  },
+  {
+    "start": 554.788,
+    "end": 558.168,
+    "text": "昼飯の後自由時間に入ったら",
+    "originalSegment": 187,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "昼飯の後自由時間に入ったら",
+    "id": 211
+  },
+  {
+    "start": 558.168,
+    "end": 559.628,
+    "text": "俺がママを引きつける",
+    "originalSegment": 188,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "俺がママを引きつける",
+    "id": 212
+  },
+  {
+    "start": 559.628,
+    "end": 562.788,
+    "text": "ノーマンとエマは塀に登って下見",
+    "originalSegment": 189,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマンとエマは塀に登って下見",
+    "id": 213
+  },
+  {
+    "start": 562.788,
+    "end": 566.148,
+    "text": "ドンとギルダは外からハウス2階の",
+    "originalSegment": 190,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "ドンとギルダは外からハウス2階の",
+    "id": 214
+  },
+  {
+    "start": 566.148,
+    "end": 567.688,
+    "text": "南窓が見える位置にいろ",
+    "originalSegment": 191,
+    "avg_logprob": -0.21311858,
+    "no_speech_prob": 0,
+    "originalJapanese": "南窓が見える位置にいろ",
+    "id": 215
+  },
+  {
+    "start": 567.688,
+    "end": 573.087,
+    "text": "万一俺がママを引きつけられなかったら合図する",
+    "originalSegment": 192,
+    "avg_logprob": -0.17742382,
+    "no_speech_prob": 0,
+    "originalJapanese": "万一俺がママを引きつけられなかったら合図する",
+    "id": 216
+  },
+  {
+    "start": 573.087,
+    "end": 576.967,
+    "text": "エマたちに伝えて速攻で下見中止させろ",
+    "originalSegment": 193,
+    "avg_logprob": -0.17742382,
+    "no_speech_prob": 0,
+    "originalJapanese": "エマたちに伝えて速攻で下見中止させろ",
+    "id": 217
+  },
+  {
+    "start": 576.967,
+    "end": 581.308,
+    "text": "決行日までは6日だが究極次の1月",
+    "originalSegment": 194,
+    "avg_logprob": -0.17742382,
+    "no_speech_prob": 0,
+    "originalJapanese": "結婚日までは6日だが究極次の1月",
+    "id": 218
+  },
+  {
+    "start": 581.308,
+    "end": 585.087,
+    "text": "俺の満期出荷まで2ヶ月半の時間がある",
+    "originalSegment": 195,
+    "avg_logprob": -0.17742382,
+    "no_speech_prob": 0,
+    "originalJapanese": "俺の満期出荷まで2ヶ月半の時間がある",
+    "id": 219
+  },
+  {
+    "start": 585.087,
+    "end": 587.587,
+    "text": "何かあれば下見は即中止",
+    "originalSegment": 196,
+    "avg_logprob": -0.17742382,
+    "no_speech_prob": 0,
+    "originalJapanese": "何かあれば下見は即中止",
+    "id": 220
+  },
+  {
+    "start": 587.587,
+    "end": 591.707,
+    "text": "あくまで水面下制御可能を装うんだ",
+    "originalSegment": 197,
+    "avg_logprob": -0.17742382,
+    "no_speech_prob": 0,
+    "originalJapanese": "あくまで水面下制御可能を装うんだ",
+    "id": 221
+  },
+  {
+    "start": 591.707,
+    "end": 596.008,
+    "text": "ドン遊んで遊んで（語音不清）",
+    "originalSegment": 198,
+    "avg_logprob": -0.17742382,
+    "no_speech_prob": 0,
+    "originalJapanese": "ドーン遊んで遊んでいるだわ",
+    "id": 222
+  },
+  {
+    "start": 596.008,
+    "end": 598.388,
+    "text": "よーし鬼ごっこだ",
+    "originalSegment": 199,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "よーし鬼ごっこだ",
+    "id": 223
+  },
+  {
+    "start": 598.388,
+    "end": 601.087,
+    "text": "レイちょっといい",
+    "originalSegment": 200,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイちょっといい",
+    "id": 224
+  },
+  {
+    "start": 601.087,
+    "end": 604.548,
+    "text": "発信機壊せるをシスターにつかまれた",
+    "originalSegment": 201,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "発信機壊せるをシスターにつかまれた",
+    "id": 225
+  },
+  {
+    "start": 604.548,
+    "end": 607.148,
+    "text": "決行日を早めたい",
+    "originalSegment": 202,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "血行日を早めたい",
+    "id": 226
+  },
+  {
+    "start": 607.148,
+    "end": 609.428,
+    "text": "発信機はいつ壊せる",
+    "originalSegment": 203,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "発信機はいつ壊せる",
+    "id": 227
+  },
+  {
+    "start": 609.428,
+    "end": 610.947,
+    "text": "いきなり何",
+    "originalSegment": 204,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "いきなり何",
+    "id": 228
+  },
+  {
+    "start": 610.947,
+    "end": 614.548,
+    "text": "これで最後のパーツが揃った",
+    "originalSegment": 205,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "これで最後のパーツが揃った",
+    "id": 229
+  },
+  {
+    "start": 614.548,
+    "end": 616.788,
+    "text": "もういつでも壊せる",
+    "originalSegment": 206,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "もういつでも壊せる",
+    "id": 230
+  },
+  {
+    "start": 616.788,
+    "end": 618.188,
+    "text": "変な顔",
+    "originalSegment": 207,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "変な顔",
+    "id": 231
+  },
+  {
+    "start": 618.188,
+    "end": 619.508,
+    "text": "ひどい",
+    "originalSegment": 208,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "ひどい",
+    "id": 232
+  },
+  {
+    "start": 619.508,
+    "end": 622.808,
+    "text": "これはまさに諸刃の剣だね",
+    "originalSegment": 209,
+    "avg_logprob": -0.2655509,
+    "no_speech_prob": 0,
+    "originalJapanese": "これはまさに諸刃の剣だね",
+    "id": 233
+  },
+  {
+    "start": 622.808,
+    "end": 626.408,
+    "text": "僕らが発信機を壊して脱走するのが先か",
+    "originalSegment": 210,
+    "avg_logprob": -0.086907044,
+    "no_speech_prob": 0,
+    "originalJapanese": "僕らが発信機を壊して脱走するのが先か",
+    "id": 234
+  },
+  {
+    "start": 626.408,
+    "end": 629.788,
+    "text": "それともシスターがこの物証をつかんで",
+    "originalSegment": 210,
+    "avg_logprob": -0.086907044,
+    "no_speech_prob": 0,
+    "originalJapanese": "それともシスターがこの物証をつかんで",
+    "id": 235
+  },
+  {
+    "start": 629.788,
+    "end": 631.428,
+    "text": "僕らを突き出すのが先か",
+    "originalSegment": 210,
+    "avg_logprob": -0.086907044,
+    "no_speech_prob": 0,
+    "originalJapanese": "僕らを突き出すのが先か",
+    "id": 236
+  },
+  {
+    "start": 631.428,
+    "end": 635.508,
+    "text": "大丈夫手は打ってある",
+    "originalSegment": 210,
+    "avg_logprob": -0.086907044,
+    "no_speech_prob": 0,
+    "originalJapanese": "大丈夫手は打ってある",
+    "id": 237
+  },
+  {
+    "start": 635.508,
+    "end": 641.207,
+    "text": "ねえあの子たちどうして知らないふりしたのかしら",
+    "originalSegment": 211,
+    "avg_logprob": -0.20583332,
+    "no_speech_prob": 0,
+    "originalJapanese": "ねえあの子たちどうして知らないふりしたのかしら",
+    "id": 238
+  },
+  {
+    "start": 641.207,
+    "end": 645.648,
+    "text": "本当は発信機の場所も壊し方も知ってるのに",
+    "originalSegment": 212,
+    "avg_logprob": -0.20583332,
+    "no_speech_prob": 0,
+    "originalJapanese": "本当は発信機の場所も壊し方も知ってるのに",
+    "id": 239
+  },
+  {
+    "start": 645.648,
+    "end": 649.027,
+    "text": "そもそもどうやって知ったのかしら",
+    "originalSegment": 213,
+    "avg_logprob": -0.20583332,
+    "no_speech_prob": 0,
+    "originalJapanese": "そもそもどうやって知ったのかしら",
+    "id": 240
+  },
+  {
+    "start": 649.027,
+    "end": 652.408,
+    "text": "っていうかどうやって壊すの",
+    "originalSegment": 214,
+    "avg_logprob": -0.20583332,
+    "no_speech_prob": 0,
+    "originalJapanese": "っていうかどうやって壊すの",
+    "id": 241
+  },
+  {
+    "start": 652.408,
+    "end": 655.967,
+    "text": "専用の道具でも使うのかしら",
+    "originalSegment": 215,
+    "avg_logprob": -0.20583332,
+    "no_speech_prob": 0,
+    "originalJapanese": "専用の道具でも使うのかしら",
+    "id": 242
+  },
+  {
+    "start": 655.967,
+    "end": 658.408,
+    "text": "まさかそういうの作ったの",
+    "originalSegment": 216,
+    "avg_logprob": -0.20583332,
+    "no_speech_prob": 0,
+    "originalJapanese": "まさかそういうの作ったの",
+    "id": 243
+  },
+  {
+    "start": 658.408,
+    "end": 662.207,
+    "text": "ならそれが確たる証拠になったりする",
+    "originalSegment": 217,
+    "avg_logprob": -0.20583332,
+    "no_speech_prob": 0,
+    "originalJapanese": "ならそれが確たる証拠になったりする",
+    "id": 244
+  },
+  {
+    "start": 662.207,
+    "end": 665.288,
+    "text": "だから恐れて嘘をついたの",
+    "originalSegment": 218,
+    "avg_logprob": -0.20583332,
+    "no_speech_prob": 0,
+    "originalJapanese": "だから恐れて嘘をついたの",
+    "id": 245
+  },
+  {
+    "start": 665.288,
+    "end": 669.188,
+    "text": "だとしたらガサ入れね",
+    "originalSegment": 219,
+    "avg_logprob": -0.32650796,
+    "no_speech_prob": 0,
+    "originalJapanese": "だとしたらガサ入れね",
+    "id": 246
+  },
+  {
+    "start": 669.188,
+    "end": 675.487,
+    "text": "今がチャンス",
+    "originalSegment": 220,
+    "avg_logprob": -0.32650796,
+    "no_speech_prob": 0,
+    "originalJapanese": "今がチャンス",
+    "id": 247
+  },
+  {
+    "start": 675.487,
+    "end": 677.348,
+    "text": "何してるの",
+    "originalSegment": 221,
+    "avg_logprob": -0.32650796,
+    "no_speech_prob": 0,
+    "originalJapanese": "何してるの",
+    "id": 248
+  },
+  {
+    "start": 677.348,
+    "end": 679.688,
+    "text": "ちょっと床のお掃除",
+    "originalSegment": 222,
+    "avg_logprob": -0.32650796,
+    "no_speech_prob": 0,
+    "originalJapanese": "ちょっと床のお掃除",
+    "id": 249
+  },
+  {
+    "start": 679.688,
+    "end": 684.747,
+    "text": "あった",
+    "originalSegment": 223,
+    "avg_logprob": -0.32650796,
+    "no_speech_prob": 0,
+    "originalJapanese": "あった",
+    "id": 250
+  },
+  {
+    "start": 684.747,
+    "end": 686.768,
+    "text": "本当だ",
+    "originalSegment": 224,
+    "avg_logprob": -0.32650796,
+    "no_speech_prob": 0,
+    "originalJapanese": "本当だ",
+    "id": 251
+  },
+  {
+    "start": 686.768,
+    "end": 689.348,
+    "text": "これは本当に事実なんだ",
+    "originalSegment": 225,
+    "avg_logprob": -0.32650796,
+    "no_speech_prob": 0,
+    "originalJapanese": "これは本当に事実なんだ",
+    "id": 252
+  },
+  {
+    "start": 689.348,
+    "end": 693.048,
+    "text": "思いがけずゲットしちゃった",
+    "originalSegment": 226,
+    "avg_logprob": -0.32650796,
+    "no_speech_prob": 0,
+    "originalJapanese": "思いがけずゲットしちゃった",
+    "id": 253
+  },
+  {
+    "start": 693.048,
+    "end": 695.348,
+    "text": "イザベラの二つ目の弱み",
+    "originalSegment": 227,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "イザベラの二つ目の弱み",
+    "id": 254
+  },
+  {
+    "start": 695.348,
+    "end": 699.327,
+    "text": "さあどう料理する",
+    "originalSegment": 228,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "さあどう料理する",
+    "id": 255
+  },
+  {
+    "start": 699.327,
+    "end": 701.027,
+    "text": "このメモを見せて",
+    "originalSegment": 229,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "このメモを見せて",
+    "id": 256
+  },
+  {
+    "start": 701.027,
+    "end": 703.447,
+    "text": "グランマあたりに直訴できれば",
+    "originalSegment": 230,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "グランマあたりに直訴できれば",
+    "id": 257
+  },
+  {
+    "start": 703.447,
+    "end": 704.628,
+    "text": "イザベラを落として",
+    "originalSegment": 231,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "イザベラを落として",
+    "id": 258
+  },
+  {
+    "start": 704.628,
+    "end": 706.908,
+    "text": "ママの座をゲットできるかしら",
+    "originalSegment": 232,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママの座をゲットできるかしら",
+    "id": 259
+  },
+  {
+    "start": 706.908,
+    "end": 710.548,
+    "text": "ガキどもも無条件で出荷できるわね",
+    "originalSegment": 233,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "ガキどもも無条件で出荷できるわね",
+    "id": 260
+  },
+  {
+    "start": 710.548,
+    "end": 712.247,
+    "text": "でもなぜ",
+    "originalSegment": 234,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "でもなぜ",
+    "id": 261
+  },
+  {
+    "start": 712.247,
+    "end": 714.867,
+    "text": "レイはなぜこれを知ってるの",
+    "originalSegment": 235,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイはなぜこれを知ってるの",
+    "id": 262
+  },
+  {
+    "start": 714.867,
+    "end": 718.628,
+    "text": "イザベラでさえ本来知らないことなのに",
+    "originalSegment": 236,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "イザベラでさえ本来知らないことなのに",
+    "id": 263
+  },
+  {
+    "start": 718.628,
+    "end": 719.848,
+    "text": "本部からよ",
+    "originalSegment": 237,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "本部からよ",
+    "id": 264
+  },
+  {
+    "start": 719.848,
+    "end": 721.688,
+    "text": "開けてごらんなさい",
+    "originalSegment": 238,
+    "avg_logprob": -0.15977155,
+    "no_speech_prob": 0,
+    "originalJapanese": "開けてごらんなさい",
+    "id": 265
+  },
+  {
+    "start": 721.688,
+    "end": 724.067,
+    "text": "残念だけどそういうことね",
+    "originalSegment": 239,
+    "avg_logprob": -0.32854712,
+    "no_speech_prob": 0,
+    "originalJapanese": "残念だけどそういうことね",
+    "id": 266
+  },
+  {
+    "start": 724.067,
+    "end": 726.148,
+    "text": "さようなら",
+    "originalSegment": 240,
+    "avg_logprob": -0.32854712,
+    "no_speech_prob": 0,
+    "originalJapanese": "さようなら",
+    "id": 267
+  }
+]

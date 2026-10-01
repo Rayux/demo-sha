@@ -3,6 +3,19 @@
 !.env.example
 node_modules/
 .DS_Store
-practice-data.json
 .local-subtitles/
 scripts/local-subtitles/__pycache__/
+practice-data.json
+import-data/
+!import-data/prepared/
+import-data/prepared/*
+
+# Cloudflare build output and local credentials
+.cloudflare/
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# Python bytecode caches
+__pycache__/
+*.py[cod]

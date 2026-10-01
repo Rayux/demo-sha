@@ -1,0 +1,13 @@
+import fs from 'node:fs';import{createRequire}from'node:module';const require=createRequire(import.meta.url);const k=require('/Users/ray/shadowing/import-data/tools/node_modules/kuromoji');const t=await new Promise((res,rej)=>k.builder({dicPath:'/Users/ray/shadowing/import-data/tools/node_modules/kuromoji/dict'}).build((e,x)=>e?rej(e):res(x)));
+const hira=s=>s.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96));const han=/[\p{Script=Han}々]/u;
+const paths=['/Users/ray/shadowing/import-data/prepared/neverland-tsv','/Users/ray/shadowing/import-data/prepared/neverland-05-12'].flatMap(dir=>fs.readdirSync(dir).filter(f=>f.endsWith('.json')).map(f=>dir+'/'+f));
+for(const path of paths){
+ const d=JSON.parse(fs.readFileSync(path));let count=0;
+ for(const c of d.clips){const text=c.jp??c.japanese;let ruby=c.ruby??c.rubyText;let cursor=0;const tokens=t.tokenize(text).map(tok=>{let start=text.indexOf(tok.surface_form,cursor);cursor=start+tok.surface_form.length;return{start,end:cursor,s:tok.surface_form,r:tok.reading?hira(tok.reading):null}});let plain='',last=0;let anns=[];
+ for(const m of ruby.matchAll(/\[([^\]]*)\]/g)){plain+=ruby.slice(last,m.index);let end=plain.length;let start=end-(plain.match(/[\p{Script=Han}々]+[0-9０-９]*[\p{Script=Hiragana}ー]*$/u)?.[0].length??0);let ending=tokens.findIndex(x=>x.end===end);if(ending>=0){let r='';for(let j=ending;j>=0&&end-tokens[j].start<30;j--){if(!tokens[j].r)break;r=tokens[j].r+r;if(r===m[1]){start=tokens[j].start;break;}if(r.length>m[1].length+4)break;}}anns.push({start,end,r:m[1]});last=m.index+m[0].length;}
+ plain+=ruby.slice(last);if(plain!==text)throw Error('Original mismatch');const unclear=[...text.matchAll(/（語音不清）/g)].map(m=>[m.index,m.index+m[0].length]);
+ for(const tok of tokens){let missing=false;for(let i=tok.start;i<tok.end;i++)if(han.test(text[i])&&!anns.some(a=>a.start<=i&&i<a.end)&&!unclear.some(([a,b])=>a<=i&&i<b))missing=true;if(!missing)continue;if(!tok.r||!/^[ぁ-ゖーゝゞ]+$/.test(tok.r))throw Error('No reading '+tok.s);if(anns.some(a=>a.start<tok.end&&a.end>tok.start&&(a.start<tok.start||a.end>tok.end)))throw Error('Cross-boundary '+text);anns=anns.filter(a=>!(a.start>=tok.start&&a.end<=tok.end));anns.push({start:tok.start,end:tok.end,r:tok.r});count++;}
+ anns.sort((a,b)=>a.end-b.end);ruby='';cursor=0;for(const a of anns){ruby+=text.slice(cursor,a.end)+'['+a.r+']';cursor=a.end;}ruby+=text.slice(cursor);if(ruby.replace(/\[[^\]]*\]/g,'')!==text)throw Error('Mismatch');if(c.jp!==undefined)c.ruby=ruby;else c.rubyText=ruby;
+ }
+ fs.writeFileSync(path,JSON.stringify(d,null,2));console.log(path.split('/').pop(),count);
+}

@@ -1521,3 +1521,7 @@ h2 {
   padding: 6px 10px;
   font-size: 12px;
 }
+
+.track-play-actions { display: flex; align-items: center; gap: 6px; }
+.track-play-button { border: 1px solid var(--border); border-radius: 16px; padding: 4px 12px; min-height: 32px; font-size: 0.8em; font-weight: 500; white-space: nowrap; }
+.track-play-button[aria-pressed="true"] { color: var(--bg, #fff); background: var(--text, #243223); }
