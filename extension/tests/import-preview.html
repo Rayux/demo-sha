@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kage local import preview</title>
+<link rel="stylesheet" href="/content/content.css?v=1.7.6">
+<style>
+body{margin:0;background:#16221e;color:#e6eee8;font:14px system-ui}.stage{position:relative;height:100vh;background:radial-gradient(ellipse at 20% 30%,#506b4d,transparent 55%),linear-gradient(130deg,#283d34,#10221e)}video{width:100%;height:100%}.fixture{position:absolute;left:28px;top:28px;z-index:1;max-width:52%}.fixture h1{font-size:20px;font-weight:500}.fixture p{max-width:480px;color:#adbfb3;line-height:1.6}.fixture button{background:#273d34;color:#e6eee8;border:1px solid #698070;border-radius:6px;padding:8px 12px;margin:0 6px 8px 0;cursor:pointer}.fixture small{display:block;color:#adbfb3;margin-top:8px}
+:fullscreen .stage{margin:0!important;width:100vw!important;height:100vh!important;border:0!important;transform:none!important}
+</style>
+<div class="stage bpx-player-container"><video></video><div class="fixture"><h1>Local subtitle import</h1><p>Development fixture with a saved Japanese track, real offline furigana dictionary, and mocked Chinese translations. No media or inference leaves this page.</p><button id="fixtureFullscreen">Toggle fullscreen</button><button data-time="0.5">First line</button><button data-time="2.5">Next line</button><button data-time="4.5">Subtitle gap</button><small id="fixtureStatus">Loading…</small></div></div>
+<script src="/vendor/kuromoji/kuromoji.js"></script>
+<script src="/tests/tutor-preview.js"></script>
+<script>
+(async () => {
+  // Exercise dragging inside a bordered, scaled player away from the page origin.
+  const layout = new URL(location.href).searchParams.has('layout');
+  if (layout) Object.assign(document.querySelector('.stage').style, {margin:'80px 0 0 110px',width:'900px',height:'650px',border:'8px solid #698070',transform:'scale(.85)',transformOrigin:'top left'});
+  const fixtureLocation = {href:'https://www.bilibili.com/video/BV1fixture001?p=1',hostname:'www.bilibili.com',origin:location.origin};
+  const saved = {key:'bilibili:BV1fixture001:p1',name:'Japanese practice.mp4',enabled:true,offset:0,revision:1,updatedAt:Date.now(),job:null,cues:[{start:0,end:2,text:'今日はいい天気ですね。',id:0},{start:2,end:4,text:'一緒に日本語を勉強しましょう。',id:1}]};
+  if (layout) saved.cues[0].text = 'ダメダメ。今日のお昼は';
+  const progressive = new URL(location.href).searchParams.has('progressive');
+  if (progressive) saved.job = {id:'fixture-progress',state:'preparing'};
+  const state = {enabled:true,apiModel:'gemma2',autoTranslate:'true',groqFallback:false,kageImportedTracksV1:[saved]};
+  const settings = [], incoming = [];
+  let queueJobs = [{id:'fixture-other-video',name:'Bilibili · Another video',state:'preparing',progress:.4},{id:'fixture-waiting-video',name:'Bilibili · Next lesson',state:'queued',queuePosition:1}];
+  const translation = text => ({chunks:[{japanese:text}],sentence_translation:layout ? (text.includes('ダメ')?'不行不行。今天中午':'我們一起學習日文，每天慢慢練習，讓自己越來越熟悉自然的日語對話。') : text.includes('天気')?'今天天氣真好呢。':'一起學日文吧。'});
+  window.chrome = {runtime:{connect:window.fixtureTutorConnect,getURL:path=>location.origin+'/'+path,onMessage:{addListener:fn=>incoming.push(fn)},sendMessage:async message=>{
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='list')return {success:true,data:{limit:4,concurrency:2,jobs:queueJobs}};
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='cancel'){queueJobs=queueJobs.filter(job=>job.id!==message.id);return {success:true,data:{state:'cancelled'}};}
+    if(message.type==='PROCESS_SUBTITLE')return {success:true,data:translation(message.text)};
+    if(message.type==='PREPARE_SUBTITLES'){const results=message.texts.map(text=>({text,data:translation(text)}));incoming.forEach(fn=>fn({type:'SUBTITLES_READY',context:message.context,results}));return {success:true,results};}
+    if(message.type==='LOCAL_SUBTITLES' && progressive && message.action==='status')return {success:true,data:{state:'preparing',transcriptionComplete:false,processedThrough:60,duration:360,translationCompleted:1,translationTotal:2,cues:saved.cues.map((cue,index)=>({...cue,...(index===0?{translation:'今天天氣真好呢。'}:{})}))}};
+    if(message.type==='LOCAL_SUBTITLES')return {success:false,error:'This fixture previews saved subtitles. Use a Bilibili tab to import real media.'};
+    return {success:true};
+  }},storage:{local:{get:async keys=>typeof keys==='string'?{[keys]:state[keys]}:Array.isArray(keys)?Object.fromEntries(keys.map(k=>[k,state[k]])):{...state},set:async values=>Object.assign(state,values),remove:async keys=>{for(const key of Array.isArray(keys)?keys:[keys])delete state[key];}},onChanged:{addListener:fn=>settings.push(fn)}}};
+  document.getElementById('fixtureFullscreen').addEventListener('click', () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
+  const player=document.querySelector('video');
+  Object.defineProperty(player,'readyState',{value:4});Object.defineProperty(player,'currentTime',{value:.5,writable:true});
+  for(const file of ['subtitles.js','readings.js','prepare.js','imported.js','tutor.js','content.js']){
+    const source=await(await fetch('/content/'+file,{cache:'no-store'})).text();
+    new Function('location',source)(fixtureLocation);
+  }
+  document.querySelectorAll('[data-time]').forEach(button=>button.addEventListener('click',()=>{player.currentTime=Number(button.dataset.time);player.dispatchEvent(new Event('timeupdate'));}));
+  await KageReadings.ready;
+  document.getElementById('fixtureStatus').textContent='Ready · open Study → Subtitles to inspect import controls';
+})();
+</script>
+</html>

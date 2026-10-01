@@ -1,0 +1,101 @@
+[
+  {
+    "start": 90.66,
+    "end": 91.66,
+    "text": "いや",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 92.66,
+    "end": 93.66,
+    "text": "その",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 94.0,
+    "end": 97.06,
+    "text": "他のプラントの子たちは",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 97.06,
+    "end": 100.8,
+    "text": "いいのかな私たちだけで",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 100.8,
+    "end": 103.66,
+    "text": "見たこともないけれど",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 103.66,
+    "end": 106.22,
+    "text": "隣にいるんでしょう",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 106.22,
+    "end": 108.78,
+    "text": "同じように何も知らず",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 108.78,
+    "end": 111.46,
+    "text": "同じように暮らす家族が",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 111.46,
+    "end": 114.16,
+    "text": "いやあのごめん",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 114.16,
+    "end": 116.72,
+    "text": "どうするエマ",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 301.675,
+    "end": 305.055,
+    "text": "（語音不清）",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  }
+]

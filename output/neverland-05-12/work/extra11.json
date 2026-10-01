@@ -1,0 +1,92 @@
+[
+  {
+    "start": 172.71,
+    "end": 175.29,
+    "text": "6年越しの準備なめるなよ",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 175.29,
+    "end": 178.67,
+    "text": "で、その火炎瓶を橋へ向かう途中",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 178.67,
+    "end": 180.69,
+    "text": "隣のプラントに投げ入れろ",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 180.69,
+    "end": 184.29,
+    "text": "うまくいけばそこでも火事が起こって人手が割ける",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 184.29,
+    "end": 187.11,
+    "text": "夜だから森には誰もいない",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 187.11,
+    "end": 189.03,
+    "text": "誰も死なない",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 189.03,
+    "end": 192.87,
+    "text": "さあ明日と言わず今夜今逃げよう",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 192.87,
+    "end": 195.31,
+    "text": "できるかエマ",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 196.93,
+    "end": 197.93,
+    "text": "大丈夫",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  },
+  {
+    "start": 198.5,
+    "end": 201.59,
+    "text": "ここはみんなの部屋から一番遠い",
+    "originalSegment": -1,
+    "avg_logprob": 0,
+    "no_speech_prob": 0,
+    "recoveredGap": true
+  }
+]

@@ -1,0 +1,2092 @@
+[
+  {
+    "start": 0,
+    "end": 2.5,
+    "text": "ノーマンが出荷",
+    "originalSegment": 0,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマンが出荷",
+    "id": 0
+  },
+  {
+    "start": 2.5,
+    "end": 5.8,
+    "text": "そう 明日に決まったの",
+    "originalSegment": 1,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "そう 明日に決まったの",
+    "id": 1
+  },
+  {
+    "start": 5.8,
+    "end": 8.1,
+    "text": "ママ エマのその足",
+    "originalSegment": 2,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママ エマのその足",
+    "id": 2
+  },
+  {
+    "start": 8.1,
+    "end": 10.4,
+    "text": "うまく折ったから大丈夫",
+    "originalSegment": 3,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "うまく折ったから大丈夫",
+    "id": 3
+  },
+  {
+    "start": 10.4,
+    "end": 14.4,
+    "text": "傷一つ残らず元通りになるわ",
+    "originalSegment": 4,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "傷一つ残らず元通りになるわ",
+    "id": 4
+  },
+  {
+    "start": 14.4,
+    "end": 17.26,
+    "text": "全治一二ヶ月ってとこかしら",
+    "originalSegment": 5,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "全治一二ヶ月ってとこかしら",
+    "id": 5
+  },
+  {
+    "start": 17.26,
+    "end": 20.3,
+    "text": "あなたの誕生日に間に合えばいいわね",
+    "originalSegment": 6,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "あなたの誕生日に間に合えばいいわね",
+    "id": 6
+  },
+  {
+    "start": 20.3,
+    "end": 23.9,
+    "text": "レイ その袋 後でこちらにちょうだいね",
+    "originalSegment": 7,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイ その袋 後でこちらにちょうだいね",
+    "id": 7
+  },
+  {
+    "start": 23.9,
+    "end": 27.76,
+    "text": "さあ お家へ帰りましょう",
+    "originalSegment": 8,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "さあ お家へ帰りましょう",
+    "id": 8
+  },
+  {
+    "start": 28.58,
+    "end": 29.92,
+    "text": "どうすりゃいいんだ",
+    "originalSegment": 9,
+    "avg_logprob": -0.19671817,
+    "no_speech_prob": 0,
+    "originalJapanese": "どうすりゃいいんだ",
+    "id": 9
+  },
+  {
+    "start": 29.92,
+    "end": 33.36,
+    "text": "ノーマンが出荷",
+    "originalSegment": 10,
+    "avg_logprob": -0.15512542,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマンが出荷",
+    "id": 10
+  },
+  {
+    "start": 33.36,
+    "end": 38.42,
+    "text": "ロープは取られたし エマは足を折られて動けねえ",
+    "originalSegment": 10,
+    "avg_logprob": -0.15512542,
+    "no_speech_prob": 0,
+    "originalJapanese": "ロープは取られたし エマは足を折られて動けねえ",
+    "id": 11
+  },
+  {
+    "start": 38.42,
+    "end": 40.16,
+    "text": "エマなら足は速攻で治す",
+    "originalSegment": 11,
+    "avg_logprob": -0.15512542,
+    "no_speech_prob": 0,
+    "originalJapanese": "エマなら足は速攻で治す",
+    "id": 12
+  },
+  {
+    "start": 40.16,
+    "end": 45.58,
+    "text": "ロープもまた作りゃいい 脱獄はどうにかなるしどうにかする",
+    "originalSegment": 11,
+    "avg_logprob": -0.15512542,
+    "no_speech_prob": 0,
+    "originalJapanese": "ロープもまた作りゃいい 脱獄はどうにかなるしどうにかする",
+    "id": 13
+  },
+  {
+    "start": 45.58,
+    "end": 51.58,
+    "text": "今はまずノーマンだ でもなんでどうしてノーマンが出荷なの",
+    "originalSegment": 12,
+    "avg_logprob": -0.15512542,
+    "no_speech_prob": 0,
+    "originalJapanese": "今はまずノーマンだ でもなんでどうしてノーマンが出荷なの",
+    "id": 14
+  },
+  {
+    "start": 51.58,
+    "end": 58.12,
+    "text": "ママが言ってた次の出荷 事情が変わったってのはノーマンのことだったのか",
+    "originalSegment": 13,
+    "avg_logprob": -0.15512542,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママが言ってた次の出荷 事情が変わったってのはノーマンのことだったのか",
+    "id": 15
+  },
+  {
+    "start": 58.12,
+    "end": 65.5,
+    "text": "それにまさかシスターまで昼前までは普通に元気だったのに",
+    "originalSegment": 14,
+    "avg_logprob": -0.047013566,
+    "no_speech_prob": 0,
+    "originalJapanese": "それにまさかシスターまで昼前までは普通に元気だったのに",
+    "id": 16
+  },
+  {
+    "start": 65.5,
+    "end": 72.76,
+    "text": "普通に笑って洗濯とかしてなのに今はもう世界のどこにも生きてない",
+    "originalSegment": 14,
+    "avg_logprob": -0.047013566,
+    "no_speech_prob": 0,
+    "originalJapanese": "普通に笑って洗濯とかしてなのに今はもう世界のとこにも生きてない",
+    "id": 17
+  },
+  {
+    "start": 72.76,
+    "end": 77.38,
+    "text": "エマ大丈夫取られたのはロープだけだ",
+    "originalSegment": 15,
+    "avg_logprob": -0.047013566,
+    "no_speech_prob": 0,
+    "originalJapanese": "エマ大丈夫取られたのはロープだけだ",
+    "id": 18
+  },
+  {
+    "start": 77.38,
+    "end": 81.54,
+    "text": "待っててお水取ってくるノーマン",
+    "originalSegment": 15,
+    "avg_logprob": -0.047013566,
+    "no_speech_prob": 0,
+    "originalJapanese": "待っててお水取ってくるノーマン",
+    "id": 19
+  },
+  {
+    "start": 81.54,
+    "end": 83.72,
+    "text": "レイどうすんだよ",
+    "originalSegment": 16,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイどうすんだよ",
+    "id": 20
+  },
+  {
+    "start": 83.72,
+    "end": 86.32,
+    "text": "（語音不清）もちろん何としてでも",
+    "originalSegment": 17,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "逃がすとはもちろん何としてでも",
+    "id": 21
+  },
+  {
+    "start": 86.32,
+    "end": 87.38,
+    "text": "くそ",
+    "originalSegment": 18,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "くそ",
+    "id": 22
+  },
+  {
+    "start": 87.38,
+    "end": 89.78,
+    "text": "ドンギルダ",
+    "originalSegment": 19,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "どうギルダ",
+    "id": 23
+  },
+  {
+    "start": 89.78,
+    "end": 91.54,
+    "text": "準備だ",
+    "originalSegment": 20,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "準備だ",
+    "id": 24
+  },
+  {
+    "start": 91.54,
+    "end": 93.28,
+    "text": "ノーマンを逃がすぞ",
+    "originalSegment": 21,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマンを逃がすと",
+    "id": 25
+  },
+  {
+    "start": 93.28,
+    "end": 94.36,
+    "text": "エマ",
+    "originalSegment": 22,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "エマ",
+    "id": 26
+  },
+  {
+    "start": 94.36,
+    "end": 97.08,
+    "text": "レイ",
+    "originalSegment": 23,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイ",
+    "id": 27
+  },
+  {
+    "start": 97.08,
+    "end": 99.54,
+    "text": "ノーマン",
+    "originalSegment": 24,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマン",
+    "id": 28
+  },
+  {
+    "start": 99.54,
+    "end": 102.7,
+    "text": "明日の昼お前一人で逃げろ",
+    "originalSegment": 25,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "明日の昼お前一人で逃げろ",
+    "id": 29
+  },
+  {
+    "start": 102.7,
+    "end": 105.14,
+    "text": "絶対死なせないから",
+    "originalSegment": 26,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "絶対死なせないから",
+    "id": 30
+  },
+  {
+    "start": 105.14,
+    "end": 107.54,
+    "text": "ごめん",
+    "originalSegment": 27,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "ごめん",
+    "id": 31
+  },
+  {
+    "start": 107.54,
+    "end": 108.86,
+    "text": "できない",
+    "originalSegment": 28,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "できない",
+    "id": 32
+  },
+  {
+    "start": 108.86,
+    "end": 109.52,
+    "text": "却下",
+    "originalSegment": 29,
+    "avg_logprob": -0.29876116,
+    "no_speech_prob": 0,
+    "originalJapanese": "却下",
+    "id": 33
+  },
+  {
+    "start": 109.52,
+    "end": 114.56,
+    "text": "正確には明日の昼一人で逃げたふりをしろ",
+    "originalSegment": 30,
+    "avg_logprob": -0.12609224,
+    "no_speech_prob": 0,
+    "originalJapanese": "正確には明日の昼一人で逃げたふりをしろ",
+    "id": 34
+  },
+  {
+    "start": 114.56,
+    "end": 118.24,
+    "text": "発信機を無効化させて逃げたふりをして",
+    "originalSegment": 31,
+    "avg_logprob": -0.12609224,
+    "no_speech_prob": 0,
+    "originalJapanese": "発信機を無効化させて逃げたふりをして",
+    "id": 35
+  },
+  {
+    "start": 118.24,
+    "end": 121.74,
+    "text": "エマの足が治るまで敷地内に潜伏しろ",
+    "originalSegment": 32,
+    "avg_logprob": -0.12609224,
+    "no_speech_prob": 0,
+    "originalJapanese": "エマの足が治るまで敷地内に潜伏しろ",
+    "id": 36
+  },
+  {
+    "start": 121.74,
+    "end": 125.06,
+    "text": "そして私たちの決行日に一緒に逃げる",
+    "originalSegment": 33,
+    "avg_logprob": -0.12609224,
+    "no_speech_prob": 0,
+    "originalJapanese": "そして私たちの血行日に一緒に逃げる",
+    "id": 37
+  },
+  {
+    "start": 125.06,
+    "end": 129.64,
+    "text": "けどたとえ嘘でも僕が逃げたら警備が厳しく",
+    "originalSegment": 34,
+    "avg_logprob": -0.12609224,
+    "no_speech_prob": 0,
+    "originalJapanese": "けどたとえ嘘でも僕が逃げたら警備が厳しく",
+    "id": 38
+  },
+  {
+    "start": 129.64,
+    "end": 133.38,
+    "text": "問題ないこのハウスの飼育方針から言って",
+    "originalSegment": 35,
+    "avg_logprob": -0.12609224,
+    "no_speech_prob": 0,
+    "originalJapanese": "問題ないこのハウスの飼育方針から言って",
+    "id": 39
+  },
+  {
+    "start": 133.38,
+    "end": 135.46,
+    "text": "大した警備強化はされない",
+    "originalSegment": 36,
+    "avg_logprob": -0.12609224,
+    "no_speech_prob": 0,
+    "originalJapanese": "大した警備強化はされない",
+    "id": 40
+  },
+  {
+    "start": 135.46,
+    "end": 137.4,
+    "text": "飼育方針",
+    "originalSegment": 37,
+    "avg_logprob": -0.12609224,
+    "no_speech_prob": 0,
+    "originalJapanese": "飼育方針",
+    "id": 41
+  },
+  {
+    "start": 137.4,
+    "end": 140.54,
+    "text": "1.伸び伸び健全に育てる",
+    "originalSegment": 38,
+    "avg_logprob": -0.11040461,
+    "no_speech_prob": 0,
+    "originalJapanese": "1.伸び伸び健全に育てる",
+    "id": 42
+  },
+  {
+    "start": 140.54,
+    "end": 149.535,
+    "text": "2.秘密は厳守すること1.は脳の発達に最適だから伸び伸び育った感情豊かで健康な子供",
+    "originalSegment": 39,
+    "avg_logprob": -0.18051298,
+    "no_speech_prob": 0,
+    "originalJapanese": "2.秘密は原種すること1.は脳の発達に最適だから伸び伸び育った感情豊かで健康な子供",
+    "id": 43
+  },
+  {
+    "start": 149.535,
+    "end": 153.535,
+    "text": "ハウスが製造する人間の最低条件",
+    "originalSegment": 39,
+    "avg_logprob": -0.18051298,
+    "no_speech_prob": 0,
+    "originalJapanese": "ハウスが製造する人間の最低条件",
+    "id": 44
+  },
+  {
+    "start": 153.535,
+    "end": 158.995,
+    "text": "ということはにもそう 鬼たちは姿を見せない",
+    "originalSegment": 40,
+    "avg_logprob": -0.18051298,
+    "no_speech_prob": 0,
+    "originalJapanese": "ということはにもそう 鬼たちは姿を見せない",
+    "id": 45
+  },
+  {
+    "start": 158.995,
+    "end": 162.855,
+    "text": "恐怖支配しても好みの脳にはならないから",
+    "originalSegment": 41,
+    "avg_logprob": -0.18051298,
+    "no_speech_prob": 0,
+    "originalJapanese": "恐怖支配しても好みの脳にはならないから",
+    "id": 46
+  },
+  {
+    "start": 162.855,
+    "end": 166.895,
+    "text": "警備変えるとすりゃせいぜい見回りや飼育者の増員",
+    "originalSegment": 41,
+    "avg_logprob": -0.18051298,
+    "no_speech_prob": 0,
+    "originalJapanese": "警備変えるとすりゃせいぜい見回りや飼育者の増員",
+    "id": 47
+  },
+  {
+    "start": 166.895,
+    "end": 169.895,
+    "text": "その程度どうにでもできる いやする",
+    "originalSegment": 42,
+    "avg_logprob": -0.17967919,
+    "no_speech_prob": 0,
+    "originalJapanese": "その程度どうにでもできる いやする",
+    "id": 48
+  },
+  {
+    "start": 169.895,
+    "end": 174.495,
+    "text": "それでも わずかでも塀をロープで登れない高さにされたら",
+    "originalSegment": 43,
+    "avg_logprob": -0.17967919,
+    "no_speech_prob": 0,
+    "originalJapanese": "それでも わずかでも塀をロープで登れない高さにされたら",
+    "id": 49
+  },
+  {
+    "start": 174.495,
+    "end": 176.995,
+    "text": "次どうやって塀を越えて出るつもり?",
+    "originalSegment": 44,
+    "avg_logprob": -0.17967919,
+    "no_speech_prob": 0,
+    "originalJapanese": "次どうやって塀を越えて出るつもり?",
+    "id": 50
+  },
+  {
+    "start": 176.995,
+    "end": 180.295,
+    "text": "お前が隠れて 梯子でも作っときゃいいだろ",
+    "originalSegment": 45,
+    "avg_logprob": -0.17967919,
+    "no_speech_prob": 0,
+    "originalJapanese": "お前が隠れて 梯子でも作っときゃいいだろ",
+    "id": 51
+  },
+  {
+    "start": 180.295,
+    "end": 183.495,
+    "text": "発信機をより高性能なものに変えられたら?",
+    "originalSegment": 46,
+    "avg_logprob": -0.17967919,
+    "no_speech_prob": 0,
+    "originalJapanese": "発信機をより高性能なものに変えられたら?",
+    "id": 52
+  },
+  {
+    "start": 183.495,
+    "end": 187.295,
+    "text": "新たに埋められても 場所が分かっているんだから取り出せばいい",
+    "originalSegment": 47,
+    "avg_logprob": -0.17967919,
+    "no_speech_prob": 0,
+    "originalJapanese": "新たに埋められても 場所が分かっているんだから取り出せばいい",
+    "id": 53
+  },
+  {
+    "start": 187.295,
+    "end": 189.495,
+    "text": "どうにだってできる",
+    "originalSegment": 48,
+    "avg_logprob": -0.17967919,
+    "no_speech_prob": 0,
+    "originalJapanese": "どうにだってできる",
+    "id": 54
+  },
+  {
+    "start": 189.495,
+    "end": 191.795,
+    "text": "ふっ わかるだろ",
+    "originalSegment": 49,
+    "avg_logprob": -0.17967919,
+    "no_speech_prob": 0,
+    "originalJapanese": "ふっ わかるだろ",
+    "id": 55
+  },
+  {
+    "start": 191.795,
+    "end": 194.195,
+    "text": "とにかくお前が死ぬことはないんだよ",
+    "originalSegment": 50,
+    "avg_logprob": -0.17967919,
+    "no_speech_prob": 0,
+    "originalJapanese": "とにかくお前が死ぬことはないんだよ",
+    "id": 56
+  },
+  {
+    "start": 194.195,
+    "end": 197.455,
+    "text": "食料は手配する潜伏は絶対に隠し通す",
+    "originalSegment": 51,
+    "avg_logprob": -0.1253333,
+    "no_speech_prob": 0,
+    "originalJapanese": "食料は手配する潜伏は絶対に隠し通す",
+    "id": 57
+  },
+  {
+    "start": 197.455,
+    "end": 199.875,
+    "text": "多少の警備強化はなんとかなる",
+    "originalSegment": 52,
+    "avg_logprob": -0.1253333,
+    "no_speech_prob": 0,
+    "originalJapanese": "多少の警備強化はなんとかなる",
+    "id": 58
+  },
+  {
+    "start": 199.875,
+    "end": 202.995,
+    "text": "ママを出し抜く奥の手も俺はまだ持ってる",
+    "originalSegment": 53,
+    "avg_logprob": -0.1253333,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママを出し抜く奥の手も俺はまだ持ってる",
+    "id": 59
+  },
+  {
+    "start": 202.995,
+    "end": 206.735,
+    "text": "だから生きろ逃げたふりしてこの方法で",
+    "originalSegment": 54,
+    "avg_logprob": -0.1253333,
+    "no_speech_prob": 0,
+    "originalJapanese": "だから生きろ逃げたふりしてこの方法で",
+    "id": 60
+  },
+  {
+    "start": 206.735,
+    "end": 208.875,
+    "text": "ダメだできない",
+    "originalSegment": 55,
+    "avg_logprob": -0.1253333,
+    "no_speech_prob": 0,
+    "originalJapanese": "ダメだできない",
+    "id": 61
+  },
+  {
+    "start": 208.875,
+    "end": 212.775,
+    "text": "ダメなんだ警備だけじゃない",
+    "originalSegment": 56,
+    "avg_logprob": -0.1253333,
+    "no_speech_prob": 0,
+    "originalJapanese": "ダメなんだ警備だけじゃない",
+    "id": 62
+  },
+  {
+    "start": 212.775,
+    "end": 217.115,
+    "text": "僕が逃げたらレイやエマが代わりに出荷されるかもしれない",
+    "originalSegment": 57,
+    "avg_logprob": -0.1253333,
+    "no_speech_prob": 0,
+    "originalJapanese": "僕が逃げたらレイやエマが代わりに出荷されるかもしれない",
+    "id": 63
+  },
+  {
+    "start": 217.115,
+    "end": 219.375,
+    "text": "二人ともありがとう",
+    "originalSegment": 58,
+    "avg_logprob": -0.1253333,
+    "no_speech_prob": 0,
+    "originalJapanese": "二人ともありがとう",
+    "id": 64
+  },
+  {
+    "start": 219.375,
+    "end": 222.055,
+    "text": "僕がいなくなってからの計画",
+    "originalSegment": 59,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "僕がいなくなってからの計画",
+    "id": 65
+  },
+  {
+    "start": 222.055,
+    "end": 225.315,
+    "text": "今のうちに考えて決めておかなきゃね",
+    "originalSegment": 60,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "今のうちに考えて決めておかなきゃね",
+    "id": 66
+  },
+  {
+    "start": 225.315,
+    "end": 226.375,
+    "text": "ふざけるな",
+    "originalSegment": 61,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "ふざけるな",
+    "id": 67
+  },
+  {
+    "start": 226.375,
+    "end": 229.875,
+    "text": "これじゃ俺の6年は何だったんだ",
+    "originalSegment": 62,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "これじゃ俺の6年は何だったんだ",
+    "id": 68
+  },
+  {
+    "start": 229.875,
+    "end": 231.515,
+    "text": "ごめん",
+    "originalSegment": 63,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "ごめん",
+    "id": 69
+  },
+  {
+    "start": 231.515,
+    "end": 233.055,
+    "text": "くそ",
+    "originalSegment": 64,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "くそ",
+    "id": 70
+  },
+  {
+    "start": 233.055,
+    "end": 236.195,
+    "text": "じゃあレイも足折ればいいよ",
+    "originalSegment": 65,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "じゃあレイマ足折ればいいよ",
+    "id": 71
+  },
+  {
+    "start": 236.195,
+    "end": 237.955,
+    "text": "いいでしょ",
+    "originalSegment": 66,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "いいでしょ",
+    "id": 72
+  },
+  {
+    "start": 237.955,
+    "end": 239.855,
+    "text": "ねえレイ骨折しよ",
+    "originalSegment": 67,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "ねえレイ骨折しよ",
+    "id": 73
+  },
+  {
+    "start": 239.855,
+    "end": 241.695,
+    "text": "（語音不清）何って",
+    "originalSegment": 68,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイマ何って",
+    "id": 74
+  },
+  {
+    "start": 241.695,
+    "end": 244.555,
+    "text": "あのねこんな派手に怪我してるから",
+    "originalSegment": 69,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "あのねこんな派手に気がしてるから",
+    "id": 75
+  },
+  {
+    "start": 244.555,
+    "end": 247.635,
+    "text": "私が代わりに出荷されることはないと思うの",
+    "originalSegment": 70,
+    "avg_logprob": -0.1902837,
+    "no_speech_prob": 0,
+    "originalJapanese": "私が代わりに出荷されることはないと思うの",
+    "id": 76
+  },
+  {
+    "start": 247.635,
+    "end": 250.255,
+    "text": "門で鬼が言ってたでしょ",
+    "originalSegment": 71,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "もんで鬼が言ってたでしょ",
+    "id": 77
+  },
+  {
+    "start": 250.255,
+    "end": 252.215,
+    "text": "私たちは高級品",
+    "originalSegment": 72,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "私たちは高級品",
+    "id": 78
+  },
+  {
+    "start": 252.215,
+    "end": 253.515,
+    "text": "しかも特別",
+    "originalSegment": 73,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "しかも特別",
+    "id": 79
+  },
+  {
+    "start": 253.515,
+    "end": 256.495,
+    "text": "出すときはちゃんとしてなきゃダメなんだよ",
+    "originalSegment": 74,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "出すときはちゃんとしてなきゃダメなんだよ",
+    "id": 80
+  },
+  {
+    "start": 256.495,
+    "end": 258.535,
+    "text": "代わりに出されるとしたらレイ",
+    "originalSegment": 75,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "代わりに出されるとしたらレイ",
+    "id": 81
+  },
+  {
+    "start": 258.535,
+    "end": 260.695,
+    "text": "だからレイも大怪我しちゃえば",
+    "originalSegment": 76,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "だからレイも大怪我しちゃえば",
+    "id": 82
+  },
+  {
+    "start": 260.695,
+    "end": 262.775,
+    "text": "きっとすぐには出荷されないよ",
+    "originalSegment": 77,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "きっとすぐには出荷されないよ",
+    "id": 83
+  },
+  {
+    "start": 262.775,
+    "end": 264.855,
+    "text": "その手があった",
+    "originalSegment": 78,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "その手があった",
+    "id": 84
+  },
+  {
+    "start": 264.855,
+    "end": 265.955,
+    "text": "よしおろう",
+    "originalSegment": 79,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "よしおろう",
+    "id": 85
+  },
+  {
+    "start": 265.955,
+    "end": 266.395,
+    "text": "ね",
+    "originalSegment": 80,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "ね",
+    "id": 86
+  },
+  {
+    "start": 266.395,
+    "end": 268.795,
+    "text": "けど別に腕でよくね",
+    "originalSegment": 81,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "けど別に腕でよくね",
+    "id": 87
+  },
+  {
+    "start": 268.795,
+    "end": 271.015,
+    "text": "あそっかじゃあ腕にしよう",
+    "originalSegment": 82,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "あそっかじゃあ腕にしよう",
+    "id": 88
+  },
+  {
+    "start": 271.015,
+    "end": 272.095,
+    "text": "いや待って",
+    "originalSegment": 83,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "いや待って",
+    "id": 89
+  },
+  {
+    "start": 272.095,
+    "end": 275.455,
+    "text": "必ずしも怪我をすればすぐに出荷されないとは",
+    "originalSegment": 84,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "必ずしも怪我をすればすぐに出荷されないとは",
+    "id": 90
+  },
+  {
+    "start": 275.455,
+    "end": 277.135,
+    "text": "じゃあめっちゃ風邪ひく",
+    "originalSegment": 85,
+    "avg_logprob": -0.16586515,
+    "no_speech_prob": 0,
+    "originalJapanese": "じゃあめっちゃ風邪ひく",
+    "id": 91
+  },
+  {
+    "start": 277.135,
+    "end": 280.175,
+    "text": "病気の時のは食わんだろってことね",
+    "originalSegment": 86,
+    "avg_logprob": -0.27824596,
+    "no_speech_prob": 0,
+    "originalJapanese": "病気の時のは食わんだろってことね",
+    "id": 92
+  },
+  {
+    "start": 280.175,
+    "end": 282.015,
+    "text": "ううう",
+    "originalSegment": 87,
+    "avg_logprob": -0.27824596,
+    "no_speech_prob": 0,
+    "originalJapanese": "ううう",
+    "id": 93
+  },
+  {
+    "start": 282.015,
+    "end": 285.775,
+    "text": "骨折超痛いし風邪もしんどいけどいいよね",
+    "originalSegment": 88,
+    "avg_logprob": -0.27824596,
+    "no_speech_prob": 0,
+    "originalJapanese": "骨折超痛いし風邪もしんどいけどいいよね",
+    "id": 94
+  },
+  {
+    "start": 285.775,
+    "end": 286.815,
+    "text": "おう",
+    "originalSegment": 89,
+    "avg_logprob": -0.27824596,
+    "no_speech_prob": 0,
+    "originalJapanese": "おう",
+    "id": 95
+  },
+  {
+    "start": 286.815,
+    "end": 290.155,
+    "text": "脱走の計画は糸電話使って話せばいいよ",
+    "originalSegment": 90,
+    "avg_logprob": -0.27824596,
+    "no_speech_prob": 0,
+    "originalJapanese": "脱走の計画は糸電話使って話せばいいよ",
+    "id": 96
+  },
+  {
+    "start": 290.155,
+    "end": 293.015,
+    "text": "そりゃいいママに聞かれる心配もねえ",
+    "originalSegment": 91,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "そりゃいいママに聞かれる心配もねえ",
+    "id": 97
+  },
+  {
+    "start": 293.015,
+    "end": 297.35,
+    "text": "そんなそれでもダメならまた別ので考える",
+    "originalSegment": 91,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "そんなそれでもダメならまた別ので考える",
+    "id": 98
+  },
+  {
+    "start": 297.35,
+    "end": 302.49,
+    "text": "何だってするなんでおかしいよ二人とも",
+    "originalSegment": 91,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "何だってするなんでおかしいよ二人とも",
+    "id": 99
+  },
+  {
+    "start": 302.49,
+    "end": 303.39,
+    "text": "そんな",
+    "originalSegment": 92,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "そんな",
+    "id": 100
+  },
+  {
+    "start": 303.39,
+    "end": 306.75,
+    "text": "ノーマンが死んじゃうより全然いいよ",
+    "originalSegment": 93,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマンが死んじゃうより全然いいよ",
+    "id": 101
+  },
+  {
+    "start": 306.75,
+    "end": 308.59,
+    "text": "ノーマン言ってくれたよね",
+    "originalSegment": 94,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマン言ってくれたよね",
+    "id": 102
+  },
+  {
+    "start": 308.59,
+    "end": 310.93,
+    "text": "みんなで一緒に逃げようって",
+    "originalSegment": 95,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "みんなで一緒に逃げようって",
+    "id": 103
+  },
+  {
+    "start": 310.93,
+    "end": 313.73,
+    "text": "みんなの中にノーマンがいなきゃ",
+    "originalSegment": 96,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "みんなの中にノーマンがいなきゃ",
+    "id": 104
+  },
+  {
+    "start": 313.73,
+    "end": 315.39,
+    "text": "私は嫌だ",
+    "originalSegment": 97,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "私は嫌だ",
+    "id": 105
+  },
+  {
+    "start": 315.39,
+    "end": 317.49,
+    "text": "一緒に生きよう",
+    "originalSegment": 98,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "一緒に生きよう",
+    "id": 106
+  },
+  {
+    "start": 317.49,
+    "end": 318.83,
+    "text": "ノーマン",
+    "originalSegment": 99,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマン",
+    "id": 107
+  },
+  {
+    "start": 318.83,
+    "end": 320.97,
+    "text": "ノーマン",
+    "originalSegment": 100,
+    "avg_logprob": -0.22092755,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマン",
+    "id": 108
+  },
+  {
+    "start": 320.97,
+    "end": 325.91,
+    "text": "明日はこれで発信機を無効化してそのまま森に身を隠す",
+    "originalSegment": 101,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "明日はこれで発信機を無効化してそのまま森に身を隠す",
+    "id": 109
+  },
+  {
+    "start": 325.91,
+    "end": 327.95,
+    "text": "それから塀に登って",
+    "originalSegment": 102,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "それから塀に登って",
+    "id": 110
+  },
+  {
+    "start": 327.95,
+    "end": 331.83,
+    "text": "下見警備が緩いうちに済ませておこう",
+    "originalSegment": 103,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "下見警備が緩いうちに済ませておこう",
+    "id": 111
+  },
+  {
+    "start": 331.83,
+    "end": 334.95,
+    "text": "新しいロープは今ドンとギルダが作ってる",
+    "originalSegment": 104,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "新しいロープは今ドンとギルダが作ってる",
+    "id": 112
+  },
+  {
+    "start": 334.95,
+    "end": 337.63,
+    "text": "リネン室から盗んだ予備シーツでな",
+    "originalSegment": 105,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "理念室から盗んだ予備シーズでな",
+    "id": 113
+  },
+  {
+    "start": 337.63,
+    "end": 338.95,
+    "text": "できたんだね",
+    "originalSegment": 106,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "できたんだね",
+    "id": 114
+  },
+  {
+    "start": 338.95,
+    "end": 342.21,
+    "text": "左耳に当ててスイッチを押す",
+    "originalSegment": 107,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "左耳に当ててスイッチを押す",
+    "id": 115
+  },
+  {
+    "start": 342.21,
+    "end": 344.85,
+    "text": "それで発信機を無効にできる",
+    "originalSegment": 108,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "それで発信機を無効にできる",
+    "id": 116
+  },
+  {
+    "start": 344.85,
+    "end": 347.85,
+    "text": "この方法ならママに通知されない",
+    "originalSegment": 109,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "この方法ならママに通知されない",
+    "id": 117
+  },
+  {
+    "start": 347.85,
+    "end": 350.49,
+    "text": "それカメラから作ったの?",
+    "originalSegment": 110,
+    "avg_logprob": -0.1766166,
+    "no_speech_prob": 0,
+    "originalJapanese": "それカメラから作ったの?",
+    "id": 118
+  },
+  {
+    "start": 350.97,
+    "end": 352.45,
+    "text": "カメラだけじゃない",
+    "originalSegment": 111,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "カメラだけじゃない",
+    "id": 119
+  },
+  {
+    "start": 352.45,
+    "end": 354.87,
+    "text": "今まで手に入れた報酬から",
+    "originalSegment": 112,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "今まで手に入れた報酬から",
+    "id": 120
+  },
+  {
+    "start": 354.87,
+    "end": 356.43,
+    "text": "いろいろ調達して",
+    "originalSegment": 113,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "いろいろ調達して",
+    "id": 121
+  },
+  {
+    "start": 356.43,
+    "end": 358.69,
+    "text": "カメラは主に",
+    "originalSegment": 114,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "カメラは主に",
+    "id": 122
+  },
+  {
+    "start": 358.69,
+    "end": 360.45,
+    "text": "ストロボ部分が欲しかっただけ",
+    "originalSegment": 115,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "ストロボ部分が欲しかっただけ",
+    "id": 123
+  },
+  {
+    "start": 360.45,
+    "end": 362.55,
+    "text": "6年かけて",
+    "originalSegment": 116,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "6年かけて",
+    "id": 124
+  },
+  {
+    "start": 362.55,
+    "end": 364.33,
+    "text": "いろんなものから",
+    "originalSegment": 117,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "いろんなものから",
+    "id": 125
+  },
+  {
+    "start": 364.33,
+    "end": 365.89,
+    "text": "ママにバレないように",
+    "originalSegment": 118,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "ママにバレないように",
+    "id": 126
+  },
+  {
+    "start": 365.89,
+    "end": 366.75,
+    "text": "これを",
+    "originalSegment": 119,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "これを",
+    "id": 127
+  },
+  {
+    "start": 366.75,
+    "end": 368.13,
+    "text": "すごい",
+    "originalSegment": 120,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "すごい",
+    "id": 128
+  },
+  {
+    "start": 368.13,
+    "end": 370.73,
+    "text": "別にすごかねえよ",
+    "originalSegment": 121,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "別にすごかねえよ",
+    "id": 129
+  },
+  {
+    "start": 370.73,
+    "end": 372.95,
+    "text": "ハウスの秘密に気づいて",
+    "originalSegment": 122,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "ハウスの秘密に気づいて",
+    "id": 130
+  },
+  {
+    "start": 372.95,
+    "end": 374.83,
+    "text": "やるしかなかった",
+    "originalSegment": 123,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "やるしかなかった",
+    "id": 131
+  },
+  {
+    "start": 374.83,
+    "end": 376.81,
+    "text": "それだけだ",
+    "originalSegment": 124,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "それだけだ",
+    "id": 132
+  },
+  {
+    "start": 376.81,
+    "end": 377.37,
+    "text": "レイ",
+    "originalSegment": 125,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイ",
+    "id": 133
+  },
+  {
+    "start": 377.37,
+    "end": 380.19,
+    "text": "レイはどうやって知ったの",
+    "originalSegment": 126,
+    "avg_logprob": -0.22586429,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイはどうやって知ったの",
+    "id": 134
+  },
+  {
+    "start": 380.19,
+    "end": 381.77,
+    "text": "ハウスの秘密",
+    "originalSegment": 127,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "ハウスの秘密",
+    "id": 135
+  },
+  {
+    "start": 381.77,
+    "end": 386.19,
+    "text": "これ前にも聞いたんだけど",
+    "originalSegment": 128,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "これ前にも聞いたんだけど",
+    "id": 136
+  },
+  {
+    "start": 386.19,
+    "end": 389.55,
+    "text": "だって普通気づきようがないよね",
+    "originalSegment": 129,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "だって普通気づきようがないよね",
+    "id": 137
+  },
+  {
+    "start": 389.55,
+    "end": 391.27,
+    "text": "最初から",
+    "originalSegment": 130,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "最初から",
+    "id": 138
+  },
+  {
+    "start": 391.27,
+    "end": 394.97,
+    "text": "最初からだよ",
+    "originalSegment": 131,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "最初からだよ",
+    "id": 139
+  },
+  {
+    "start": 394.97,
+    "end": 398.49,
+    "text": "幼児期健忘って知ってるか",
+    "originalSegment": 132,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "幼児期剣房って知ってるか",
+    "id": 140
+  },
+  {
+    "start": 398.49,
+    "end": 399.79,
+    "text": "何それ",
+    "originalSegment": 133,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "何それ",
+    "id": 141
+  },
+  {
+    "start": 399.79,
+    "end": 402.19,
+    "text": "人は誰しも知らぬ間に",
+    "originalSegment": 134,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "人は誰しも知らぬ間に",
+    "id": 142
+  },
+  {
+    "start": 402.19,
+    "end": 405.01,
+    "text": "赤ん坊の頃の記憶をなくしてる",
+    "originalSegment": 135,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "赤ん坊の頃の記憶をなくしてる",
+    "id": 143
+  },
+  {
+    "start": 405.01,
+    "end": 407.25,
+    "text": "それが幼児期健忘",
+    "originalSegment": 136,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "それが幼児期剣房",
+    "id": 144
+  },
+  {
+    "start": 407.25,
+    "end": 409.79,
+    "text": "でもごく稀に",
+    "originalSegment": 137,
+    "avg_logprob": -0.23243491,
+    "no_speech_prob": 0,
+    "originalJapanese": "でもごく稀に",
+    "id": 145
+  },
+  {
+    "start": 409.79,
+    "end": 412.75,
+    "text": "それが起こらない人間がいるらしい",
+    "originalSegment": 138,
+    "avg_logprob": -0.1853134,
+    "no_speech_prob": 0,
+    "originalJapanese": "それが起こらない人間がいるらしい",
+    "id": 146
+  },
+  {
+    "start": 412.75,
+    "end": 414.09,
+    "text": "レイまさか",
+    "originalSegment": 139,
+    "avg_logprob": -0.1853134,
+    "no_speech_prob": 0,
+    "originalJapanese": "レイまさか",
+    "id": 147
+  },
+  {
+    "start": 414.09,
+    "end": 418.07,
+    "text": "俺には胎児の頃からの記憶がある",
+    "originalSegment": 140,
+    "avg_logprob": -0.1853134,
+    "no_speech_prob": 0,
+    "originalJapanese": "俺には大事の頃からの記憶がある",
+    "id": 148
+  },
+  {
+    "start": 418.07,
+    "end": 422.51,
+    "text": "その記憶とハウスでの暮らしに矛盾がある",
+    "originalSegment": 141,
+    "avg_logprob": -0.1853134,
+    "no_speech_prob": 0,
+    "originalJapanese": "その記憶とハウスでの暮らしに矛盾がある",
+    "id": 149
+  },
+  {
+    "start": 422.51,
+    "end": 424.13,
+    "text": "だから気づいた",
+    "originalSegment": 142,
+    "avg_logprob": -0.1853134,
+    "no_speech_prob": 0,
+    "originalJapanese": "だから気づいた",
+    "id": 150
+  },
+  {
+    "start": 424.13,
+    "end": 428.65,
+    "text": "最初の記憶は暗くて暖かい水の中",
+    "originalSegment": 143,
+    "avg_logprob": -0.1853134,
+    "no_speech_prob": 0,
+    "originalJapanese": "最初の記憶は暗くて暖かい水の中",
+    "id": 151
+  },
+  {
+    "start": 428.65,
+    "end": 432.21,
+    "text": "遠くから聞こえてくる歌声",
+    "originalSegment": 144,
+    "avg_logprob": -0.1853134,
+    "no_speech_prob": 0,
+    "originalJapanese": "遠くから聞こえてくる歌声",
+    "id": 152
+  },
+  {
+    "start": 432.21,
+    "end": 436.91,
+    "text": "どのくらいあるの記憶って",
+    "originalSegment": 145,
+    "avg_logprob": -0.1853134,
+    "no_speech_prob": 0,
+    "originalJapanese": "どのくらいあるの記憶って",
+    "id": 153
+  },
+  {
+    "start": 436.91,
+    "end": 438.89,
+    "text": "断片的だけど",
+    "originalSegment": 146,
+    "avg_logprob": -0.1853134,
+    "no_speech_prob": 0,
+    "originalJapanese": "断片的だけど",
+    "id": 154
+  },
+  {
+    "start": 438.89,
+    "end": 447.065,
+    "text": "かなり詳細に鬼の姿も他に子供がいたのも覚えてる",
+    "originalSegment": 147,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "かなり詳細に鬼の姿も他に子供がいたのも覚えてる",
+    "id": 155
+  },
+  {
+    "start": 447.065,
+    "end": 450.285,
+    "text": "発信機を埋め込まれてそれから子供たちは",
+    "originalSegment": 147,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "発信機を埋め込まれてそれから子供たちは",
+    "id": 156
+  },
+  {
+    "start": 450.285,
+    "end": 452.145,
+    "text": "五つに振り分けられた",
+    "originalSegment": 148,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "五つに振り分けられた",
+    "id": 157
+  },
+  {
+    "start": 452.145,
+    "end": 453.485,
+    "text": "五つ",
+    "originalSegment": 149,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "五つ",
+    "id": 158
+  },
+  {
+    "start": 453.485,
+    "end": 455.445,
+    "text": "その後は",
+    "originalSegment": 150,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "その後は",
+    "id": 159
+  },
+  {
+    "start": 455.445,
+    "end": 457.185,
+    "text": "暗いトンネルを抜けて",
+    "originalSegment": 151,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "暗いトンネルを抜けて",
+    "id": 160
+  },
+  {
+    "start": 457.185,
+    "end": 458.345,
+    "text": "ここに来た",
+    "originalSegment": 152,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "ここに来た",
+    "id": 161
+  },
+  {
+    "start": 458.345,
+    "end": 460.385,
+    "text": "トンネルっていうのは門",
+    "originalSegment": 153,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "トンネルっていうのは門",
+    "id": 162
+  },
+  {
+    "start": 460.385,
+    "end": 461.385,
+    "text": "ああ",
+    "originalSegment": 154,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "ああ",
+    "id": 163
+  },
+  {
+    "start": 461.385,
+    "end": 462.305,
+    "text": "待って",
+    "originalSegment": 155,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "待って",
+    "id": 164
+  },
+  {
+    "start": 462.305,
+    "end": 465.365,
+    "text": "じゃあ門の先は外じゃなくて",
+    "originalSegment": 156,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "じゃあ門の先は外じゃなくて",
+    "id": 165
+  },
+  {
+    "start": 465.365,
+    "end": 465.965,
+    "text": "本部",
+    "originalSegment": 157,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "本部",
+    "id": 166
+  },
+  {
+    "start": 465.965,
+    "end": 468.565,
+    "text": "本部と",
+    "originalSegment": 158,
+    "avg_logprob": -0.2507043,
+    "no_speech_prob": 0,
+    "originalJapanese": "本部と",
+    "id": 167
+  },
+  {
+    "start": 468.565,
+    "end": 472.945,
+    "text": "近接する5つのプラント それがこのハウス",
+    "originalSegment": 159,
+    "avg_logprob": -0.16722487,
+    "no_speech_prob": 0,
+    "originalJapanese": "近接する5つのプラント それがこのハウス",
+    "id": 168
+  },
+  {
+    "start": 472.945,
+    "end": 476.965,
+    "text": "シスターが言ってたことは本当だったんだ",
+    "originalSegment": 160,
+    "avg_logprob": -0.16722487,
+    "no_speech_prob": 0,
+    "originalJapanese": "シスターが言ってたことは本当だったんだ",
+    "id": 169
+  },
+  {
+    "start": 476.965,
+    "end": 479.365,
+    "text": "門は逃げ道にならない",
+    "originalSegment": 161,
+    "avg_logprob": -0.16722487,
+    "no_speech_prob": 0,
+    "originalJapanese": "門は逃げ道にならない",
+    "id": 170
+  },
+  {
+    "start": 479.365,
+    "end": 484.665,
+    "text": "その先すぐそこには見張り番数匹って数じゃない",
+    "originalSegment": 162,
+    "avg_logprob": -0.16722487,
+    "no_speech_prob": 0,
+    "originalJapanese": "その先すぐそこには見張り板数匹って数じゃない",
+    "id": 171
+  },
+  {
+    "start": 484.665,
+    "end": 486.445,
+    "text": "鬼や大人がうじゃうじゃいる",
+    "originalSegment": 163,
+    "avg_logprob": -0.16722487,
+    "no_speech_prob": 0,
+    "originalJapanese": "鬼や大人がうじゃうじゃいる",
+    "id": 172
+  },
+  {
+    "start": 486.445,
+    "end": 488.625,
+    "text": "それってまずいんじゃ",
+    "originalSegment": 164,
+    "avg_logprob": -0.16722487,
+    "no_speech_prob": 0,
+    "originalJapanese": "それってまずいんじゃ",
+    "id": 173
+  },
+  {
+    "start": 488.625,
+    "end": 492.925,
+    "text": "違う だからこそ俺たちへの警備が甘い",
+    "originalSegment": 165,
+    "avg_logprob": -0.16722487,
+    "no_speech_prob": 0,
+    "originalJapanese": "違う だからこそ俺たちへの警備が甘い",
+    "id": 174
+  },
+  {
+    "start": 492.925,
+    "end": 496.505,
+    "text": "奴らは門だけを警戒してろくな警備強化をしない",
+    "originalSegment": 166,
+    "avg_logprob": -0.16722487,
+    "no_speech_prob": 0,
+    "originalJapanese": "奴らは門だけを警戒してろくな警備強化をしない",
+    "id": 175
+  },
+  {
+    "start": 496.505,
+    "end": 499.265,
+    "text": "エマの足が治りしだい脱獄だ",
+    "originalSegment": 167,
+    "avg_logprob": -0.09834968,
+    "no_speech_prob": 0,
+    "originalJapanese": "エマの足が治りしだい脱獄だ",
+    "id": 176
+  },
+  {
+    "start": 499.265,
+    "end": 507.445,
+    "text": "なるほど何もビビる必要はねえんだ明日お前は姿を消す",
+    "originalSegment": 167,
+    "avg_logprob": -0.09834968,
+    "no_speech_prob": 0,
+    "originalJapanese": "なるほど何もビビる必要はねえんだ明日お前は姿を消す",
+    "id": 177
+  },
+  {
+    "start": 507.445,
+    "end": 511.505,
+    "text": "分かったみんな聞いていい知らせよ",
+    "originalSegment": 168,
+    "avg_logprob": -0.09834968,
+    "no_speech_prob": 0,
+    "originalJapanese": "分かったみんな聞いていい知らせよ",
+    "id": 178
+  },
+  {
+    "start": 511.505,
+    "end": 517.705,
+    "text": "ノーマンの里親が決まったの急だけど明日夜の出発よ",
+    "originalSegment": 168,
+    "avg_logprob": -0.09834968,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマンの里親が決まったの急だけど明日夜の出発よ",
+    "id": 179
+  },
+  {
+    "start": 517.705,
+    "end": 519.525,
+    "text": "明日おめでとう",
+    "originalSegment": 169,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "明日おめでとう",
+    "id": 180
+  },
+  {
+    "start": 519.525,
+    "end": 521.265,
+    "text": "おめでとうなお前",
+    "originalSegment": 170,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "おめでとうなお前",
+    "id": 181
+  },
+  {
+    "start": 521.265,
+    "end": 523.085,
+    "text": "お別れ",
+    "originalSegment": 171,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "お別れ",
+    "id": 182
+  },
+  {
+    "start": 523.085,
+    "end": 529.265,
+    "text": "こんな急に寂しくなるような",
+    "originalSegment": 172,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "こんな急に寂しくなるような",
+    "id": 183
+  },
+  {
+    "start": 529.265,
+    "end": 531.645,
+    "text": "おめでとう",
+    "originalSegment": 173,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "おめでとう",
+    "id": 184
+  },
+  {
+    "start": 531.645,
+    "end": 535.045,
+    "text": "明日たくさん遊ぼうね",
+    "originalSegment": 174,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "明日たくさん遊ぼうね",
+    "id": 185
+  },
+  {
+    "start": 535.045,
+    "end": 537.205,
+    "text": "おめでとう",
+    "originalSegment": 175,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "おめでとう",
+    "id": 186
+  },
+  {
+    "start": 537.205,
+    "end": 538.385,
+    "text": "おめでとう",
+    "originalSegment": 176,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "おめでとう",
+    "id": 187
+  },
+  {
+    "start": 538.385,
+    "end": 541.145,
+    "text": "おめでとう",
+    "originalSegment": 177,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "おめでとう",
+    "id": 188
+  },
+  {
+    "start": 541.145,
+    "end": 544.985,
+    "text": "おめでとう",
+    "originalSegment": 178,
+    "avg_logprob": -0.3120016,
+    "no_speech_prob": 0,
+    "originalJapanese": "おめでとう",
+    "id": 189
+  },
+  {
+    "start": 544.985,
+    "end": 552.005,
+    "text": "ノーマンおめでとう",
+    "originalSegment": 179,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマンおめでとう",
+    "id": 190
+  },
+  {
+    "start": 552.005,
+    "end": 554.905,
+    "text": "みんなありがとう",
+    "originalSegment": 180,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "みんなありがとう",
+    "id": 191
+  },
+  {
+    "start": 554.905,
+    "end": 558.325,
+    "text": "さあじゃあ晩ごはんいただきましょ",
+    "originalSegment": 181,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "さあじゃあ晩ごはんいただきましょ",
+    "id": 192
+  },
+  {
+    "start": 558.325,
+    "end": 559.705,
+    "text": "ドドン",
+    "originalSegment": 182,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "ドドン",
+    "id": 193
+  },
+  {
+    "start": 559.705,
+    "end": 561.825,
+    "text": "ドコドコ",
+    "originalSegment": 183,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "ドコドコ",
+    "id": 194
+  },
+  {
+    "start": 561.825,
+    "end": 564.725,
+    "text": "気持ちよかった",
+    "originalSegment": 184,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "気持ちよかった",
+    "id": 195
+  },
+  {
+    "start": 564.725,
+    "end": 569.985,
+    "text": "なんだこれ大丈夫うまくいく",
+    "originalSegment": 185,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "なんだこれ大丈夫うまくいく",
+    "id": 196
+  },
+  {
+    "start": 569.985,
+    "end": 571.445,
+    "text": "ノーマン",
+    "originalSegment": 186,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマン",
+    "id": 197
+  },
+  {
+    "start": 571.445,
+    "end": 572.405,
+    "text": "ノーマンは?",
+    "originalSegment": 187,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマンは?",
+    "id": 198
+  },
+  {
+    "start": 572.405,
+    "end": 573.925,
+    "text": "おかえりなさい",
+    "originalSegment": 188,
+    "avg_logprob": -0.36653018,
+    "no_speech_prob": 0,
+    "originalJapanese": "おかえりなさい",
+    "id": 199
+  },
+  {
+    "start": 573.925,
+    "end": 575.925,
+    "text": "ノーマン",
+    "originalSegment": 189,
+    "avg_logprob": -0.3009095,
+    "no_speech_prob": 0,
+    "originalJapanese": "ノーマン",
+    "id": 200
+  },
+  {
+    "start": 575.925,
+    "end": 577.105,
+    "text": "なんで",
+    "originalSegment": 190,
+    "avg_logprob": -0.3009095,
+    "no_speech_prob": 0,
+    "originalJapanese": "なんで",
+    "id": 201
+  },
+  {
+    "start": 577.105,
+    "end": 579.925,
+    "text": "今からでも逃げないと",
+    "originalSegment": 191,
+    "avg_logprob": -0.3009095,
+    "no_speech_prob": 0,
+    "originalJapanese": "今からでも逃げないと",
+    "id": 202
+  },
+  {
+    "start": 579.925,
+    "end": 581.625,
+    "text": "嫌だ",
+    "originalSegment": 192,
+    "avg_logprob": -0.3009095,
+    "no_speech_prob": 0,
+    "originalJapanese": "嫌だ",
+    "id": 203
+  },
+  {
+    "start": 581.625,
+    "end": 584.125,
+    "text": "逃げるつもりはない",
+    "originalSegment": 193,
+    "avg_logprob": -0.3009095,
+    "no_speech_prob": 0,
+    "originalJapanese": "逃げるつもりはない",
+    "id": 204
+  },
+  {
+    "start": 584.125,
+    "end": 586.805,
+    "text": "それより聞いてほしい",
+    "originalSegment": 194,
+    "avg_logprob": -0.3009095,
+    "no_speech_prob": 0,
+    "originalJapanese": "それより聞いてほしい",
+    "id": 205
+  },
+  {
+    "start": 586.805,
+    "end": 588.145,
+    "text": "崖だった",
+    "originalSegment": 195,
+    "avg_logprob": -0.3009095,
+    "no_speech_prob": 0,
+    "originalJapanese": "崖だった",
+    "id": 206
+  },
+  {
+    "start": 588.145,
+    "end": 589.925,
+    "text": "塀の向こうは",
+    "originalSegment": 196,
+    "avg_logprob": -0.3009095,
+    "no_speech_prob": 0,
+    "originalJapanese": "塀の向こうは",
+    "id": 207
+  },
+  {
+    "start": 589.925,
+    "end": 592.005,
+    "text": "崖だ",
+    "originalSegment": 197,
+    "avg_logprob": -0.3009095,
+    "no_speech_prob": 0,
+    "originalJapanese": "崖だ",
+    "id": 208
+  }
+]

@@ -18,6 +18,7 @@ function harness(fetch, {quotaError=false} = {}) {
     hasPreparedTranscript: clips => Array.isArray(clips) && clips.length > 0 && clips.every(c => Boolean(c && Number.isFinite(Number(c.start)) && Number.isFinite(Number(c.end)) && c.end > c.start && c.japanese?.trim() && c.rubyText?.trim() && c.translation?.trim())),
     localStorage:{setItem(){if(quotaError) throw Error('quota');}},
     loadClipCache:()=>[{japanese:'stale',analyzed:true}],repairClips:x=>x,
+    async hydrateMastery(){},
     saveClipCache(){calls.saves++;},startAutoAnalyze(){calls.analysis++;},fetch
   });
   vm.runInContext(sourceLoader,context);

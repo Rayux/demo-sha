@@ -16,6 +16,7 @@ const ui = {
   playhead: $("#playhead"),
   play: $("#play-clip"),
   playFull: $("#play-full"),
+  playLibrary: $("#play-library"),
   back: $("#back-5"),
   forward: $("#forward-3"),
   backLabel: $("#back-label"),
@@ -96,6 +97,10 @@ const state = {
   autoAnalyzePaused: false,
   analyzingIndex: -1,
   source: null,
+  library: [],
+  playLibrary: false,
+  playFullTrack: false,
+  playbackGeneration: 0,
   audioBuffer: null,
   clips: [],
   active: 0,
@@ -351,6 +356,8 @@ function renderTranslationVisibility() {
 }
 
 function renderLibrary(files) {
+  files = [...files].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  state.library = files;
   const countStr = String(files.length);
   const countPop = $("#library-count");
   if (countPop) countPop.textContent = countStr;
@@ -493,7 +500,7 @@ function resetLesson() {
   stopAutoAnalyze();
 }
 
-async function setSource({ name, url, file = null }) {
+async function setSource({ name, url, file = null }, { continuousLibrary = false } = {}) {
   if (state.recorder?.state === "recording") return toast("Stop your recording before changing audio.");
   cancelPracticePlayback();
   if (state.loadedObjectUrl) URL.revokeObjectURL(state.loadedObjectUrl);
@@ -511,6 +518,7 @@ async function setSource({ name, url, file = null }) {
   }
   markActiveSource();
   resetLesson();
+  if (continuousLibrary) startFullPlayback(true);
   const studio = $("#studio");
   studio.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
   studio.focus({ preventScroll: true });
@@ -828,7 +836,7 @@ function renderActiveClip(preventAudioInterrupt = false) {
   renderAnalyzeButton(clip);
   ui.chatContext.textContent = clip.japanese || `Clip ${state.active + 1}: add a transcript or analyze this short audio clip.`;
   
-  if (!preventAudioInterrupt) {
+  if (!preventAudioInterrupt && !state.playFullTrack) {
     restartClip(false);
   }
 }
@@ -836,6 +844,7 @@ function renderActiveClip(preventAudioInterrupt = false) {
 function selectClip(index, autoPlay = false) {
   if (!state.clips.length) return;
   if (state.recorder?.state === "recording") return toast("Stop your recording before changing clips.");
+  if (state.playFullTrack) cancelPracticePlayback();
   const nextIndex = Math.max(0, Math.min(state.clips.length - 1, index));
   if (nextIndex === state.active && !ui.stage.classList.contains("hidden")) {
     if (autoPlay) {
@@ -905,7 +914,9 @@ function cancelPendingRecording() {
 function cancelPracticePlayback() {
   state.playbackActive = false;
   state.playFullTrack = false;
-  if (ui.playFull) ui.playFull.textContent = "Play All";
+  state.playLibrary = false;
+  state.playbackGeneration += 1;
+  renderFullPlaybackButtons();
   ui.audio.pause();
   cancelPendingRecording();
 }
@@ -962,6 +973,10 @@ function monitorPlayback() {
 }
 
 function beginClipPlayback() {
+  state.playFullTrack = false;
+  state.playLibrary = false;
+  state.playbackGeneration += 1;
+  renderFullPlaybackButtons();
   state.playbackActive = true;
   ui.recordStatus.textContent = "LISTENING";
   cancelAnimationFrame(playbackLoopId);
@@ -1042,50 +1057,71 @@ function togglePlay() {
   }
 }
 
+function renderFullPlaybackButtons() {
+  const playing = state.playFullTrack && !ui.audio.paused;
+  ui.playFull.textContent = playing && !state.playLibrary ? "Pause All" : "Play All";
+  ui.playFull.setAttribute("aria-pressed", String(playing && !state.playLibrary));
+  ui.playLibrary.textContent = playing && state.playLibrary ? "Pause Full" : "Play Full";
+  ui.playLibrary.setAttribute("aria-pressed", String(playing && state.playLibrary));
+}
+
+function startFullPlayback(continuousLibrary = false) {
+  cancelPracticePlayback();
+  state.playFullTrack = true;
+  state.playLibrary = continuousLibrary;
+  const generation = state.playbackGeneration;
+  ui.audio.playbackRate = state.rate;
+  if (ui.audio.ended) ui.audio.currentTime = 0;
+  cancelAnimationFrame(playbackLoopId);
+  ui.audio.play().then(() => {
+    if (generation === state.playbackGeneration) renderFullPlaybackButtons();
+  }).catch(() => {
+    if (generation !== state.playbackGeneration) return;
+    cancelPracticePlayback();
+    toast("The audio could not start. Press play to try again.");
+  });
+}
+
 function toggleFullPlayback() {
   if (!state.source) return toast("Load an audio track first.");
   if (state.recorder?.state === "recording") return toast("Stop your recording first.");
-  
-  if (state.playFullTrack && !ui.audio.paused) {
-    state.playFullTrack = false;
+  if (state.playFullTrack && !state.playLibrary && !ui.audio.paused) return cancelPracticePlayback();
+  startFullPlayback();
+}
+
+function toggleLibraryPlayback() {
+  if (!state.library.length) return toast("Load the audio library first.");
+  if (state.recorder?.state === "recording") return toast("Stop your recording first.");
+  if (state.playLibrary && !ui.audio.paused) return cancelPracticePlayback();
+  const index = state.library.findIndex(track => track.name === state.source?.name && !state.source?.file);
+  if (index === -1) {
+    void setSource(state.library[0], { continuousLibrary: true });
+  } else {
+    startFullPlayback(true);
+  }
+}
+
+function syncFullPlaybackClip() {
+  if (!state.playFullTrack) return;
+  const time = ui.audio.currentTime;
+  const index = state.clips.findIndex(clip => time >= clip.start && time < clip.end);
+  if (index !== -1 && index !== state.active) {
+    state.active = index;
+    renderActiveClip(true);
+  }
+}
+
+function handleAudioEnded() {
+  if (!ui.audio.ended) return;
+  if (state.playLibrary && state.library.length) {
+    const index = state.library.findIndex(track => track.name === state.source?.name);
+    const next = state.library[(index + 1) % state.library.length];
+    void setSource(next, { continuousLibrary: true });
+  } else if (state.playFullTrack) {
     cancelPracticePlayback();
-    ui.playFull.textContent = "Play All";
-    return;
+  } else {
+    finishClipPlayback();
   }
-  
-  cancelPendingRecording();
-  state.playFullTrack = true;
-  state.playbackActive = false; // Disable clip bounds checking
-  ui.audio.playbackRate = state.rate;
-  ui.playFull.textContent = "Pause All";
-  
-  cancelAnimationFrame(playbackLoopId);
-  function monitorFullPlayback() {
-    if (!state.playFullTrack) return;
-    if (ui.audio.ended || ui.audio.paused) {
-      state.playFullTrack = false;
-      ui.playFull.textContent = "Play All";
-      return;
-    }
-    
-    const time = ui.audio.currentTime;
-    const currentIdx = state.clips.findIndex(c => time >= c.start && time < c.end);
-    if (currentIdx !== -1 && currentIdx !== state.active) {
-      state.active = currentIdx;
-      renderActiveClip(true);
-    }
-    
-    updateTransportProgress();
-    playbackLoopId = requestAnimationFrame(monitorFullPlayback);
-  }
-  
-  ui.audio.play().then(() => {
-    playbackLoopId = requestAnimationFrame(monitorFullPlayback);
-  }).catch(() => {
-    state.playFullTrack = false;
-    ui.playFull.textContent = "Play All";
-    toast("The audio could not start.");
-  });
 }
 
 function seekBy(amount) {
@@ -1991,6 +2027,7 @@ ui.previous.addEventListener("click", () => selectClip(state.active - 1, true));
 ui.next.addEventListener("click", () => selectClip(state.active + 1, true));
 ui.play.addEventListener("click", togglePlay);
 ui.playFull.addEventListener("click", toggleFullPlayback);
+ui.playLibrary.addEventListener("click", toggleLibraryPlayback);
 ui.back.addEventListener("click", () => seekBy(-state.jumpLength));
 ui.forward.addEventListener("click", () => seekBy(state.jumpLength));
 ui.loop.addEventListener("click", () => {
@@ -2146,19 +2183,24 @@ function initSelectionTooltip() {
 }
 
 ui.audio.addEventListener("timeupdate", () => {
+  syncFullPlaybackClip();
   const clip = currentClip();
   if (!clip) return;
   if (state.playbackActive && (!ui.audio.paused || ui.audio.ended) && ui.audio.currentTime >= clip.end - .025) finishClipPlayback();
   updateTransportProgress();
 });
-ui.audio.addEventListener("ended", () => { if (ui.audio.ended) finishClipPlayback(); });
+ui.audio.addEventListener("ended", handleAudioEnded);
+["play", "pause"].forEach(event => ui.audio.addEventListener(event, renderFullPlaybackButtons));
 ui.audio.addEventListener("play", () => { ui.attemptAudio.pause(); ui.play.innerHTML = '<svg class="ui-icon" fill="currentColor" aria-hidden="true" width="24" height="24"><use href="#icon-pause"/></svg>'; ui.play.setAttribute("aria-label", "Pause current clip"); $(".shadowing-deck")?.classList.add("is-playing"); });
 ui.audio.addEventListener("pause", () => { ui.play.innerHTML = '<svg class="ui-icon" fill="currentColor" aria-hidden="true" width="24" height="24"><use href="#icon-play"/></svg>'; ui.play.setAttribute("aria-label", "Play current clip"); $(".shadowing-deck")?.classList.remove("is-playing"); });
 ui.audio.addEventListener("loadedmetadata", () => {
   ui.scan.disabled = false;
   if (ui.scanClassic) ui.scanClassic.disabled = false;
 });
-ui.audio.addEventListener("error", () => toast("This file could not be played in the browser."));
+ui.audio.addEventListener("error", () => {
+  cancelPracticePlayback();
+  toast("This file could not be played in the browser. Select a track and press Play Full to retry.");
+});
 
 setUIDesign(state.uiDesign);
 renderPlaybackMode();
