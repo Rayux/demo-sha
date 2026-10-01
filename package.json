@@ -5,7 +5,13 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "build:static": "node -e 'const fs=require(\"fs\"); const files=fs.readdirSync(\"audio\").filter(f=>/\\.(mp3|mp4|m4a|wav)$/i.test(f)).sort(); fs.mkdirSync(\"public/data\",{recursive:true}); fs.writeFileSync(\"public/data/library.json\", JSON.stringify({files: files.map(name=>({name, url: \"./audio/\"+encodeURIComponent(name)}))}, null, 2)); console.log(\"Static library updated.\");'"
+    "build:static": "node -e 'const fs=require(\"fs\"); const files=fs.readdirSync(\"audio\").filter(f=>/\\.(mp3|mp4|m4a|wav)$/i.test(f)).sort(); fs.mkdirSync(\"public/data\",{recursive:true}); fs.writeFileSync(\"public/data/library.json\", JSON.stringify({files: files.map(name=>({name, url: \"./audio/\"+encodeURIComponent(name)}))}, null, 2)); console.log(\"Static library updated.\");'",
+    "subtitles:setup": "bash scripts/local-subtitles/setup.sh",
+    "subtitles:start": "bash scripts/local-subtitles/run.sh",
+    "test:extension": "node --test extension/tests/*.test.mjs scripts/local-subtitles/*.test.mjs",
+    "subtitles:autostart": "node scripts/local-subtitles/autostart.mjs install",
+    "subtitles:autostart:remove": "node scripts/local-subtitles/autostart.mjs remove",
+    "subtitles:status": "node scripts/local-subtitles/autostart.mjs status"
   },
   "dependencies": {
     "@google-cloud/firestore": "^9.2.0",

@@ -4,3 +4,5 @@
 node_modules/
 .DS_Store
 practice-data.json
+.local-subtitles/
+scripts/local-subtitles/__pycache__/

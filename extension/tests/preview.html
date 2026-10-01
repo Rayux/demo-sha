@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kage extension preview</title>
+<link rel="stylesheet" href="/content/content.css?v=1.7.6">
+<style>body{margin:0;background:#273530;color:#eef0e7;font-family:system-ui} .stage{position:relative;height:100vh;overflow:hidden;background:radial-gradient(ellipse at 25% 20%,#67785b 0,transparent 45%),linear-gradient(130deg,#36473c,#172d2a 65%)} .scene{position:absolute;left:8%;top:28%;width:48%;height:35%;border:12px solid #1a2823;background:repeating-linear-gradient(90deg,#91a37d50 0 15%,#1d332850 15% 16%);box-shadow:0 20px 60px #0004} .label{position:absolute;left:5%;top:6%;font-size:11px;letter-spacing:3px;color:#c9d8c0}.fixture-info{position:absolute;left:5%;bottom:3%;font:11px system-ui;color:#b3c0b5}video{width:100%;height:100%}.kage-subtitle-container{width:55%;left:31%;bottom:12%}.player-timedtext{position:absolute;bottom:20%;left:15%}</style>
+<div class="stage html5-video-player"><div class="label">KAGE · INTERACTIVE TEST FIXTURE</div><div class="scene"></div><button id="fixtureNext" style="position:absolute;top:12%;left:5%;z-index:1">Next test subtitle</button><video></video><div class="player-timedtext"><div class="player-timedtext-text-container">俺様にその体を預ければな</div></div><div class="fixture-info" id="fixtureStatus">Loading test fixture…</div></div>
+<script src="/tests/tutor-preview.js"></script>
+<script>
+const settingHandlers=[];const modelState={enabled:true,apiModel:'gemma2',autoTranslate:'true',groqFallback:false};
+window.fixtureCalls=[];
+window.chrome={runtime:{connect:window.fixtureTutorConnect,getURL:path=>location.origin+'/'+path,onMessage:{addListener(){}},sendMessage:async message=>{fixtureCalls.push(message);if(message.type==='ASK_AI'){await new Promise(r=>setTimeout(r,250));return {success:true,answer:'「ですね」用來表達感受，也帶有向對方確認的語氣。\n\n這句話的意思是「今天天氣真好呢」。適合用在輕鬆的日常對話中。'};}if(message.type==='PROCESS_SUBTITLE')return {success:true,data:{sentence_translation:'把身體交給本大爺就行了。',chunks:[{japanese:message.text}]}};return {success:true};}},storage:{local:{get:async()=>modelState},onChanged:{addListener(fn){settingHandlers.push(fn)}}}};
+Object.defineProperty(document.querySelector('video'),'readyState',{value:4});Object.defineProperty(document.querySelector('video'),'currentTime',{value:1,writable:true});
+</script>
+<script src="/vendor/kuromoji/kuromoji.js"></script><script src="/content/subtitles.js"></script><script src="/content/readings.js"></script><script src="/content/prepare.js"></script><script src="/content/tutor.js?v=1.7.2"></script><script src="/content/content.js"></script>
+<script>
+(async()=>{await KageReadings.ready; await new Promise(r=>setTimeout(r,100));const v=document.querySelector('video');const source=document.querySelector('.player-timedtext-text-container');
+// Preview runs on localhost; install its native-caption selector without modifying production code.
+source.classList.add('ytp-caption-segment');sync();await new Promise(r=>setTimeout(r,50));
+document.querySelector('.kage-launcher').click();
+const japaneseCues=Array.from({length:20},(_,id)=>({start:id*3,end:id*3+3,text:id===0?'俺様にその体を預ければな':'字幕'+id,id}));tracks.set('preview-ja',japaneseCues);sync();
+const chunks=KageReadings.chunks('俺様にその体を預ければな');const valid=chunks.map(c=>c.japanese).join('')==='俺様にその体を預ければな'&&chunks.filter(c=>/[一-龯]/.test(c.japanese)).every(c=>c.furigana);
+document.getElementById('fixtureStatus').textContent=valid?'PASS · real dictionary loaded · Japanese text preserved · kanji readings present':'FAIL · dictionary readings';
+document.getElementById('fixtureNext').addEventListener('click', () => {
+source.textContent = source.textContent === '俺様にその体を預ければな' ? '明日も一緒に勉強しよう。' : '俺様にその体を預ければな';
+sync();
+});
+window.fixtureReady=true;
+})();
+</script></html>
