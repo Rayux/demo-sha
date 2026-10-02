@@ -5,7 +5,7 @@ body.kage-has-subtitle .bpx-player-subtitle-panel-text,
 body.kage-has-subtitle .bilibili-player-video-subtitle { opacity: 0 !important; }
 .kage-subtitle-container { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); width: min(90%, 1100px); z-index: 2147483600; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: auto; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans JP', sans-serif; }
 .kage-pills-wrapper { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; width: fit-content; max-width: 100%; }
-.kage-pill { box-sizing: border-box; padding: 9px 16px; border-radius: 12px; background: rgba(15, 19, 25, 0.4); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: #fff; max-width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.1); }
+.kage-pill { box-sizing: border-box; padding: 9px 16px; border-radius: 10px; background: rgba(15, 19, 25, .5); color: #fff; max-width: 100%; box-shadow: 0 3px 18px #0003; }
 /* Japanese sets the shared box width; longer Chinese wraps within that width. */
 .kage-chinese-pill, .kage-pills-wrapper > .kage-reading-status { contain: inline-size; overflow-wrap: anywhere; }
 .kage-subtitle-container .kage-japanese { display: block; text-align: center; font-size: clamp(20px, 2vw, 28px); line-height: 1.5; font-weight: 500; color: #fafafa; letter-spacing: normal; word-spacing: normal; }
