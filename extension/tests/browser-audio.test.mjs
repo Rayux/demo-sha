@@ -158,3 +158,40 @@ test('bounded combined MP4 browser fallback is handed to the helper as a matchin
   const file = await pending;
   assert.equal(file.type, 'video/mp4'); assert.equal(file.name, 'YouTube-KGbMdRhWFz4.mp4');
 });
+
+test('streamed Bilibili audio resolves before the download ends and is read in order as pieces arrive', async () => {
+  const h = harness();
+  const pending = h.api.download();
+  assert.equal(h.request().stream, true);
+  h.reply('STREAM', { total: 5, mimeType: 'audio/mp4', name: 'Bilibili ep84340 (browser audio).m4a' });
+  const source = await pending;
+  assert.equal(source.size, 5); assert.equal(source.name, 'Bilibili ep84340 (browser audio).m4a');
+  const first = source.slice(0, 3).arrayBuffer();
+  h.reply('CHUNK', { bytes: new Uint8Array([1, 2]).buffer, received: 2 });
+  h.reply('CHUNK', { bytes: new Uint8Array([3, 4]).buffer, received: 4 });
+  assert.deepEqual([...new Uint8Array(await first)], [1, 2, 3]);
+  const rest = source.slice(3, 5).arrayBuffer();
+  h.reply('CHUNK', { bytes: new Uint8Array([5]).buffer, received: 5 });
+  h.reply('END', { received: 5 });
+  assert.deepEqual([...new Uint8Array(await rest)], [4, 5]);
+  assert.equal(h.listeners.size, 0); assert.equal(h.intervals.size, 0);
+  assert.equal(h.posts.filter(post => post.data.type === 'KAGE_BROWSER_AUDIO_CANCEL').length, 0);
+});
+
+test('a streamed download that fails or is closed early stops the page transfer', async () => {
+  const h = harness();
+  const pending = h.api.download();
+  h.reply('STREAM', { total: 4, mimeType: 'audio/mp4' });
+  const source = await pending;
+  const read = source.slice(0, 4).arrayBuffer();
+  h.reply('ERROR', { error: 'Browser audio download stalled.' });
+  await assert.rejects(read, /stalled/);
+  assert.equal(h.listeners.size, 0);
+
+  const g = harness();
+  const next = g.api.download();
+  g.reply('STREAM', { total: 4, mimeType: 'audio/mp4' });
+  (await next).close();
+  assert.equal(g.posts.filter(post => post.data.type === 'KAGE_BROWSER_AUDIO_CANCEL').length, 1);
+  assert.equal(g.listeners.size, 0); assert.equal(g.intervals.size, 0);
+});

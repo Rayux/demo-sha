@@ -104,6 +104,7 @@
           startAnime1Download(data.src);
           return;
         }
+        if (data.type === 'KAGE_BROWSER_AUDIO_STREAM') { startStream(data); return; }
         if (!TYPES.has(data.type)) return;
         if (data.type === 'KAGE_BROWSER_AUDIO_ERROR') {
           complete(new Error(typeof data.error === 'string' && data.error.trim() ? data.error.slice(0, 1000) : 'Could not fetch audio from this player.'));
@@ -127,6 +128,78 @@
           const fileName = name && name.toLowerCase().endsWith(`.${extension}`) ? name : `browser-audio.${extension}`;
           complete(null, new File([data.bytes], fileName, { type: mimeType }));
         }
+      }
+      // Bilibili: the page streams pieces while it downloads. Resolve at once
+      // with a File-like source the importer uploads in order, so the helper
+      // transcribes during the download instead of after it.
+      function startStream(data) {
+        const size = data.total;
+        const mimeType = String(data.mimeType || '').toLowerCase().split(';')[0].trim();
+        const extension = MIME_EXTENSIONS.get(mimeType);
+        if (!Number.isSafeInteger(size) || size <= 0 || size > MAX_BYTES) {
+          complete(new Error('Browser audio is larger than 128 MiB. Import a local audio file instead.'), null, true); return;
+        }
+        if (!extension) { complete(new Error('The browser returned an unsupported audio format.'), null, true); return; }
+        const name = typeof data.name === 'string' ? data.name.replace(/[\x00-\x1f/\\]/g, '_').slice(0, 180) : '';
+        const fileName = name && name.toLowerCase().endsWith(`.${extension}`) ? name : `browser-audio.${extension}`;
+        const pieces = [];
+        let buffered = 0, arrived = 0, consumed = 0, ended = false, broken = null, waiting = null, open = true;
+        const settle = () => {
+          if (!waiting) return;
+          if (broken) { const { reject: rejectRead } = waiting; waiting = null; rejectRead(broken); return; }
+          if (buffered < waiting.want && !ended) return;
+          const { resolve: resolveRead, want } = waiting; waiting = null;
+          if (buffered < want) { breakStream(new Error('Browser audio download was incomplete. Refresh the episode and try again.')); return; }
+          const out = new Uint8Array(want);
+          let filled = 0;
+          while (filled < want) {
+            const head = pieces[0], take = Math.min(head.byteLength, want - filled);
+            out.set(head.subarray(0, take), filled); filled += take;
+            if (take === head.byteLength) pieces.shift(); else pieces[0] = head.subarray(take);
+          }
+          buffered -= want; consumed += want;
+          if (consumed >= size) close(false);
+          resolveRead(out.buffer);
+        };
+        function breakStream(error) { broken ||= error; close(true); settle(); }
+        function close(cancel = true) {
+          if (!open) return;
+          open = false;
+          window.removeEventListener('message', streamed);
+          clearInterval(watch);
+          pieces.length = 0; buffered = 0;
+          if (cancel && !ended) post('KAGE_BROWSER_AUDIO_CANCEL');
+        }
+        function streamed(event) {
+          const item = event.data;
+          if (!open || event.source !== window || event.origin !== origin || !item || item.requestId !== requestId || item.page !== currentPage) return;
+          if (item.type === 'KAGE_BROWSER_AUDIO_CHUNK') {
+            if (!(item.bytes instanceof ArrayBuffer) || !item.bytes.byteLength || arrived + item.bytes.byteLength > size) {
+              breakStream(new Error('The browser returned invalid audio. Refresh the episode and try again.')); return;
+            }
+            pieces.push(new Uint8Array(item.bytes)); buffered += item.bytes.byteLength; arrived += item.bytes.byteLength;
+            settle();
+          } else if (item.type === 'KAGE_BROWSER_AUDIO_END') {
+            if (arrived !== size) { breakStream(new Error('Browser audio download was incomplete. Refresh the episode and try again.')); return; }
+            ended = true; settle();
+          } else if (item.type === 'KAGE_BROWSER_AUDIO_ERROR') {
+            ended = true;
+            breakStream(new Error(typeof item.error === 'string' && item.error.trim() ? item.error.slice(0, 1000) : 'Could not fetch audio from this player.'));
+          }
+        }
+        const watch = setInterval(() => {
+          if (page() !== currentPage) breakStream(abortError('Browser audio stopped after leaving this video.'));
+        }, 500);
+        function pull(start, end) {
+          if (broken) return Promise.reject(broken);
+          const want = Math.min(end, size) - start;
+          if (start !== consumed || waiting || want <= 0) return Promise.reject(new Error('Browser audio was read out of order. Start preparation again.'));
+          return new Promise((resolveRead, rejectRead) => { waiting = { resolve: resolveRead, reject: rejectRead, want }; settle(); });
+        }
+        window.addEventListener('message', streamed);
+        // Stop the request's own listener and timers; the stream listener owns the transfer now.
+        complete(null, { name: fileName, size, type: mimeType, close: () => close(true),
+          slice: (start = 0, end = size) => ({ arrayBuffer: () => pull(start, end) }) });
       }
       // anime1.me: the page hands over the signed MP4 URL and the extension's
       // service worker downloads it (the CDN's CORS policy blocks the page).
@@ -199,7 +272,7 @@
           if (!finished) window.postMessage({ type: 'KAGE_BROWSER_AUDIO_REQUEST', requestId, page: currentPage,
             transport: reply?.success && reply.data?.available === true ? 'extension' : 'page' }, origin);
         }).catch(() => { if (!finished) post('KAGE_BROWSER_AUDIO_REQUEST'); });
-      } else post('KAGE_BROWSER_AUDIO_REQUEST');
+      } else window.postMessage({ type: 'KAGE_BROWSER_AUDIO_REQUEST', requestId, page: currentPage, stream: true }, origin);
     });
   }
 

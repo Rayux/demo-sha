@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import http from 'node:http';
 import { spawn } from 'node:child_process';
-import { createSubtitleService, splitLongCues, validateResult } from './server.mjs';
+import { createSubtitleService, splitLongCues, validateResult, streamableMedia } from './server.mjs';
 import { validateTranslationConfig } from './translation.mjs';
 
 const fixture = fileURLToPath(new URL('./fixtures/worker.mjs', import.meta.url));
@@ -1091,4 +1091,48 @@ test('YouTube audio jobs prepare both languages and recover by exact canonical v
     'https://user:pass@www.youtube.com/watch?v=dQw4w9WgXcQ']) {
     assert.equal((await client.call('/jobs', { method: 'POST', json: { sourceUrl } })).status, 400);
   }
+});
+
+test('only containers that decode front to back are transcribed while uploading', () => {
+  const box = (type, length) => { const b = Buffer.alloc(length); b.writeUInt32BE(length, 0); b.write(type, 4, 'latin1'); return b; };
+  assert.equal(streamableMedia(Buffer.concat([box('ftyp', 24), box('moov', 64), box('mdat', 16)]), 104), true);
+  assert.equal(streamableMedia(Buffer.concat([box('ftyp', 24), box('free', 8), box('mdat', 4096)]), 8192), false);
+  assert.equal(streamableMedia(box('ftyp', 24), 1000), null);
+  assert.equal(streamableMedia(Buffer.from('ID3\x04rest'), 100), true);
+  assert.equal(streamableMedia(Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0, 0, 0, 0]), 100), true);
+  assert.equal(streamableMedia(Buffer.from('not media at all'), 100), false);
+});
+
+const followFixture = fileURLToPath(new URL('./fixtures/follow-worker.mjs', import.meta.url));
+test('streamed uploads show the first lines before the upload finishes, then translate after start', async t => {
+  const client = await start(t, { worker: followFixture, streamUploads: true,
+    fetchImpl: async (_url, init) => translatedResponse(requestedItems(init)) });
+  const media = Buffer.concat([Buffer.from('ID3\x04'), Buffer.alloc(60)]);
+  const created = await client.call('/jobs', { method: 'POST', json: { name: 'episode.mp3', size: media.length } });
+  const id = created.value.id;
+  assert.equal((await client.call(`/jobs/${id}/audio?offset=0`, { method: 'PUT', bytes: media.subarray(0, 32) })).status, 200);
+  const early = await waitJob(client, id, ['preparing'], job => job.cues?.length === 1);
+  assert.equal(early.cues[0].text, 'はい。');
+  assert.equal(early.received, 32);
+  assert.equal((await client.call(`/jobs/${id}/start`, { method: 'POST', json: { translation } })).status, 409);
+  assert.equal((await client.call(`/jobs/${id}/audio?offset=32`, { method: 'PUT', bytes: media.subarray(32) })).status, 200);
+  assert.equal((await client.call(`/jobs/${id}/start`, { method: 'POST', json: { translation } })).status, 202);
+  const job = await waitJob(client, id);
+  assert.equal(job.state, 'complete');
+  assert.deepEqual(job.cues.map(cue => cue.text), ['はい。', 'いいえ。']);
+  assert.ok(job.cues.every(cue => cue.translation));
+  await missing(path.join(client.dataDir, 'jobs', id, 'input.media'));
+});
+
+test('non-streamable MP4 uploads wait for the whole file as before', async t => {
+  const client = await start(t, { worker: followFixture, streamUploads: true });
+  const head = Buffer.alloc(16); head.writeUInt32BE(16, 0); head.write('ftyp', 4, 'latin1');
+  const mdat = Buffer.alloc(32); mdat.writeUInt32BE(32, 0); mdat.write('mdat', 4, 'latin1');
+  const media = Buffer.concat([head, mdat]);
+  const created = await client.call('/jobs', { method: 'POST', json: { name: 'episode.mp4', size: media.length } });
+  const id = created.value.id;
+  await client.call(`/jobs/${id}/audio?offset=0`, { method: 'PUT', bytes: media.subarray(0, 24) });
+  const status = (await client.call(`/jobs/${id}`)).value;
+  assert.equal(status.state, 'uploading');
+  assert.equal(status.streaming, false);
 });

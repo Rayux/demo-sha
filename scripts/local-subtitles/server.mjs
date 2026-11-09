@@ -21,6 +21,33 @@ const MAX_DURATION = 6 * 3600;
 const TERMINAL = new Set(['complete', 'error', 'translation_error', 'cancelled']);
 const RETENTION_MS = 3 * 24 * 60 * 60 * 1000;
 const VIDEO_CONCURRENCY = 2;
+// Transcription may begin before an upload finishes once the container can be
+// decoded front to back (fragmented/faststart MP4, WebM, MP3, Ogg, WAV, FLAC).
+const STREAM_PROBE_BYTES = 8 * 1024 ** 2;
+const STANDBY_IDLE_MS = 10 * 60 * 1000;
+export function streamableMedia(prefix, size) {
+  if (prefix.length >= 4) {
+    const magic = prefix.subarray(0, 4).toString('latin1');
+    if (magic === '\x1aE\xdf\xa3' || magic === 'OggS' || magic === 'fLaC' || magic === 'RIFF' || magic.startsWith('ID3')) return true;
+    if (prefix[0] === 0xff && (prefix[1] & 0xe0) === 0xe0) return true; // MPEG audio frame
+  }
+  if (prefix.length < 8) return null;
+  if (prefix.subarray(4, 8).toString('latin1') !== 'ftyp') return false;
+  let offset = 0;
+  while (offset + 8 <= prefix.length) {
+    let length = prefix.readUInt32BE(offset);
+    const type = prefix.subarray(offset + 4, offset + 8).toString('latin1');
+    if (type === 'moov') return true;
+    if (type === 'mdat') return false; // Index at the end: needs the whole file.
+    if (length === 1) {
+      if (offset + 16 > prefix.length) return null;
+      length = Number(prefix.readBigUInt64BE(offset + 8));
+    }
+    if (length < 8 || offset + length > size) return false;
+    offset += length;
+  }
+  return null;
+}
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 
 class HttpError extends Error {
@@ -109,6 +136,9 @@ export async function createSubtitleService(options = {}) {
   const python = options.python || process.env.KAGE_SUBTITLES_PYTHON || path.join(dataDir, 'venv/bin/python');
   const worker = options.worker || path.join(HERE, 'worker.py');
   const modelDir = options.modelDir || process.env.KAGE_WHISPER_MODEL || path.join(dataDir, 'model');
+  // Both default on only for the real MLX worker; test fixtures opt in.
+  const streamUploads = options.streamUploads ?? !options.worker;
+  const useStandby = options.standbyWorker ?? !options.worker;
   const parallelStages = options.parallelStages ?? process.env.KAGE_PIPELINE_PARALLEL !== '0';
   const translationBatchSize = Number(options.translationBatchSize ?? process.env.KAGE_TRANSLATION_BATCH_SIZE ?? DEFAULT_BATCH_SIZE);
   if (!Number.isInteger(translationBatchSize) || translationBatchSize < 1 || translationBatchSize > 12) throw new Error('Translation batch size must be between 1 and 12.');
@@ -233,6 +263,27 @@ export async function createSubtitleService(options = {}) {
     }
   }
 
+  // One warm worker (model loaded, kernels compiled) waits for the next job, so
+  // the first section does not pay several seconds of Python and model startup.
+  let standby = null, standbyTimer = null;
+  function warmStandby() {
+    if (!useStandby || closing || !ready || standby) return;
+    let child;
+    try {
+      child = spawn(python, [worker, '--standby', '--model', modelDir], { env: workerEnv(), detached: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    } catch { return; }
+    standby = child;
+    child.once('error', () => { if (standby === child) standby = null; });
+    child.once('close', () => { if (standby === child) { standby = null; clearTimeout(standbyTimer); } });
+    clearTimeout(standbyTimer);
+    standbyTimer = setTimeout(() => { if (standby === child) { standby = null; stopChild(child); } }, STANDBY_IDLE_MS);
+    standbyTimer.unref();
+  }
+  function takeStandby() {
+    const child = standby;
+    standby = null; clearTimeout(standbyTimer);
+    return child && child.exitCode === null && child.signalCode === null && child.stdin?.writable ? child : null;
+  }
   const workerEnv = () => ({ ...process.env, HF_HUB_OFFLINE: '1', HF_HUB_DISABLE_TELEMETRY: '1',
     TOKENIZERS_PARALLELISM: 'false', PYTHONUNBUFFERED: '1', KAGE_NODE: process.execPath });
   async function probe() {
@@ -268,8 +319,15 @@ export async function createSubtitleService(options = {}) {
     await save(job);
     operation.controller.signal.throwIfAborted();
     return new Promise((resolve, reject) => {
-      const child = spawn(python, [worker, ...(remote ? ['--url', job.sourceUrl] : ['--input', mediaPath(job.id)]), '--output', resultPath(job.id), '--model', modelDir],
+      const follow = job.streaming && !remote ? job.size : null;
+      const spec = { ...(remote ? { url: job.sourceUrl } : { input: mediaPath(job.id) }), output: resultPath(job.id), ...(follow ? { followBytes: follow } : {}) };
+      let child = takeStandby();
+      if (child) child.stdin.end(JSON.stringify(spec) + '\n');
+      else child = spawn(python, [worker, ...(remote ? ['--url', job.sourceUrl] : ['--input', mediaPath(job.id)]),
+        ...(follow ? ['--follow-bytes', String(follow)] : []), '--output', resultPath(job.id), '--model', modelDir],
         { env: workerEnv(), detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      // Keep the next job warm while this one runs.
+      if (queue.length) warmStandby();
       operation.child = child;
       let stderr = '';
       let buffer = '';
@@ -502,6 +560,7 @@ export async function createSubtitleService(options = {}) {
         if (!stat.size || stat.size > MAX_UPLOAD) throw new Error('Downloaded video is empty or exceeds 4 GiB.');
         job.size = stat.size; job.received = stat.size;
       }
+      operation.startTranslation = startTranslation;
       if (!Array.isArray(job.cues)) {
         operation.workerStarted = performance.now();
         try { Object.assign(job, await transcribe(job, operation, startTranslation)); }
@@ -510,6 +569,14 @@ export async function createSubtitleService(options = {}) {
           delete operation.workerStarted;
         }
       }
+      operation.controller.signal.throwIfAborted();
+      // A streamed upload is complete once /start confirms it (the worker read every byte).
+      if (job.streaming && !job.uploadComplete) await new Promise((resolve, reject) => {
+        const signal = operation.controller.signal;
+        const abort = () => reject(signal.reason || new Error('Processing stopped.'));
+        operation.uploadComplete = () => { signal.removeEventListener('abort', abort); resolve(); };
+        signal.addEventListener('abort', abort, { once: true });
+      });
       operation.controller.signal.throwIfAborted();
       if (job.translation) { job.state = 'translating'; updateTranslationProgress(job); await save(job); }
       // A final chunk can arrive as the previous translation drain finishes.
@@ -584,7 +651,10 @@ export async function createSubtitleService(options = {}) {
       }
       const url = new URL(req.url, `http://127.0.0.1:${port}`);
       if (req.method === 'GET' && url.pathname === '/health') {
-        return reply(200, { ok: true, ready, model: MODEL, token, capabilities: { groqRelay: true, translation: true, translationPriority: true, bilibiliDownload: true, youtubeDownload: true, anime1Pages: true, progressiveSubtitles: true, audioOnly: true, jobQueue: true, recovery: true }, processing: { sectionSeconds: 60, parallelStages, concurrency: VIDEO_CONCURRENCY, translationConcurrency: 1, translationBatchSize }, status: ready ? 'ready' : 'setup_required',
+        // The extension checks health when a video page opens: load Whisper now
+        // so it is warm before the first audio bytes arrive.
+        if (!running.size) warmStandby();
+        return reply(200, { ok: true, ready, model: MODEL, token, capabilities: { groqRelay: true, streamingUploads: true, translation: true, translationPriority: true, bilibiliDownload: true, youtubeDownload: true, anime1Pages: true, progressiveSubtitles: true, audioOnly: true, jobQueue: true, recovery: true }, processing: { sectionSeconds: 60, parallelStages, concurrency: VIDEO_CONCURRENCY, translationConcurrency: 1, translationBatchSize }, status: ready ? 'ready' : 'setup_required',
           ...(!ready ? { error: readinessError } : {}) });
       }
       if (!safeEqual(req.headers['x-kage-token'], token)) fail(401, 'Local service token is missing or expired. Reconnect and retry.');
@@ -643,6 +713,7 @@ export async function createSubtitleService(options = {}) {
         await fs.writeFile(mediaPath(job.id), '', { mode: 0o600, flag: 'wx' });
         await save(job);
         jobs.set(job.id, job);
+        warmStandby();
         return reply(201, { id: job.id });
         } finally { reservedJobs--; reservedBytes -= uploadBytes; }
       }
@@ -677,7 +748,8 @@ export async function createSubtitleService(options = {}) {
       }
       if (match[2] === 'audio' && req.method === 'PUT') {
         if (job.sourceUrl) fail(409, 'This job downloads its media from the video page.');
-        if (job.state !== 'uploading') fail(409, 'This job is no longer accepting uploads.');
+        const streamingUpload = job.streaming && !job.uploadComplete && !TERMINAL.has(job.state);
+        if (job.state !== 'uploading' && !streamingUpload) fail(409, 'This job is no longer accepting uploads.');
         if (uploadLocks.has(job.id)) fail(409, 'Another upload chunk is being written.');
         const offsetText = url.searchParams.get('offset');
         const offset = Number(offsetText);
@@ -699,6 +771,20 @@ export async function createSubtitleService(options = {}) {
             }
           } finally { await handle.close(); }
           job.received += chunk.length;
+          if (streamUploads && job.streaming === undefined && job.state === 'uploading') {
+            const prefix = Buffer.alloc(Math.min(job.received, STREAM_PROBE_BYTES));
+            const reader = await fs.open(mediaPath(job.id), 'r');
+            try { await reader.read(prefix, 0, prefix.length, 0); } finally { await reader.close(); }
+            const decision = streamableMedia(prefix, job.size);
+            if (decision !== null || job.received >= Math.min(job.size, STREAM_PROBE_BYTES)) job.streaming = decision === true;
+            if (job.streaming) {
+              // Transcribe while the rest uploads; the queue starts it like any job.
+              job.state = 'queued'; job.queuedAt = Date.now();
+              job.message = 'Waiting for local transcription…';
+              if (!queue.includes(job.id)) queue.push(job.id);
+              void pump().catch(error => console.error('Subtitle queue error:', error.message));
+            }
+          }
           await save(job);
           return reply(200, { received: job.received });
         } finally { uploadLocks.delete(job.id); }
@@ -710,6 +796,16 @@ export async function createSubtitleService(options = {}) {
         if (Object.hasOwn(spec, 'translation')) {
           try { translation = validateTranslationConfig(spec.translation); }
           catch (error) { fail(400, error.message); }
+        }
+        if (job.streaming && !job.uploadComplete && !TERMINAL.has(job.state)) {
+          if (uploadLocks.has(job.id) || job.received !== job.size) fail(409, 'Upload the complete file before starting.');
+          job.uploadComplete = true;
+          if (translation) job.translation = translation;
+          await save(job);
+          const operation = running.get(job.id);
+          operation?.uploadComplete?.();
+          operation?.startTranslation?.();
+          return reply(202, { ...job, timings: timingSnapshot(job), queuePosition: queuePosition(job), ...prioritySnapshot(job) });
         }
         const resume = job.state === 'translation_error' && Array.isArray(job.cues) && job.transcriptionComplete !== false;
         const addTranslation = job.state === 'complete' && translation && Array.isArray(job.cues) && job.cues.some(cue => !cue.translation?.trim());
@@ -740,7 +836,7 @@ export async function createSubtitleService(options = {}) {
         void removeExpired(job).catch(error => console.error('Subtitle cleanup failed:', error.message));
         continue;
       }
-      if (job.state === 'uploading' && !uploadLocks.has(job.id) && Date.parse(job.updatedAt) < expiredBefore) {
+      if ((job.state === 'uploading' || (job.streaming && !job.uploadComplete && !TERMINAL.has(job.state))) && !uploadLocks.has(job.id) && Date.parse(job.updatedAt) < expiredBefore) {
         void cancel(job, 'Upload expired after being inactive. Import the file again.').catch(error => console.error('Upload cleanup failed:', error.message));
       }
     }
@@ -757,6 +853,8 @@ export async function createSubtitleService(options = {}) {
       groqRelay.close();
       clearTimeout(translationContinuationTimer);
       clearInterval(sweep);
+      clearTimeout(standbyTimer);
+      if (standby) { stopChild(standby); standby = null; }
       const operations = [...running.values()];
       for (const operation of operations) { operation.controller.abort(); stopChild(operation.child); }
       for (const job of jobs.values()) if (!TERMINAL.has(job.state)) {

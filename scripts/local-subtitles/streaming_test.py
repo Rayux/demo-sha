@@ -32,6 +32,13 @@ class StreamingTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'incomplete'):
             list(pcm_windows(io.BytesIO(bytes(3))))
 
+    def test_short_first_section_then_full_sections(self):
+        raw = b''.join(index.to_bytes(2, 'little') for index in range(1300))
+        windows = list(pcm_windows(io.BytesIO(raw), sample_rate=10, first_seconds=30))
+        self.assertEqual([(w['start'], w['end']) for w in windows], [(0, 30), (30, 90), (90, 130)])
+        self.assertEqual([w['offset'] for w in windows], [0, 28, 88])
+        self.assertEqual(windows[1]['raw'], raw[560:1840])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -545,3 +545,18 @@ test('season catalog fallback returns choices and validates selection before res
   assert.equal(h.messages('KAGE_BROWSER_EPISODE_RESULT').at(-1).episodeUrl, EP);
   assert.equal(h.apiCalls.length, 1);
 });
+
+test('a streaming request hands each downloaded piece over instead of one buffer at the end', async () => {
+  const h = harness();
+  await h.metadata(manifest());
+  h.request({ stream: true }); await flush();
+  assert.equal(h.results().length, 0);
+  const [stream] = h.messages('KAGE_BROWSER_AUDIO_STREAM');
+  assert.equal(stream.mimeType, 'audio/mp4');
+  assert.match(stream.name, /ep84340.*\.m4a$/);
+  const chunks = h.messages('KAGE_BROWSER_AUDIO_CHUNK');
+  assert.deepEqual(chunks.flatMap(chunk => [...new Uint8Array(chunk.bytes)]), [1, 2, 3, 4]);
+  assert.equal(h.messages('KAGE_BROWSER_AUDIO_END')[0].received, 4);
+  assert.equal(h.errors().length, 0);
+  assert.equal(h.intervals.size + h.timeouts.size, 0);
+});

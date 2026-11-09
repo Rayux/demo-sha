@@ -388,6 +388,13 @@
       const total = length && /^\d+$/.test(length) ? Number(length) : null;
       if (total > MAX_BYTES) throw new Error('Browser audio is larger than 128 MiB. Import a local audio file instead.');
       post('KAGE_BROWSER_AUDIO_PROGRESS', request, { received: 0, total });
+      const identity = currentIdentity();
+      const suffix = /webm/i.test(selected.mimeType) ? 'webm' : /mpeg/i.test(selected.mimeType) ? 'mp3' : 'm4a';
+      const name = `Bilibili ${identity.episode ? `ep${identity.episode}` : `${identity.bvid} p${identity.part}`} (browser audio).${suffix}`;
+      // Streaming hands each piece over as it arrives, so the helper can start
+      // transcribing during the download instead of after it.
+      const streaming = request.stream === true && total !== null && total > 0;
+      if (streaming) post('KAGE_BROWSER_AUDIO_STREAM', request, { total, mimeType: selected.mimeType, name });
       reader = response.body.getReader();
       while (true) {
         request.controller.signal.throwIfAborted();
@@ -398,8 +405,20 @@
         if (done) break;
         if (!(value instanceof Uint8Array) || received + value.byteLength > MAX_BYTES) throw new Error('Browser audio is larger than 128 MiB. Import a local audio file instead.');
         received += value.byteLength;
+        if (streaming) {
+          if (received > total) throw new Error('Browser audio download was incomplete. Refresh the episode and try again.');
+          const piece = value.slice();
+          post('KAGE_BROWSER_AUDIO_CHUNK', request, { bytes: piece.buffer, received }, [piece.buffer]);
+          continue;
+        }
         chunks.push(value);
         post('KAGE_BROWSER_AUDIO_PROGRESS', request, { received, total });
+      }
+      if (streaming) {
+        if (received !== total) throw new Error('Browser audio download was incomplete. Refresh the episode and try again.');
+        request.finished = true;
+        post('KAGE_BROWSER_AUDIO_END', request, { received });
+        return;
       }
       if (!received || (total !== null && received !== total)) throw new Error('Browser audio download was incomplete. Refresh the episode and try again.');
       const bytes = new Uint8Array(received);
@@ -408,9 +427,7 @@
       chunks = [];
       request.controller.signal.throwIfAborted();
       request.finished = true;
-      const identity = currentIdentity();
-      const suffix = /webm/i.test(selected.mimeType) ? 'webm' : /mpeg/i.test(selected.mimeType) ? 'mp3' : 'm4a';
-      post('KAGE_BROWSER_AUDIO_RESULT', request, { bytes: bytes.buffer, mimeType: selected.mimeType, name: `Bilibili ${identity.episode ? `ep${identity.episode}` : `${identity.bvid} p${identity.part}`} (browser audio).${suffix}` }, [bytes.buffer]);
+      post('KAGE_BROWSER_AUDIO_RESULT', request, { bytes: bytes.buffer, mimeType: selected.mimeType, name }, [bytes.buffer]);
     } catch (error) {
       if (!request.finished) abortSession(request, error?.message || 'Browser audio download failed. Refresh the episode and try again.');
     } finally {
@@ -457,7 +474,7 @@
       return;
     }
     if (message.type !== 'KAGE_BROWSER_AUDIO_REQUEST' || message.page !== canonicalPage(location.href)) return;
-    void acquire({ requestId: message.requestId, page: message.page });
+    void acquire({ requestId: message.requestId, page: message.page, stream: message.stream === true });
   });
   window.addEventListener('pagehide', () => { if (session) abortSession(session, 'Bilibili tab closed or navigated. Browser audio preparation cancelled.'); });
 })();

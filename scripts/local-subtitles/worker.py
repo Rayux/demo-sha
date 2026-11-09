@@ -23,6 +23,10 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 MAX_DURATION = 6 * 3600
 SAMPLE_RATE = 16000
 CHUNK_SECONDS = 60
+# Whisper pads every window to 30 s, so a 30 s opening section costs about a
+# third of a 60 s one and the first lines appear several seconds sooner.
+FIRST_SECONDS = 30
+FOLLOW_IDLE_SECONDS = 120
 CONTEXT_SECONDS = 2
 # Whisper treats this as transcription context, not a system instruction. It can
 # bias recognition toward conversation, but cannot separate simultaneous voices
@@ -116,7 +120,42 @@ def transcribe_window(samples, model, transcriber=None):
     )
 
 
-def transcribe(source, target, model, ffmpeg, url=None):
+def feed_growing_file(source, expected, sink):
+    """Copy an upload that is still being written into FFmpeg, in order.
+
+    The helper appends upload chunks to `source`; transcription starts on the
+    first bytes instead of waiting for the whole file.
+    """
+    sent = 0
+    idle_since = time.monotonic()
+    try:
+        with open(source, 'rb') as handle:
+            while sent < expected:
+                piece = handle.read(min(1024 * 1024, expected - sent))
+                if piece:
+                    sink.write(piece)
+                    sent += len(piece)
+                    idle_since = time.monotonic()
+                    continue
+                if time.monotonic() - idle_since > FOLLOW_IDLE_SECONDS:
+                    raise RuntimeError('The upload stopped before the whole file arrived.')
+                time.sleep(0.02)
+    except (BrokenPipeError, ValueError, OSError):
+        pass  # FFmpeg exited; its exit code reports the failure.
+    finally:
+        try:
+            sink.close()
+        except OSError:
+            pass
+
+
+def warm(model):
+    """Load weights and compile kernels before audio arrives."""
+    import numpy as np
+    transcribe_window(np.zeros(SAMPLE_RATE, dtype=np.float32), model)
+
+
+def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None):
     global decoder
     setup_started = time.perf_counter()
     timings = {}
@@ -136,6 +175,10 @@ def transcribe(source, target, model, ffmpeg, url=None):
         if headers:
             command += ['-headers', headers]
         input_path = media['url']
+    elif follow_bytes:
+        progress(0, "Reading audio while it uploads…")
+        command += ['-protocol_whitelist', 'pipe']
+        input_path = 'pipe:0'
     else:
         progress(0, "Reading audio on this Mac…")
         command += ['-protocol_whitelist', 'file,pipe']
@@ -149,9 +192,15 @@ def transcribe(source, target, model, ffmpeg, url=None):
     # A file avoids stderr pipe deadlocks. Decoder details (including signed URLs)
     # are never returned to the extension or written into durable job records.
     with tempfile.TemporaryFile() as errors:
-        decoder = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=errors)
+        decoder = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=errors,
+                                   stdin=subprocess.PIPE if follow_bytes else subprocess.DEVNULL)
+        if follow_bytes:
+            import threading
+            threading.Thread(target=feed_growing_file, args=(source, follow_bytes, decoder.stdin),
+                             name='upload-follow', daemon=True).start()
         timings['sourceSetupMs'] = (time.perf_counter() - setup_started) * 1000
-        windows = prefetch_one(pcm_windows(decoder.stdout, SAMPLE_RATE, CHUNK_SECONDS, CONTEXT_SECONDS, MAX_DURATION))
+        windows = prefetch_one(pcm_windows(decoder.stdout, SAMPLE_RATE, CHUNK_SECONDS, CONTEXT_SECONDS, MAX_DURATION,
+                                           first_seconds=FIRST_SECONDS))
         try:
             while True:
                 with measure(timings, 'audioWaitMs'):
@@ -209,6 +258,8 @@ def main():
     parser.add_argument("--input", type=Path)
     parser.add_argument("--url")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--follow-bytes", type=int)
+    parser.add_argument("--standby", action="store_true")
     args = parser.parse_args()
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
@@ -218,9 +269,24 @@ def main():
         if args.check:
             print(json.dumps({"ready": True}))
             return
+        if args.standby:
+            # A warm worker: the helper hands it a job on stdin when one arrives.
+            warm(model)
+            print(json.dumps({"type": "standby"}), flush=True)
+            line = sys.stdin.readline()
+            if not line.strip():
+                return
+            spec = json.loads(line)
+            args.input = Path(spec["input"]) if spec.get("input") else None
+            args.url = spec.get("url")
+            args.output = Path(spec["output"])
+            args.follow_bytes = spec.get("followBytes")
         if (not args.input and not args.url) or not args.output:
             parser.error("--input or --url, and --output are required unless --check is used")
-        transcribe(args.input.resolve() if args.input else None, args.output.resolve(), model, ffmpeg, url=args.url)
+        if args.follow_bytes is not None and not (0 < args.follow_bytes <= 4 * 1024 ** 3):
+            parser.error("--follow-bytes must be between 1 byte and 4 GiB")
+        transcribe(args.input.resolve() if args.input else None, args.output.resolve(), model, ffmpeg, url=args.url,
+                   follow_bytes=args.follow_bytes)
     except Exception as error:
         print(str(error), file=sys.stderr, flush=True)
         raise SystemExit(1)

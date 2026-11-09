@@ -2,9 +2,11 @@
 from concurrent.futures import ThreadPoolExecutor
 
 
-def pcm_windows(reader, sample_rate=16000, chunk_seconds=60, context_seconds=2, max_seconds=21600):
+def pcm_windows(reader, sample_rate=16000, chunk_seconds=60, context_seconds=2, max_seconds=21600, first_seconds=None):
+    """first_seconds shortens only the opening section so the first lines arrive sooner."""
     unit = sample_rate * 2
-    step = chunk_seconds * unit
+    full_step = chunk_seconds * unit
+    step = (first_seconds or chunk_seconds) * unit
     context = context_seconds * unit
     history = b''
     ahead = b''
@@ -30,6 +32,7 @@ def pcm_windows(reader, sample_rate=16000, chunk_seconds=60, context_seconds=2, 
         history = (history + ahead[:owned])[-context:] if context else b''
         ahead = ahead[owned:]
         offset = end
+        step = full_step
 
 
 def prefetch_one(iterator):

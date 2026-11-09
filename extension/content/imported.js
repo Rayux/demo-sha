@@ -5,6 +5,7 @@
   const MAX_TRACKS = 15;
   const MAX_STORAGE_BYTES = 3 * 1024 * 1024;
   const CHUNK_BYTES = 256 * 1024;
+  const FIRST_LINES_POLL_MS = 100;
   const MAX_FILE_BYTES = 4 * 1024 * 1024 * 1024;
   const ACTIVE_STATES = new Set(['uploading', 'queued', 'downloading', 'preparing', 'transcribing', 'translating']);
   let loading = null;
@@ -168,7 +169,10 @@
   function schedulePoll(key, generation, jobId) {
     stopPolling();
     if (!validContext(key, generation)) return;
-    timer = setTimeout(() => { timer = null; poll(key, generation, jobId); }, 1000);
+    // Check often until the first lines exist so they appear as soon as the
+    // helper writes them; afterwards new sections arrive about once a minute.
+    const delay = documentState?.cues?.length ? 1000 : FIRST_LINES_POLL_MS;
+    timer = setTimeout(() => { timer = null; poll(key, generation, jobId); }, delay);
   }
   async function poll(key, generation, jobId) {
     if (!validContext(key, generation) || browserAcquisition || uploading || polling || documentState?.job?.id !== jobId) return;
@@ -365,7 +369,8 @@
       if (browserAcquisition !== acquisition || !validContext(key, generation) || acquisition.controller.signal.aborted) return;
       browserAcquisition = null;
       // Reuse the bounded local upload and normal subtitle persistence path.
-      await importFile(file);
+      try { await importFile(file); }
+      finally { try { file?.close?.(); } catch { /* Streaming sources close once. */ } }
     } catch (cause) {
       if (fallbackToDownload && cause.name !== 'AbortError' && browserAcquisition === acquisition
           && validContext(key, generation) && !acquisition.controller.signal.aborted
