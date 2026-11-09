@@ -86,5 +86,59 @@ class DownloadTests(unittest.TestCase):
                 downloader.process_ie_result({'id': 'fixture', 'extractor': 'fixture', 'title': 'fixture', 'formats': [formats[2]]}, download=False)
 
 
+class ResolveAudioTests(unittest.TestCase):
+    def resolve(self, info, url='https://www.youtube.com/watch?v=dQw4w9WgXcQ'):
+        class Downloader:
+            def __init__(self, options):
+                self.options = options
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                pass
+            def extract_info(self, page, download):
+                if 'youtube.com' in page:
+                    assert 'node' in self.options['js_runtimes']
+                assert not download
+                assert 'cookiefile' not in self.options
+                return info
+        with patch.dict('sys.modules', {'yt_dlp': types.SimpleNamespace(YoutubeDL=Downloader)}):
+            return download.resolve_audio(url)
+
+    def test_youtube_audio_only_direct_stream_and_safe_headers(self):
+        info = {'url': 'https://rr1.googlevideo.com/videoplayback?signature=private', 'protocol': 'https',
+                'duration': 120, 'vcodec': 'none', 'http_headers': {'User-Agent': 'fixture', 'Cookie': 'secret', 'Referer': 'bad\r\nheader'}}
+        stream = self.resolve(info)
+        self.assertEqual(stream['mode'], 'audio')
+        self.assertEqual(stream['headers'], {'User-Agent': 'fixture'})
+        for url in ['file:///tmp/media', 'http://127.0.0.1/audio', 'https://googlevideo.com.evil.test/audio',
+                    'https://rr1.bilivideo.com/audio', 'https://rr1.googlevideo.com:444/audio']:
+            with self.assertRaisesRegex(RuntimeError, 'cannot be streamed'):
+                self.resolve({**info, 'url': url})
+        for extra in [{'is_live': True}, {'_type': 'playlist'}, {'duration': 21601}, {'duration': None}, {'protocol': 'm3u8_native'}]:
+            with self.assertRaises(RuntimeError):
+                self.resolve({**info, **extra})
+
+    def test_bilibili_keeps_its_own_cdn_allowlist(self):
+        info = {'url': 'https://upos.bilivideo.com/audio.m4a', 'protocol': 'https', 'duration': 60, 'vcodec': 'none'}
+        self.assertEqual(self.resolve(info, 'https://www.bilibili.com/video/BVtest')['duration'], 60)
+        with self.assertRaisesRegex(RuntimeError, 'cannot be streamed'):
+            self.resolve({**info, 'url': 'https://rr1.googlevideo.com/audio'}, 'https://www.bilibili.com/video/BVtest')
+
+
+class ResolutionErrorTests(unittest.TestCase):
+    def test_unavailable_video_does_not_claim_node_is_outdated_or_leak_signed_urls(self):
+        message = download.resolution_error('YouTube', Exception('Video unavailable https://host/secret?sig=private'))
+        self.assertIn('direct downloader', message)
+        self.assertIn('Prepare browser audio', message)
+        self.assertNotIn('Node', message)
+        self.assertNotIn('private', message)
+        self.assertNotIn('https:', message)
+
+    def test_solver_and_browser_session_errors_have_distinct_actions(self):
+        self.assertIn('Node 22+', download.resolution_error('YouTube', Exception('No supported JavaScript runtime')))
+        self.assertIn('browser session', download.resolution_error('YouTube', Exception('Sign in to confirm you are not a bot')))
+        self.assertIn('connect', download.resolution_error('YouTube', Exception('Connection timed out')))
+
+
 if __name__ == '__main__':
     unittest.main()

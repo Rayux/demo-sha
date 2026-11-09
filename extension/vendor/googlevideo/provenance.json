@@ -1,0 +1,328 @@
+{
+  "upstream": "https://github.com/LuanRT/googlevideo",
+  "commit": "96d1418984d00ac2797a1dafe4625d1368b5b9aa",
+  "archiveURL": "https://codeload.github.com/LuanRT/googlevideo/tar.gz/96d1418984d00ac2797a1dafe4625d1368b5b9aa",
+  "archiveSHA256": "63091266e32cddc3ea08266f44b7ca2690a19325a687fd701f6a56667375f640",
+  "dependencies": {
+    "esbuild": "0.25.12",
+    "@bufbuild/protobuf": "2.16.0"
+  },
+  "dependencyArtifacts": {
+    "esbuild": {
+      "url": "https://registry.npmjs.org/esbuild/-/esbuild-0.25.12.tgz",
+      "integrity": "sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg=="
+    },
+    "@bufbuild/protobuf": {
+      "url": "https://registry.npmjs.org/@bufbuild/protobuf/-/protobuf-2.16.0.tgz",
+      "integrity": "sha512-FWa0sPlqYGJgpTs6OxBRcL/AW4JT0OIO+W1ajerluoTVh8CV0B7XM1qsNCRgnkSCkRCgOICKHRQlY17jrsm0+Q=="
+    }
+  },
+  "bundleSHA256": "9d521d687daf9e9612cf4cb586a4a1af81ee63f84a50e8c6a758f8e4fd197926",
+  "bundleBytes": 103595,
+  "inputs": [
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/create.js",
+      "sha256": "40bd3240cb5a947f964ff37bea753c6706249e63ec41ee5bb7f5728e4c2e4159"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/descriptors.js",
+      "sha256": "92884553e5d2d46ea273441deb32dc07187dc8ded3524356fa68536d1f2fc435"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/from-binary.js",
+      "sha256": "57f3bdee1924c1dbc3fae2f655a5438fce914dec8ef79f8981336f3c9a975501"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/is-message.js",
+      "sha256": "eda289d9ef0e979fe77a578ffbbf8012cadcfec4629b66cd98c27d6229a9f020"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/proto-int64.js",
+      "sha256": "cdb1f7869edc7171b689fd532fcaa4fa039680e1af44b32cce227cf61ca3fe05"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/reflect/error.js",
+      "sha256": "6ec9654705968f0c75cb0b184d4bb6629a932c05e3d27d603eb42a3cb9447f6f"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/reflect/guard.js",
+      "sha256": "f3b9324922e08cffcc4c7ae3c6e08454f62e187a37404df31a00160cddf34d77"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/reflect/message.js",
+      "sha256": "f3039eda68ff17bdf9fd0bb8333602247325d0fadd49b591c89314922874027f"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/reflect/scalar.js",
+      "sha256": "cb095614d5f901cd00d46b930a23c64ebd909a77831aa666768fca47f3e7745f"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/reflect/unsafe.js",
+      "sha256": "7481dc6cb1f88f66f225894c0087daef1d563809f5e44433eaa0de2e4df33c1f"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/to-binary.js",
+      "sha256": "63241fb54445dbb81561236f074d1a031735ad8cc0abc93269b014e8a9661886"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/wire/base64-encoding.js",
+      "sha256": "d65944009ab55b40661572a8bdcaf0374de8566e2bc4a0dc11d7790e79cf9eeb"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/wire/binary-encoding.js",
+      "sha256": "26c6bf67cca293ccbc8282c042746ae67449f79ad5f9deb04cc33cc0745947cf"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/wire/index.js",
+      "sha256": "4cc137a3eb782f0ab9e8d02f6c5975e55f721f2d63ce2186f0fd6014af9b9bd5"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/wire/size-delimited.js",
+      "sha256": "1c364712aa61711ce0e654ed81e26fe821e8f7b6dac9c31fe6d49fc184dbacd2"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/wire/text-encoding.js",
+      "sha256": "145fc2c8a2ee92148dd9fd595b250591574c9b1271a8db7ffb95c78353962cb5"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/wire/text-format.js",
+      "sha256": "92aa7e4df3bf7dfc02235174f297dcbff6bd02f7eb6325876cbb24ada6d51414"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/wire/varint.js",
+      "sha256": "5a78ffe702716989b7c1d5f5deb73f7283655af5a7ecb3d885ae0b19f59eeaeb"
+    },
+    {
+      "path": "dependencies/@bufbuild/protobuf/dist/esm/wkt/wrappers.js",
+      "sha256": "5f084c743c64707a1861d4e6ce05fcc5aede31838e03f13f2882b02dab7e945a"
+    },
+    {
+      "path": "googlevideo/protos/generated/misc/common.ts",
+      "sha256": "6268fb6fd1d1573e297fe07eb8e69276bebb78ce3eddbbe6a1db9f8f98f33590"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/allowed_cached_formats.ts",
+      "sha256": "938e82513c904836913f54344729f57d5b3bf91918ada9ab1591448fc4849401"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/buffered_range.ts",
+      "sha256": "5008bd65747994b5f562a383b7032421cab718c0595ec6ff9ca3f366ef706333"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/client_abr_state.ts",
+      "sha256": "eda26947065bb55365679c78f39fdb83fa353a96a1e9eb602e969aa971f3fdd9"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/crypto_params.ts",
+      "sha256": "ed635df641fcd47d84f202dac6eb57cac38782566276533f156a21cba9198812"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/cuepoint.ts",
+      "sha256": "6470b117353d72b5f29237c03ffb5cd7013300271ce439d4decc2907c42796d1"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/cuepoint_info.ts",
+      "sha256": "3a43a60c4f0f22c9e98659c16f047ddba1b3b4de5d3f77fbf6745e7f36a19cfd"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/cuepoint_list.ts",
+      "sha256": "8ea2383f49947389f2efbbfa42b05bbf97922925ceb85b0a16235fb28998c846"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/format_initialization_metadata.ts",
+      "sha256": "baedb3e30d982341487d35f61a3ae24733ef3631099c58a6a80c5aab384113c8"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/format_selection_config.ts",
+      "sha256": "02955c140f9d6e945b70fb815ca019740b56dfb1394a111fb8cbc0c95f47c5b4"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/innertube_request.ts",
+      "sha256": "4bfc1d6425032a02afdd3208ca5e5069ab0778f0ece3739f2c942c86bac0047f"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/media_capabilities.ts",
+      "sha256": "5ceedee8a140d20ec81d5837d17e6e05a2e34c153a73e1e8f1a5fc094d2f2e5d"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/media_header.ts",
+      "sha256": "1cde18a4c80851d4c17e3eea8771085ea8f9ef71e582e7eb31ab39c8fb754922"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/next_request_policy.ts",
+      "sha256": "fa428f99e859f2976acb30f9ffcc4e8194d09cd2a469f4945db827b93baeff53"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/onesie_header.ts",
+      "sha256": "a37dc65e0d616d462e1f1fb68bcb52ebd287b9ffb242d8cb0a9e0192a7afe456"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/onesie_header_type.ts",
+      "sha256": "3d3cd1c6f50d89b1cad7facd983759378094b5ee237a5c403ad0a882c03cfa82"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/onesie_innertube_request.ts",
+      "sha256": "d828ec33236ca21d63f158edb2d8d77e75911b038bc7828aee3dcb298cfa98a3"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/onesie_innertube_response.ts",
+      "sha256": "25550e76b675472127e0aac38efeff68d0b76c4f315abe73fa60a5ec45711260"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/onesie_proxy_status.ts",
+      "sha256": "d98228d01e11ea311afbc46de492dcd8b89a6f71436581d77bc2ba4c89801a9d"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/onesie_request.ts",
+      "sha256": "6f24ca01da60268428ddb9ff27d506f277b4885b20ada0b899293485f7c7601c"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/playback_cookie.ts",
+      "sha256": "f99ceaca8f5d3f8a2674d6642c7f7f6484d468097b2d08eb8ed53fd5af61fa0a"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/playback_start_policy.ts",
+      "sha256": "faed9f50f41e9bdf4793031e085f2e84f957c80449077217e15ce58083ee5941"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/prewarm_connection.ts",
+      "sha256": "529439191fe40013955cee368d1d2e3d95e315d78a6b2ae280c446451ba0af9a"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/reload_player_response.ts",
+      "sha256": "3bc1dde259adbd489795ddd09729c0f11434e4453e5deab3a1c85a3c996ca771"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/request_cancellation_policy.ts",
+      "sha256": "fa7ba6831fc481eb0256c24c76b36002d689a5fdc2960a4be5642d87c64a2c69"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/request_identifier.ts",
+      "sha256": "ec11d94ddb5e79cb9c59369b4866bf3b1bc22fc12bcee30d96e6778d75993cc3"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/sabr_context_sending_policy.ts",
+      "sha256": "df458d5629a2eab7238dc8cf5ec96229978873e9076011795875b4bd24eed41a"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/sabr_context_update.ts",
+      "sha256": "b622f324470fa6049df63563e4dd569cd3da62c4aa3c30b304cad04de3befa57"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/sabr_error.ts",
+      "sha256": "892aca9ebb9d68941aed83ce4c1a63e954b5f3ccd8d367ad54c9b3d1847c56ee"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/sabr_live_metadata.ts",
+      "sha256": "83b47e70369f1a6e9a41d9a6e7a8496a4f162d72b676e7186a2c79ba47d73b1d"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/sabr_redirect.ts",
+      "sha256": "c1d557a875f7ac498bbb9bb6289fd41d0270a9cf439eac15d4aa0e17787dd181"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/sabr_seek.ts",
+      "sha256": "01ced7105525b0f5c22fd6f69225b88df8e483914e1332b0658857a5a4a77558"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/selectable_formats.ts",
+      "sha256": "23ea28e2e622d1fe894de9aa845d60c33a9c55b6a0ee1911ea44e2f4fb077158"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/snackbar_message.ts",
+      "sha256": "46d942764cf23d407896b2126dc98a9932a69d891ace4359449bacfb00de61b6"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/ssap_playback_info.ts",
+      "sha256": "cf4a196b60eb4d34732b17041b09fbc6ec063a87dbed0196156355df47ae1e88"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/stream_protection_status.ts",
+      "sha256": "e500d64b78f77c8ad4ea3b32a64918040aeafb4128ddd86c6b6ba872e7e650c4"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/streamer_context.ts",
+      "sha256": "59959b730045636127f076d91c68aa85bbedf331507cda23b3f8e1bc31d07c30"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/time_range.ts",
+      "sha256": "62f9f51c839e9eae58d65475fe2f1099ddfc79d080886095437bbb0953c4d368"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/ump_part_id.ts",
+      "sha256": "8b5821d94615ef6c59f9912bee3a2da313e8a9dcd8958f5b1c07092b9803cdc8"
+    },
+    {
+      "path": "googlevideo/protos/generated/video_streaming/video_playback_abr_request.ts",
+      "sha256": "98e8024dba8e7cf5e51c9d02a21dc6c77ac9c7bfbba97309230e9c1525f9b256"
+    },
+    {
+      "path": "googlevideo/src/core/CompositeBuffer.ts",
+      "sha256": "bdf7f605fd927065dd52fcc381bcebc91444a7ef3d09f29ac578c500c5ea9f52"
+    },
+    {
+      "path": "googlevideo/src/core/SabrStream.ts",
+      "sha256": "7cac603b93cb1198ae6c00fe9494da712e66fda80fe8067446eaacdd91a88f70"
+    },
+    {
+      "path": "googlevideo/src/core/UmpReader.ts",
+      "sha256": "7348c82538cb2868e25d9c69a6a279680a0245463695b1bf7a8bbe983174761e"
+    },
+    {
+      "path": "googlevideo/src/utils/EmsgSegmentMetadata.ts",
+      "sha256": "3e9869a7b8fe9f2d514f0eb00a78b194751f071aef8c8668da3867eede4abc55"
+    },
+    {
+      "path": "googlevideo/src/utils/EventEmitterLike.ts",
+      "sha256": "d600841ed85b37b83f8d2be4dd885c1f89b1db4ff2f0d48a22fc24c1da558d6c"
+    },
+    {
+      "path": "googlevideo/src/utils/Logger.ts",
+      "sha256": "9b751bbd7589aecefcfa0ec0bb60ce3cef96400837b3330ff27c924bace3acfe"
+    },
+    {
+      "path": "googlevideo/src/utils/Protos.ts",
+      "sha256": "d0da05fb33d7fb379d13fefc84cfee66525171d8166ba6f592e2377dfda12a4a"
+    },
+    {
+      "path": "googlevideo/src/utils/SabrSegmentBuffer.ts",
+      "sha256": "d8cee306b03d76a14109f8b85a65e6a7dc630674f05554fc89c1de08ccbf4538"
+    },
+    {
+      "path": "googlevideo/src/utils/Track.ts",
+      "sha256": "711510618e7bb19dd3af333e0dac973f8882ba21136581d40e10f24b1c810486"
+    },
+    {
+      "path": "googlevideo/src/utils/TrackCollection.ts",
+      "sha256": "c0cdaaeff0936c2baf5a246540abb33b7e281e144cdf873ebdb1bee29b24fbbc"
+    },
+    {
+      "path": "googlevideo/src/utils/formatUtils.ts",
+      "sha256": "76367bdbfab42fcd2af02d2f4e69fe218ee208c5d59f6d98fdccbdc247019a7b"
+    },
+    {
+      "path": "googlevideo/src/utils/mediaCapabilityUtils.ts",
+      "sha256": "71b1b4792910e7ab5e14d6fafea97b7941927b06813d5b1b2e48b4d824759218"
+    },
+    {
+      "path": "googlevideo/src/utils/mediaSegmentUtils.ts",
+      "sha256": "3451b7ff51c5cc7b22a535318d7d649fe188c91af88f6c0c3971506c1a7302d1"
+    },
+    {
+      "path": "googlevideo/src/utils/mediaTimeUtils.ts",
+      "sha256": "087d4a22392dc74b9de7134060075457e6379c1864a87eb143b9d4a03576e098"
+    },
+    {
+      "path": "googlevideo/src/utils/misc.ts",
+      "sha256": "550a6f73cce3ad1348115934b79985159bf62919c1c70cf64a1f1aa81abfb904"
+    },
+    {
+      "path": "googlevideo/src/utils/uint8arrayUtils.ts",
+      "sha256": "f130a6aa7690920137134ad8d2471cb9cc01bf73e37308427427c01a2c9a683c"
+    },
+    {
+      "path": "googlevideo/src/utils/urlUtils.ts",
+      "sha256": "651bc1f4a4d2d6af972e8150f46166d1d1ecd76d3976d6442aafeb489150a373"
+    }
+  ]
+}

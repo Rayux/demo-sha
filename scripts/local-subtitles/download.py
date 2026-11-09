@@ -3,7 +3,7 @@
 import argparse
 import json
 import math
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, parse_qs
 import os
 from pathlib import Path
 import sys
@@ -17,7 +17,7 @@ FORMAT = 'bestaudio/best[height<=360]'
 
 def check_media(info, *, incomplete=False):
     if info.get('_type') in ('playlist', 'multi_video') or info.get('is_live'):
-        return 'Choose one recorded Bilibili video part or episode.'
+        return 'Choose one recorded video or episode.'
     duration = info.get('duration')
     if duration is not None and duration > MAX_DURATION:
         return 'This video exceeds the six-hour limit.'
@@ -97,35 +97,66 @@ def download(url, directory):
 
 
 
+def source_platform(url):
+    page = urlsplit(url)
+    if page.scheme != 'https' or page.username or page.password or page.port:
+        raise RuntimeError('Use a Bilibili or YouTube video page.')
+    if page.hostname == 'www.youtube.com':
+        import re
+        video_id = parse_qs(page.query).get('v', [''])[0]
+        if page.path != '/watch' or not re.fullmatch(r'[A-Za-z0-9_-]{11}', video_id):
+            raise RuntimeError('Open a specific YouTube video first.')
+        return 'YouTube'
+    if page.hostname != 'www.bilibili.com':
+        raise RuntimeError('Use a Bilibili or YouTube video page.')
+    return 'Bilibili'
+
+
+def resolution_error(platform, error):
+    if platform != 'YouTube':
+        return 'Cannot access Bilibili audio. Retry or import a local file; login-only or restricted videos may be unavailable.'
+    # Classify diagnostics without persisting URLs, response bodies, or credentials.
+    detail = str(error).lower()
+    fallback = ' If it plays in this tab, select Prepare browser audio. Otherwise import a matching local file.'
+    if any(term in detail for term in ('javascript runtime', 'js runtime', 'challenge solving', 'yt-dlp-ejs')):
+        return 'YouTube audio extraction could not run its JavaScript solver. Run npm run subtitles:setup and use Node 22+ or Deno 2.3+.' + fallback
+    if any(term in detail for term in ('sign in', 'login', 'private video', 'members-only', 'age-restricted', 'not a bot')):
+        return 'YouTube requires a browser session to access this audio.' + fallback
+    if any(term in detail for term in ('video unavailable', 'not available', 'removed', 'http error 403')):
+        return 'YouTube did not make this video available to the helper’s direct downloader.' + fallback
+    if any(term in detail for term in ('timed out', 'connection', 'certificate', 'resolve', 'network')):
+        return 'The helper could not connect to YouTube audio.' + fallback
+    return 'The helper could not resolve a supported YouTube audio stream.' + fallback
+
+
 def resolve_audio(url):
     """Resolve once; FFmpeg consumes the audio progressively without a full download."""
     try:
         import yt_dlp
     except ImportError as error:
-        raise RuntimeError('Install the Bilibili downloader with npm run subtitles:setup.') from error
-    page = urlsplit(url)
-    if page.scheme != 'https' or page.hostname != 'www.bilibili.com' or page.username or page.password or page.port:
-        raise RuntimeError('Use a Bilibili video page.')
+        raise RuntimeError('Update the audio downloader with npm run subtitles:setup.') from error
+    platform = source_platform(url)
     try:
         with yt_dlp.YoutubeDL({'format': FORMAT, 'noplaylist': True, 'playlist_items': '1',
                               'quiet': True, 'logger': Logger(), 'no_warnings': True,
                               'cachedir': False, 'socket_timeout': 30, 'retries': 3,
-                              'extractor_retries': 3}) as downloader:
+                              'extractor_retries': 3,
+                              **({'js_runtimes': {'deno': {}, 'node': {'path': os.environ.get('KAGE_NODE') or 'node'}}} if platform == 'YouTube' else {})}) as downloader:
             info = downloader.extract_info(url, download=False)
     except Exception as error:
-        raise RuntimeError('Cannot access Bilibili audio. Retry or import a local file; login-only or restricted videos may be unavailable.') from error
+        raise RuntimeError(resolution_error(platform, error)) from error
     if not info or check_media(info):
-        raise RuntimeError(check_media(info or {}) or 'Bilibili did not provide a single audio stream.')
+        raise RuntimeError(check_media(info or {}) or f'{platform} did not provide a single audio stream.')
     duration = info.get('duration')
     if not isinstance(duration, (int, float)) or not math.isfinite(duration) or not 0 < duration <= MAX_DURATION:
-        raise RuntimeError('Bilibili did not provide a valid duration of up to six hours.')
+        raise RuntimeError(f'{platform} did not provide a valid duration of up to six hours.')
     stream = urlsplit(info.get('url') or '')
-    # Only direct Bilibili CDN media is handed to the decoder. No playlist or local URLs.
-    domains = ('bilivideo.com', 'bilivideo.cn', 'bilivideo.net', 'hdslb.com', 'akamaized.net')
+    # Only direct platform CDN media is handed to the decoder. No playlist or local URLs.
+    domains = ('googlevideo.com',) if platform == 'YouTube' else ('bilivideo.com', 'bilivideo.cn', 'bilivideo.net', 'hdslb.com', 'akamaized.net')
     if (stream.scheme not in ('http', 'https') or stream.username or stream.password or stream.port not in (None, 80, 443)
             or not any(stream.hostname == domain or (stream.hostname or '').endswith('.' + domain) for domain in domains)
             or info.get('protocol') not in ('http', 'https')):
-        raise RuntimeError('This Bilibili audio format cannot be streamed. Import a local file instead.')
+        raise RuntimeError(f'This {platform} audio format cannot be streamed. Import a local file instead.')
     if info.get('vcodec') != 'none' and (not info.get('height') or info['height'] > 360):
         raise RuntimeError('No separate audio or low-resolution fallback is available.')
     headers = {key: str(value) for key, value in info.get('http_headers', {}).items()

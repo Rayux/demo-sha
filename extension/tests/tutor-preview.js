@@ -8,7 +8,7 @@ window.fixtureTutorConnect = () => {
     disconnect() { if (!closed) { closed = true; disconnects.forEach(fn => fn()); } },
     postMessage(request) {
       window.fixtureCalls?.push(request);
-      const text = `「${request.sentence}」\n\n這是串流回答的測試。整句意思會先顯示，接著解釋重要文法與語氣。你可以隨時輸入問題，打斷這段自動解釋。`;
+      const text = `「${request.sentence}」\n\n### 整句意思\n這是 **串流回答** 的測試。\n\n### 文法與語氣\n- **ですね**：確認對方的感受。\n- 使用 *柔和的語氣*，自然地開啟對話。\n\n1. 先理解整句意思。\n2. 再練習重要文法。`;
       let length = 0;
       function next() {
         if (closed) return;

@@ -7,10 +7,17 @@
   const CHUNK_BYTES = 256 * 1024;
   const MAX_FILE_BYTES = 4 * 1024 * 1024 * 1024;
   const ACTIVE_STATES = new Set(['uploading', 'queued', 'downloading', 'preparing', 'transcribing', 'translating']);
+  let loading = null;
+  let seasonRefresh = 0;
+  let resolvingEpisode = false;
   let pageKey = '', epoch = 0, video = null, documentState = null, loaded = false;
   let trackCache = null, timer = null, polling = false, uploading = false, stopping = false;
+  let pollRevision = 0;
+  let browserAcquisition = null, uploadSession = null;
+  let youtubeCaptionKind = '';
   let notice = '', error = false, storageQueue = Promise.resolve(), ui = null;
   let queueTimer = null, queueLoading = false;
+  let queuePriorityPending = '', queuePriorityButtons = [];
   const jsonBytes = value => new TextEncoder().encode(JSON.stringify(value)).length;
   const hasTranslation = cue => typeof cue.translation === 'string' && !!cue.translation.trim();
   const expiresAt = saved => Number(saved?.expiresAt) || (Number(saved?.updatedAt) || Date.now()) + RETENTION_MS;
@@ -30,7 +37,17 @@
 
   function identity(href = location.href) {
     try {
-      const url = new URL(href);
+      const resolved = href === location.href ? globalThis.KageBrowserAudio?.currentPage?.() : '';
+      const url = new URL(resolved || href);
+      if (['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname)) {
+        const id = url.pathname === '/watch' ? url.searchParams.get('v')
+          : url.pathname.match(/^\/(?:shorts|live)\/([\w-]{11})\/?$/)?.[1];
+        return /^[\w-]{11}$/.test(id || '') ? `youtube:${id}` : '';
+      }
+      if (/(^|\.)anime1\.me$/i.test(url.hostname)) {
+        const post = url.pathname.match(/^\/(\d+)/);
+        return post ? `anime1:${post[1]}` : '';
+      }
       if (!/(^|\.)bilibili\.com$/i.test(url.hostname)) return '';
       const episode = url.pathname.match(/^\/bangumi\/play\/(ep\d+)(?:\/|$)/i);
       if (episode) return `bilibili:${episode[1].toLowerCase()}`;
@@ -40,6 +57,14 @@
       return `bilibili:${match[1]}:p${part}`;
     } catch { return ''; }
   }
+  function isBilibiliPage() {
+    try { return /(^|\.)bilibili\.com$/i.test(new URL(location.href).hostname); } catch { return false; }
+  }
+  function isAnime1Page() {
+    try { return /(^|\.)anime1\.me$/i.test(new URL(location.href).hostname); } catch { return false; }
+  }
+  const isYouTube = () => identity().startsWith('youtube:');
+  const supportsPreparation = () => isBilibiliPage() || isYouTube() || isAnime1Page();
   function validContext(key, generation) { return key === pageKey && generation === epoch && identity() === key; }
   function emit() {
     trackCache = null;
@@ -49,16 +74,27 @@
     if (timer !== null) clearTimeout(timer);
     timer = null;
   }
+  function invalidatePoll() {
+    stopPolling();
+    pollRevision++;
+    polling = false;
+  }
+  function displayMessage(text) {
+    if (/^Cannot access YouTube audio\./i.test(text) || (isYouTube() && /select Prepare browser audio/i.test(text))) return 'Automatic audio preparation could not access this video. Refresh the video, briefly initialize playback, then try Download audio & prepare subtitles again. You can also import a matching local file.';
+    return /^Cannot access Bilibili audio\./i.test(text)
+      ? 'The helper could not download this episode directly. If it plays through UfunR, select Prepare browser audio.'
+      : text;
+  }
   function setNotice(text, isError = false) {
     // Reloading the extension leaves this page's old panel visible, but its
     // Chrome APIs no longer work. Helper setup cannot restore that connection.
     notice = isError && /extension context invalidated/i.test(text)
-      ? 'Kage lost its connection to the extension. Refresh this Bilibili tab, then reopen Study. Your saved subtitles will remain.'
-      : text;
+      ? 'Kage lost its connection to the extension. Refresh this video tab, then reopen Study. Your saved subtitles will remain.'
+      : displayMessage(text);
     error = isError; render();
   }
   async function request(action, fields = {}) {
-    const reply = await chrome.runtime.sendMessage({ type: 'LOCAL_SUBTITLES', action, ...fields });
+    const reply = await chrome.runtime.sendMessage({ type: 'LOCAL_SUBTITLES', action, ...fields, pageUrl: globalThis.KageBrowserAudio?.currentPage?.() || location.href });
     if (!reply?.success) throw new Error(reply?.error || 'The local subtitle helper did not respond.');
     return reply.data;
   }
@@ -74,11 +110,19 @@
     }
     return result;
   }
+  function sourceIdentity(saved) {
+    const sourceUrl = saved?.sourceUrl || saved?.job?.sourceUrl;
+    if (sourceUrl) return identity(sourceUrl);
+    // Older completed downloads kept only their generated name. Detect records
+    // made with the old sender URL bug without discarding a different part's work.
+    const named = String(saved?.name || '').match(/^Bilibili (BV[a-zA-Z0-9]+)\?p=([1-9]\d*) \(audio\)$/);
+    return named ? `bilibili:${named[1]}:p${Number(named[2])}` : '';
+  }
   function normalizeDocument(saved, key) {
-    if (!saved || saved.key !== key) return null;
+    if (!saved || saved.key !== key || (sourceIdentity(saved) && sourceIdentity(saved) !== key)) return null;
     const offset = Number(saved.offset);
     return {
-      key, name: String(saved.name || 'Imported media').slice(0, 240),
+      key, ...(saved.sourceUrl ? { sourceUrl: saved.sourceUrl } : {}), name: String(saved.name || 'Imported media').slice(0, 240),
       cues: normalizeCues(saved.cues || []), enabled: saved.enabled !== false,
       offset: Number.isFinite(offset) ? Math.min(3600, Math.max(-3600, offset)) : 0,
       revision: Number(saved.revision) || 1, updatedAt: Number(saved.updatedAt) || Date.now(),
@@ -101,11 +145,8 @@
         if (jsonBytes(copy) > MAX_STORAGE_BYTES - 1024) throw new Error('This subtitle track is too large to save.');
         await chrome.storage.local.set({ [storageKey]: copy });
       } else {
-        const legacy = await chrome.storage.local.get(STORAGE_KEY);
-        if (legacy[STORAGE_KEY]?.some?.(item => item?.key === key)) {
-          // A small tombstone prevents the old shared array from restoring a removed track.
-          await chrome.storage.local.set({ [storageKey]: { key, deleted: true } });
-        } else await chrome.storage.local.remove(storageKey);
+        // Remember explicit removal so helper recovery cannot resurrect it.
+        await chrome.storage.local.set({ [storageKey]: { key, deleted: true } });
       }
       const state = await chrome.storage.local.get(null);
       const documents = Object.entries(state).filter(([name, value]) => name.startsWith(STORAGE_PREFIX) && value && !value.deleted);
@@ -130,11 +171,19 @@
     timer = setTimeout(() => { timer = null; poll(key, generation, jobId); }, 1000);
   }
   async function poll(key, generation, jobId) {
-    if (!validContext(key, generation) || polling || documentState?.job?.id !== jobId) return;
+    if (!validContext(key, generation) || browserAcquisition || uploading || polling || documentState?.job?.id !== jobId) return;
+    const revision = pollRevision;
+    const currentPoll = () => validContext(key, generation) && revision === pollRevision;
     polling = true;
     try {
       const status = await request('status', { id: jobId });
-      if (!validContext(key, generation) || documentState?.job?.id !== jobId || stopping) return;
+      if (!currentPoll() || documentState?.job?.id !== jobId || stopping) return;
+      if (status.sourceUrl && identity(status.sourceUrl) !== key) {
+        stopPolling(); documentState = null; emit();
+        setNotice(`These subtitles belong to a different ${isYouTube() ? 'YouTube video' : 'Bilibili part'}. Select Download audio & prepare subtitles for the current part.`, true);
+        return;
+      }
+      if (status.sourceUrl) documentState.sourceUrl = status.sourceUrl;
       if (status.timings) documentState.timings = normalizeTimings(status.timings);
       // Use the helper's deadline even when the tab was closed at completion.
       documentState.expiresAt = Number(status.expiresAt) || Date.now() + RETENTION_MS;
@@ -150,7 +199,7 @@
           documentState.job = { ...documentState.job, state: 'error', message: cause.message };
           if (wasPreparingChinese !== preparingChinese()) emit();
           await saveCurrent();
-          if (validContext(key, generation)) setNotice(cause.message, true);
+          if (currentPoll()) setNotice(cause.message, true);
           return;
         }
         const enable = documentState.job.cuesSaved ? documentState.enabled : true;
@@ -165,7 +214,7 @@
         if (status.state === 'complete') documentState.job = null;
         if (changed || wasPreparingChinese !== preparingChinese()) emit();
         await saveCurrent();
-        if (!validContext(key, generation)) return;
+        if (!currentPoll()) return;
         if (status.state === 'complete') {
           setNotice(cues.every(hasTranslation)
             ? `${cues.length} lines ready with Japanese and Traditional Chinese. Play the video to use your subtitles.`
@@ -183,7 +232,7 @@
       } else if (status.state === 'error' || status.state === 'cancelled' || status.state === 'translation_error') {
         if (wasPreparingChinese !== preparingChinese()) emit();
         await saveCurrent();
-        if (validContext(key, generation)) setNotice(status.state === 'translation_error'
+        if (currentPoll()) setNotice(status.state === 'translation_error'
           ? `Japanese subtitles saved. ${status.message || 'Traditional Chinese translation stopped.'} Select Retry Chinese translations to continue.`
           : status.message || (status.state === 'cancelled' ? 'Processing cancelled.' : 'Transcription failed.'), status.state !== 'cancelled');
       } else if (status.state === 'uploading' && !uploading) {
@@ -195,9 +244,9 @@
         schedulePoll(key, generation, jobId);
       }
     } catch (cause) {
-      if (validContext(key, generation)) setNotice(`${cause.message} Start the local helper and select Reconnect.`, true);
+      if (currentPoll()) setNotice(`${cause.message} Start the local helper and select Reconnect.`, true);
     } finally {
-      if (validContext(key, generation)) { polling = false; render(); }
+      if (currentPoll()) { polling = false; render(); }
     }
   }
   async function load(key, generation) {
@@ -208,13 +257,27 @@
       const documents = Array.isArray(state[STORAGE_KEY]) ? state[STORAGE_KEY] : [];
       const saved = state[storageKey] || documents.find(item => item?.key === key);
       const expired = saved && !saved.deleted && expiresAt(saved) <= Date.now();
+      const wrongPart = !saved?.deleted && sourceIdentity(saved) && sourceIdentity(saved) !== key;
       documentState = saved?.deleted || expired ? null : normalizeDocument(saved, key);
+      if (wrongPart) { notice = `The saved subtitles belong to a different ${isYouTube() ? 'YouTube video' : 'Bilibili part'}. Prepare subtitles for the current part.`; error = true; }
       if (expired) { notice = 'Saved subtitles expired after 3 days. Prepare this video again to continue.'; void persist(null, key).catch(() => {}); }
       loaded = true; emit(); render();
       if (documentState?.job && ACTIVE_STATES.has(documentState.job.state)) poll(key, generation, documentState.job.id);
+      else if (!saved || wrongPart) void recover(key, generation);
     } catch (cause) {
       if (validContext(key, generation)) { loaded = true; setNotice(`Could not load saved subtitles. ${cause.message}`, true); }
     }
+  }
+  async function recover(key, generation) {
+    try {
+      const { job } = await request('recover');
+      if (!validContext(key, generation) || documentState || uploading || browserAcquisition || !job?.id) return;
+      documentState = normalizeDocument({ key, name: job.name, cues: [], job, sourceUrl: job.sourceUrl,
+        expiresAt: Number(job.expiresAt) || Date.now() + RETENTION_MS }, key);
+      if (!documentState) return;
+      await saveCurrent();
+      if (validContext(key, generation)) await poll(key, generation, job.id);
+    } catch { /* Saved Chrome tracks work even when the helper is offline or older. */ }
   }
   function expireCurrent() {
     const key = pageKey;
@@ -226,17 +289,28 @@
   }
   function observe(currentVideo) {
     video = currentVideo || null;
+    if (/\/bangumi\/play\/ss\d+(?:[/?#]|$)/i.test(location.href)
+        && globalThis.KageBrowserAudio?.resolveEpisode && Date.now() - seasonRefresh > 1000) {
+      seasonRefresh = Date.now();
+      const previous = identity();
+      void KageBrowserAudio.resolveEpisode().then(() => { if (identity() !== previous) observe(video); });
+    }
     const key = identity();
     if (key === pageKey) {
       if (documentState && expiresAt(documentState) <= Date.now()) expireCurrent();
+      if (!key) render();
       return;
     }
+    browserAcquisition?.controller.abort(); browserAcquisition = null;
+    if (uploadSession) uploadSession.cancelled = true;
+    uploadSession = null;
+    youtubeCaptionKind = '';
     pageKey = key; epoch++;
     stopPolling(); documentState = null; loaded = false; polling = false; uploading = false; stopping = false;
     notice = ''; error = false;
     if (ui) ui.editor.hidden = true;
     emit(); render();
-    if (key) load(key, epoch);
+    if (key) loading = load(key, epoch);
   }
   function getTrack(currentVideo) {
     observe(currentVideo);
@@ -269,41 +343,112 @@
     for (let offset = 0; offset < bytes.length; offset += 8192) binary += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
     return btoa(binary);
   }
-  async function importFile(file, download = false) {
-    if ((!file && !download) || !pageKey || !loaded || uploading || stopping || ACTIVE_STATES.has(documentState?.job?.state)) return;
-    if (!download && (!file.size || file.size > MAX_FILE_BYTES)) { setNotice('Choose a video or audio file smaller than 4 GiB (up to 6 hours).', true); return; }
+  async function prepareBrowserAudio({ fallbackToDownload = false } = {}) {
+    observe(video);
+    if (!pageKey || !loaded || browserAcquisition || uploading || stopping || ACTIVE_STATES.has(documentState?.job?.state)) return;
+    // An old Reconnect response must not replace this attempt's progress or error.
+    invalidatePoll();
+    if (!globalThis.KageBrowserAudio?.download) {
+      if (fallbackToDownload) return importFile(null, true);
+      setNotice(`Refresh this ${isYouTube() ? 'YouTube' : isAnime1Page() ? 'Anime1' : 'Bilibili'} tab to enable browser audio preparation.`, true); return;
+    }
     const key = pageKey, generation = epoch;
-    const name = download ? `Bilibili ${key.slice(9)} (audio)` : file.name;
+    const acquisition = { controller: new AbortController(), received: 0, total: null };
+    browserAcquisition = acquisition;
+    notice = ''; error = false; render();
+    try {
+      const file = await globalThis.KageBrowserAudio.download({ signal: acquisition.controller.signal, onProgress: progress => {
+        if (browserAcquisition !== acquisition || !validContext(key, generation)) return;
+        acquisition.received = progress.received; acquisition.total = progress.total;
+        render();
+      } });
+      if (browserAcquisition !== acquisition || !validContext(key, generation) || acquisition.controller.signal.aborted) return;
+      browserAcquisition = null;
+      // Reuse the bounded local upload and normal subtitle persistence path.
+      await importFile(file);
+    } catch (cause) {
+      if (fallbackToDownload && cause.name !== 'AbortError' && browserAcquisition === acquisition
+          && validContext(key, generation) && !acquisition.controller.signal.aborted
+          && /(?:\[YT_(?:HTTP_(?:403|410)|PAGE_NETWORK|NO_FILE_URL|WAIT_FOR_PLAYER|STREAMING_ONLY|SABR_NOT_READY|SABR_NETWORK)\]|current video’s audio metadata)/.test(cause.message)) {
+        browserAcquisition = null;
+        await importFile(null, true);
+        return;
+      }
+      if (browserAcquisition === acquisition && validContext(key, generation)) setNotice(cause.message, cause.name !== 'AbortError');
+    } finally {
+      if (browserAcquisition === acquisition) browserAcquisition = null;
+      if (validContext(key, generation)) render();
+    }
+  }
+  async function downloadCurrent(episodeId) {
+    if (resolvingEpisode) return;
+    const season = /\/bangumi\/play\/ss\d+(?:[/?#]|$)/i.test(location.href);
+    if (season && globalThis.KageBrowserAudio?.resolveEpisode) {
+      resolvingEpisode = true; setNotice('Finding episodes in this Bilibili season…'); render();
+      try { await KageBrowserAudio.resolveEpisode({ lookup: true, ...(typeof episodeId === 'string' ? { episodeId } : {}) }); }
+      finally { resolvingEpisode = false; }
+    }
+    observe(video);
+    if (season && pageKey) {
+      if (!loaded) await loading;
+      return prepareBrowserAudio();
+    }
+    if (!pageKey) {
+      const episodes = globalThis.KageBrowserAudio?.episodes || [];
+      if (ui) {
+        ui.episodes.replaceChildren(...episodes.map(ep => { const option = node('option', '', ep.title); option.value = ep.id; return option; }));
+        ui.episodePicker.hidden = !episodes.length;
+      }
+      setNotice(episodes.length ? 'Choose the episode playing in your browser below, then prepare its audio.'
+        : globalThis.KageBrowserAudio?.resolutionError || 'The player has not exposed an episode and Bilibili returned no episode list. Refresh the tab and try again.', !episodes.length);
+      globalThis.KageTutor?.openSubtitles?.();
+      return;
+    }
+    if (isAnime1Page()) return prepareBrowserAudio();
+    return isYouTube() ? prepareBrowserAudio({ fallbackToDownload: true }) : importFile(null, true);
+  }
+  async function importFile(file, download = false) {
+    observe(video);
+    if ((!file && !download) || !pageKey || !loaded || browserAcquisition || uploading || stopping || ACTIVE_STATES.has(documentState?.job?.state)) return;
+    if (!download && (!file.size || file.size > MAX_FILE_BYTES)) { setNotice('Choose a video or audio file smaller than 4 GiB (up to 6 hours).', true); return; }
+    invalidatePoll();
+    const key = pageKey, generation = epoch;
+    const session = { cancelled: false, jobId: null };
+    uploadSession = session;
+    const transferring = () => validContext(key, generation) && uploadSession === session && !session.cancelled && !stopping;
+    const name = download ? isYouTube() ? `YouTube ${key.slice(8)} (audio)` : `Bilibili ${key.slice(9)} (audio)` : file.name;
     let jobId = null, ownedDocument = null, started = false, failure = null;
     uploading = true; setNotice('Connecting to the local subtitle helper…');
     try {
       const health = await request('health');
-      if (!validContext(key, generation)) return;
+      if (!transferring()) return;
       if (health?.ready === false) throw new Error(health.error || 'Local transcription is not installed yet. Run npm run subtitles:setup.');
       const created = download ? await request('download') : await request('create', { name, size: file.size });
       if (typeof created?.id !== 'string') throw new Error('The local helper returned an invalid job.');
       jobId = created.id;
-      if (!validContext(key, generation)) return;
+      session.jobId = jobId;
+      if (!transferring()) return;
       documentState ||= { key, name, cues: [], enabled: true, offset: 0, revision: 1, updatedAt: Date.now(), job: null };
       ownedDocument = documentState;
+      delete documentState.sourceUrl;
       documentState.job = { id: jobId, name, size: download ? 0 : file.size, received: 0, state: 'uploading', progress: 0 };
       documentState.timings = null;
       documentState.expiresAt = Date.now() + RETENTION_MS;
       await saveCurrent();
       for (let offset = 0; !download && offset < file.size; offset += CHUNK_BYTES) {
-        if (!validContext(key, generation) || documentState?.job?.id !== jobId || stopping) return;
+        if (!transferring() || documentState?.job?.id !== jobId) return;
         const bytes = new Uint8Array(await file.slice(offset, offset + CHUNK_BYTES).arrayBuffer());
-        if (!validContext(key, generation) || documentState?.job?.id !== jobId || stopping) return;
+        if (!transferring() || documentState?.job?.id !== jobId) return;
         const result = await request('upload', { id: jobId, offset, data: base64(bytes) });
-        if (!validContext(key, generation) || documentState?.job?.id !== jobId || stopping) return;
+        if (!transferring() || documentState?.job?.id !== jobId) return;
         documentState.job.received = Number(result?.received) || Math.min(offset + bytes.length, file.size);
         documentState.job.progress = documentState.job.received / file.size;
         notice = ''; render();
       }
-      if (!validContext(key, generation) || documentState?.job?.id !== jobId || stopping) return;
+      if (!transferring() || documentState?.job?.id !== jobId) return;
       await request('start', { id: jobId });
       started = true;
-      if (!validContext(key, generation) || documentState?.job?.id !== jobId || stopping) return;
+      if (!transferring() || documentState?.job?.id !== jobId) return;
       const wasPreparingChinese = preparingChinese();
       documentState.job.state = 'queued'; documentState.job.progress = 0;
       notice = ''; error = false;
@@ -312,13 +457,14 @@
       if (validContext(key, generation)) { uploading = false; await poll(key, generation, jobId); }
     } catch (cause) {
       failure = cause;
-      if (validContext(key, generation) && !stopping) {
+      if (transferring()) {
         setNotice(cause.message, true);
         if (/queue|upload.*limit/i.test(cause.message) && ui) { ui.queue.open = true; void refreshQueue(); }
       }
     } finally {
       // A page navigation or failed transfer must not leave a partial media file behind.
       // Jobs that have started transcription can finish and reconnect on a later visit.
+      try { file?.close?.(); } catch { /* Streaming sources close themselves when read to the end. */ }
       if (jobId && !started) {
         try { await request('cancel', { id: jobId }); } catch { /* The helper also expires abandoned jobs. */ }
         if (validContext(key, generation) && documentState === ownedDocument && documentState?.job?.id === jobId) {
@@ -329,11 +475,22 @@
           try { await persist(abandoned, key, jobId); } catch { /* Reconnecting can still recover the helper status. */ }
         }
       }
-      if (validContext(key, generation)) { uploading = false; render(); }
+      if (uploadSession === session) {
+        uploadSession = null;
+        if (validContext(key, generation)) { uploading = false; render(); }
+      }
     }
   }
   async function cancel(forget = false) {
     const key = pageKey, generation = epoch, jobId = documentState?.job?.id;
+    if (browserAcquisition) {
+      browserAcquisition.controller.abort(); browserAcquisition = null;
+      setNotice('Browser audio preparation stopped. Saved subtitles are kept.'); return;
+    }
+    if (uploading && uploadSession && jobId !== uploadSession.jobId) {
+      uploadSession.cancelled = true; uploadSession = null; uploading = false;
+      setNotice('Media preparation stopped. Saved subtitles are kept.'); return;
+    }
     if (!jobId || stopping) return;
     stopping = true; stopPolling(); render();
     try {
@@ -369,7 +526,7 @@
   }
   async function retryTranslation() {
     const key = pageKey, generation = epoch, jobId = documentState?.job?.id;
-    if (!jobId || documentState.job.state !== 'translation_error' || polling || stopping) return;
+    if (!jobId || documentState.job.state !== 'translation_error' || browserAcquisition || uploading || polling || stopping) return;
     documentState.job.state = 'translating';
     emit();
     notice = ''; error = false; render();
@@ -397,31 +554,53 @@
     const element = node('button', 'kage-text-button', text); element.type = 'button'; element.addEventListener('click', handler); return element;
   }
   function render() {
+    const failure = notice ? (error ? notice : '') : !browserAcquisition && !uploading && ['translation_error', 'error'].includes(documentState?.job?.state)
+      ? displayMessage(documentState.job.message || 'Subtitle preparation needs attention.') : '';
+    globalThis.KageTutor?.subtitleError(pageKey ? failure : '');
+    globalThis.KageTutor?.downloadState?.(supportsPreparation(), resolvingEpisode || (!!pageKey && (!loaded || !!browserAcquisition || uploading || stopping || ACTIVE_STATES.has(documentState?.job?.state))));
     if (!ui) return;
-    ui.card.hidden = !pageKey;
+    ui.card.hidden = !supportsPreparation();
+    ui.browserAudio.hidden = isYouTube();
+    ui.browserHint.hidden = false;
+    ui.browserHint.textContent = isYouTube() && /\[YT_(?:STREAMING_ONLY|NO_FILE_URL|AUDIO_TOO_LARGE|AUDIO_SIZE_UNKNOWN|SIGNED_RANGE)\]/.test(notice || failure)
+      ? 'This video needs a matching local audio or video file. Choose Import video / audio to prepare and save subtitles for it.'
+      : isYouTube()
+      ? 'Kage chooses the audio connection automatically. Keep this tab open while downloading; the full video does not need to play.'
+      : isAnime1Page()
+      ? 'Click play on the video first, then choose Prepare browser audio. Kage will fetch the episode audio through your browser.'
+      : 'For episodes that play through UfunR, choose Prepare browser audio. Keep UfunR enabled and this tab open while Kage fetches the current episode’s audio.';
     const hasTrack = !!documentState?.cues.length;
     const job = documentState?.job;
-    const busy = uploading || stopping || ACTIVE_STATES.has(job?.state);
+    const busy = !!browserAcquisition || uploading || stopping || ACTIVE_STATES.has(job?.state);
     ui.file.disabled = !loaded || busy;
     ui.choose.disabled = ui.file.disabled;
-    ui.download.disabled = ui.file.disabled;
+    ui.download.disabled = resolvingEpisode || (!!pageKey && ui.file.disabled);
+    ui.browserAudio.disabled = ui.download.disabled;
     ui.toggleRow.hidden = !hasTrack;
     ui.toggle.checked = documentState?.enabled !== false;
     ui.adjust.hidden = !hasTrack;
     if (document.activeElement !== ui.offset) ui.offset.value = String(documentState?.offset || 0);
-    ui.source.textContent = hasTrack ? `${documentState.name} · ${documentState.cues.length} lines` : 'No imported subtitles for this video part.';
+    ui.source.textContent = hasTrack ? `${documentState.name} · ${documentState.cues.length} lines` : isYouTube()
+      ? youtubeCaptionKind === 'asr' ? 'YouTube automatic captions detected. Prepare fresh subtitles from the audio for complete lines.'
+        : 'Use the original Japanese captions, or prepare fresh subtitles from audio when automatic captions are slow or fragmented.'
+      : 'No imported subtitles for this video part.';
     ui.remove.hidden = !documentState;
     ui.remove.disabled = busy;
-    ui.cancel.hidden = !job || !ACTIVE_STATES.has(job.state);
+    ui.cancel.hidden = !browserAcquisition && !uploading && (!job || !ACTIVE_STATES.has(job.state));
     ui.cancel.disabled = stopping;
-    ui.reconnect.hidden = !job || uploading || stopping || job.state === 'translation_error';
+    ui.reconnect.hidden = !job || !!browserAcquisition || uploading || stopping || job.state === 'translation_error';
     ui.reconnect.disabled = polling;
     ui.retry.hidden = job?.state !== 'translation_error';
-    ui.retry.disabled = polling || stopping;
-    ui.discard.hidden = !error || !job || uploading || stopping || !ACTIVE_STATES.has(job.state);
+    ui.retry.disabled = !!browserAcquisition || uploading || polling || stopping;
+    ui.discard.hidden = !error || !job || !!browserAcquisition || uploading || stopping || !ACTIVE_STATES.has(job.state);
     ui.edit.disabled = !hasTrack || busy;
     ui.choose.textContent = hasTrack ? 'Import another video / audio' : 'Import video / audio';
     let message = notice;
+    if (!message && browserAcquisition) {
+      const received = browserAcquisition.received, total = browserAcquisition.total;
+      const amount = received ? ` · ${(received / (1024 * 1024)).toFixed(1)} MiB${total ? ` of ${(total / (1024 * 1024)).toFixed(1)} MiB` : ''}` : '';
+      message = isYouTube() ? `Fetching audio through this YouTube tab${amount}. Keep the tab open. You do not need to play the full video.` : `Fetching audio through this Bilibili tab${amount}. Keep the tab open and UfunR enabled. You do not need to play the full episode.`;
+    }
     if (!message && busy) {
       const progress = Number(job?.progress);
       const percent = Number.isFinite(progress) ? ` · ${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%` : '';
@@ -429,7 +608,7 @@
       const completed = Math.min(total, Math.max(0, Number(job?.translationCompleted) || 0));
       message = stopping ? 'Cancelling…'
         : job?.state === 'queued' ? `Queued${Number(job.queuePosition) > 0 ? ` · position ${job.queuePosition}` : ''}. Waiting for a processing slot. See Video queue below.`
-        : job?.state === 'downloading' ? 'Connecting to Bilibili audio. The first subtitles will appear as they are prepared…'
+        : job?.state === 'downloading' ? `Connecting to ${isYouTube() ? 'YouTube' : 'Bilibili'} audio. The first subtitles will appear as they are prepared…`
         : job?.state === 'preparing' && !(Number(job.processedThrough) > 0) ? 'Preparing the first minute. Subtitles will appear as soon as they are ready…'
         : job?.state === 'preparing' ? `Preparing subtitles in sections · Japanese through ${Math.floor((Number(job.processedThrough) || 0) / 60)}:${String(Math.floor((Number(job.processedThrough) || 0) % 60)).padStart(2, '0')}${total ? ` · ${completed} / ${total} lines translated` : ''}. You can play the ready sections now.`
         : job?.state === 'uploading' ? `Sending media to your local helper${percent}`
@@ -437,9 +616,10 @@
             : job?.message || `Transcribing Japanese locally${percent}. Traditional Chinese translation will follow automatically.`;
     }
     if (!message && job?.state === 'translation_error') message = `Japanese subtitles saved. ${job.message || 'Traditional Chinese translation stopped.'} Select Retry Chinese translations to continue.`;
-    if (!message) message = loaded ? hasTrack ? `Saved on this device until ${new Date(documentState.expiresAt).toLocaleString()}. Reopen this video to restore subtitles.` : 'Download this Bilibili video to prepare subtitles, or import a matching file.' : 'Loading saved subtitles…';
+    if (!message && job?.state === 'error') message = displayMessage(job.message || 'Subtitle preparation stopped. Download or import again to continue.');
+    if (!message) message = loaded ? hasTrack ? `Saved on this device until ${new Date(documentState.expiresAt).toLocaleString()}. Reopen this video to restore subtitles.` : 'Download this video to prepare subtitles, or import a matching file.' : !pageKey ? 'Choose Download to find the current episode. No saved-subtitle lookup is pending.' : 'Loading saved subtitles…';
     ui.status.textContent = message;
-    ui.status.classList.toggle('kage-import-error', error || job?.state === 'translation_error');
+    ui.status.classList.toggle('kage-import-error', !!failure);
     const timings = documentState?.timings;
     ui.timings.hidden = !timings;
     const labels = { processingMs: 'Processing', queueMs: 'Waiting to start', recognitionMs: 'Japanese recognition', translationMs: 'Chinese translation', translationQueueMs: 'Waiting for translation', sourceSetupMs: 'Audio setup', audioWaitMs: 'Waiting for audio', downloadMs: 'Download' };
@@ -449,12 +629,18 @@
       ? `${timings.translationRequests} translation requests · ${timings.translationRetries || 0} retries · up to ${timings.batchSize || 4} lines per batch` : '';
     ui.progress.hidden = !busy;
     if (job?.state === 'queued') ui.progress.hidden = true;
+    if (browserAcquisition) {
+      ui.progress.hidden = false;
+      if (browserAcquisition.total) ui.progress.value = Math.min(1, browserAcquisition.received / browserAcquisition.total);
+      else ui.progress.removeAttribute?.('value');
+      return;
+    }
     ui.progress.value = job?.state === 'translating' && Number(job.translationTotal) > 0
       ? Math.max(0, Math.min(1, Number(job.translationCompleted) / Number(job.translationTotal) || 0))
       : Math.max(0, Math.min(1, Number(job?.progress) || 0));
   }
   function editCue() {
-    if (!documentState?.cues.length || uploading || stopping || ACTIVE_STATES.has(documentState.job?.state)) return;
+    if (!documentState?.cues.length || browserAcquisition || uploading || stopping || ACTIVE_STATES.has(documentState.job?.state)) return;
     const time = Number(video?.currentTime || 0) - documentState.offset;
     const upcoming = documentState.cues.findIndex(cue => cue.end > time);
     const index = upcoming < 0 ? documentState.cues.length - 1 : upcoming;
@@ -466,7 +652,7 @@
     ui.editor.hidden = false; ui.editText.focus();
   }
   async function saveEdit() {
-    if (!documentState || uploading || stopping || ACTIVE_STATES.has(documentState.job?.state) || ui.editor.dataset.key !== pageKey || ui.editor.dataset.revision !== String(documentState.revision)) return;
+    if (!documentState || browserAcquisition || uploading || stopping || ACTIVE_STATES.has(documentState.job?.state) || ui.editor.dataset.key !== pageKey || ui.editor.dataset.revision !== String(documentState.revision)) return;
     const start = Number(ui.start.value), end = Number(ui.end.value), text = ui.editText.value.replace(/\s+/g, ' ').trim();
     if (!text || text.length > 4000 || !Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end <= start) {
       setNotice('Enter Japanese text and an end time later than the non-negative start time.', true); return;
@@ -497,8 +683,30 @@
     if (type === 'number') input.step = '0.1';
     label.append(caption, input); return { label, input };
   }
+  async function prioritizeTranslation(job, control) {
+    if (queuePriorityPending || queueLoading) return;
+    queuePriorityPending = job.id;
+    clearTimeout(queueTimer); queueTimer = null;
+    ui.queueRefresh.disabled = true;
+    for (const button of queuePriorityButtons) button.disabled = true;
+    control.textContent = 'Setting priority…';
+    ui.queueStatus.textContent = `Setting translation priority for ${job.name}…`;
+    try {
+      await request('prioritize', { id: job.id });
+    } catch (cause) {
+      ui.queueStatus.textContent = cause.message;
+      control.textContent = 'Translate first';
+      for (const button of queuePriorityButtons) button.disabled = false;
+      if (ui.queue.open) queueTimer = setTimeout(refreshQueue, 2000);
+      return;
+    } finally {
+      queuePriorityPending = '';
+      ui.queueRefresh.disabled = false;
+    }
+    await refreshQueue();
+  }
   async function refreshQueue() {
-    if (!ui?.queue.open || queueLoading) return;
+    if (!ui?.queue.open || queueLoading || queuePriorityPending) return;
     clearTimeout(queueTimer); queueTimer = null;
     queueLoading = true;
     ui.queueRefresh.disabled = true;
@@ -510,7 +718,8 @@
       ui.queueSummary.textContent = `Video queue${result.jobs.length ? ` · ${result.jobs.length} / ${result.limit}` : ''}`;
       ui.queueStatus.textContent = result.jobs.length
         ? `${processing} processing · ${waiting} waiting · ${concurrency === 1 ? 'one video processes at a time' : `up to ${concurrency} videos process at once`}.`
-        : 'No active jobs. The helper is running. Queue videos from their Bilibili tabs.';
+        : 'No active jobs. The helper is running. Queue videos from their Bilibili or YouTube tabs.';
+      ui.queuePriorityHint.hidden = !result.translationPrioritySupported || !result.jobs.length;
       const rank = job => job.state === 'queued' ? 1 : job.state === 'uploading' ? 2 : 0;
       const ordered = [...result.jobs].sort((a, b) => rank(a) - rank(b) || (a.queuePosition || 0) - (b.queuePosition || 0));
       const ownJob = result.jobs.find(job => job.id === documentState?.job?.id);
@@ -518,6 +727,7 @@
         documentState.job.queuePosition = ownJob.queuePosition;
         render();
       }
+      queuePriorityButtons = [];
       const rows = ordered.map(job => {
         const row = node('div', 'kage-queue-job');
         const label = node('p', 'kage-queue-title', `${job.name}${job.id === documentState?.job?.id ? ' · This video' : ''}`);
@@ -535,9 +745,17 @@
         });
         stop.setAttribute('aria-label', `Stop ${job.name}`);
         row.append(label, status);
+        const hasPriority = job.translationPriority === true || result.translationPriorityJobId === job.id;
+        if (hasPriority) row.append(node('p', 'kage-queue-priority', 'Translation priority'));
+        else if (result.translationPrioritySupported && job.canPrioritizeTranslation === true) {
+          const prioritize = button('Translate first', () => prioritizeTranslation(job, prioritize));
+          prioritize.setAttribute('aria-label', `Translate ${job.name} first`);
+          queuePriorityButtons.push(prioritize);
+          row.append(prioritize);
+        }
         try {
           const url = new URL(job.sourceUrl);
-          if (url.protocol === 'https:' && /(^|\.)bilibili\.com$/i.test(url.hostname)) {
+          if (url.protocol === 'https:' && (/(^|\.)bilibili\.com$/i.test(url.hostname) || ['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname))) {
             const link = node('a', 'kage-text-button', 'Open video');
             link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
             row.append(link);
@@ -550,6 +768,8 @@
     } catch (cause) {
       ui.queueStatus.textContent = cause.message;
       ui.queueJobs.replaceChildren();
+      ui.queuePriorityHint.hidden = true;
+      queuePriorityButtons = [];
       if (ui.queue.open) queueTimer = setTimeout(refreshQueue, 10000);
     } finally { queueLoading = false; ui.queueRefresh.disabled = false; }
   }
@@ -557,13 +777,19 @@
     if (!slot || ui) return;
     const card = node('section', 'kage-import-card kage-source-card');
     card.append(node('span', 'kage-eyebrow', 'Video subtitles'), node('h3', '', 'Learn from this video'));
-    card.append(node('p', 'kage-import-hint', 'Japanese, Chinese, and furigana from this video’s audio. Start watching as each section becomes ready.'));
+    card.append(node('p', 'kage-import-hint', 'Japanese subtitles from this video’s audio, with Chinese translations and dictionary furigana. Start watching as each section becomes ready.'));
     const source = node('p', 'kage-import-source');
     const file = node('input'); file.type = 'file'; file.accept = 'video/*,audio/*,.mkv,.flac,.m4a,.opus'; file.hidden = true;
     file.setAttribute('aria-label', 'Choose a local video or audio file');
     const choose = button('Import video / audio', () => file.click());
-    const download = button('Download audio & prepare subtitles', () => importFile(null, true));
+    const download = button('Download audio & prepare subtitles', () => downloadCurrent());
     download.className = 'kage-primary-action';
+    const episodePicker = node('div', 'kage-import-episode-picker'); episodePicker.hidden = true;
+    const episodes = node('select'); episodes.setAttribute('aria-label', 'Episode to prepare');
+    const prepareEpisode = button('Prepare selected episode', () => { episodePicker.hidden = true; return downloadCurrent(episodes.value); });
+    episodePicker.append(episodes, prepareEpisode);
+    const browserAudio = button('Prepare browser audio', () => !pageKey ? downloadCurrent() : prepareBrowserAudio());
+    const browserHint = node('p', 'kage-import-hint', 'For episodes that play through UfunR, choose Prepare browser audio. Kage can ask Bilibili for the current episode’s audio through Chrome. Keep UfunR enabled and this tab open while it fetches; the full episode does not need to play.');
     file.addEventListener('change', () => { const selected = file.files?.[0]; file.value = ''; importFile(selected); });
     const cancelButton = button('Stop processing', () => cancel());
     const discard = button('Discard pending import', () => cancel(true));
@@ -572,7 +798,7 @@
       notice = ''; error = false; poll(pageKey, epoch, documentState.job.id);
     });
     const retry = button('Retry Chinese translations', retryTranslation);
-    const actions = node('div', 'kage-import-actions'); actions.append(download, choose, cancelButton, reconnect, retry, discard);
+    const actions = node('div', 'kage-import-actions'); actions.append(download, browserAudio, choose, cancelButton, reconnect, retry, discard);
     const progress = node('progress'); progress.max = 1; progress.setAttribute('aria-label', 'Subtitle preparation progress');
     const status = node('p', 'kage-import-status'); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
     const timings = node('details', 'kage-import-timings'); timings.hidden = true;
@@ -585,9 +811,11 @@
     const queueSummary = node('summary', '', 'Video queue');
     const queueStatus = node('p', 'kage-import-hint', 'Loading the video queue…');
     queueStatus.setAttribute('role', 'status');
+    const queuePriorityHint = node('p', 'kage-import-hint', 'Translation priority applies after the current request, once that video is ready. Other videos continue while it waits for audio.');
+    queuePriorityHint.hidden = true;
     const queueJobs = node('div', 'kage-queue-jobs');
     const queueRefresh = button('Refresh queue', refreshQueue);
-    queue.append(queueSummary, queueStatus, queueJobs, queueRefresh);
+    queue.append(queueSummary, queueStatus, queuePriorityHint, queueJobs, queueRefresh);
     queue.addEventListener('toggle', () => {
       if (queue.open) void refreshQueue();
       else { clearTimeout(queueTimer); queueTimer = null; }
@@ -627,7 +855,7 @@
     const editorButtons = node('div', 'kage-import-actions'); editorButtons.append(button('Save correction', saveEdit), button('Close editor', () => { editor.hidden = true; }));
     editor.append(textLabel, start.label, end.label, editorButtons);
     const remove = button('Remove saved subtitles', async () => {
-      if (!documentState || uploading || ACTIVE_STATES.has(documentState.job?.state)) return;
+      if (!documentState || browserAcquisition || uploading || ACTIVE_STATES.has(documentState.job?.state)) return;
       const key = pageKey, generation = epoch;
       documentState = null; editor.hidden = true; emit(); render();
       try { await persist(null, key); if (validContext(key, generation)) setNotice('Saved subtitles removed for this video part.'); }
@@ -635,12 +863,14 @@
     });
     remove.className = 'kage-danger-action';
     adjust.append(editor, remove);
-    card.append(source, file, actions, progress, status, toggleRow, adjust, timings, queue, setup); slot.appendChild(card);
-    ui = { card, source, file, choose, download, cancel: cancelButton, reconnect, retry, discard, progress, status, timings, timingValues, timingRequests, queue, queueSummary, queueStatus, queueJobs, queueRefresh, toggleRow, toggle, adjust, offset: offsetField.input, edit, editor, editText, start: start.input, end: end.input, remove };
+    card.append(source, file, actions, episodePicker, browserHint, progress, status, toggleRow, adjust, timings, queue, setup); slot.appendChild(card);
+    ui = { card, episodePicker, episodes, source, file, choose, download, browserAudio, browserHint, cancel: cancelButton, reconnect, retry, discard, progress, status, timings, timingValues, timingRequests, queue, queueSummary, queueStatus, queuePriorityHint, queueJobs, queueRefresh, toggleRow, toggle, adjust, offset: offsetField.input, edit, editor, editText, start: start.input, end: end.input, remove };
     observe(video); render();
   }
   globalThis.KageImport = {
     mount, observe, current, chinese, track: getTrack,
+    download: downloadCurrent,
+    captionSource(kind) { if (isYouTube()) { youtubeCaptionKind = kind; render(); } },
     get hasTrack() { return !!documentState?.cues.length; },
     get enabled() { return !!documentState?.enabled && !!documentState.cues.length; },
     get preparingChinese() { return preparingChinese(); },

@@ -14,7 +14,7 @@
     "deploy:cloudflare": "npm run build:cloudflare && wrangler deploy",
     "test:cloudflare": "npm run build:cloudflare && node --test cloudflare/*.test.mjs",
     "secrets:cloudflare": "node scripts/cloudflare-secrets.mjs",
-    "test:playback": "node --test scripts/playback-library.test.mjs scripts/import-loading.test.mjs",
+    "test:playback": "node --test scripts/playback-library.test.mjs scripts/import-loading.test.mjs scripts/library-categories.test.mjs",
     "subtitles:autostart": "node scripts/local-subtitles/autostart.mjs install",
     "subtitles:autostart:remove": "node scripts/local-subtitles/autostart.mjs remove",
     "subtitles:status": "node scripts/local-subtitles/autostart.mjs status"

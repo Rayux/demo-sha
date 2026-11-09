@@ -9,6 +9,8 @@ const ui = {
   empty: $("#empty-stage"),
   stage: $("#study-stage"),
   library: $("#library-list"),
+  libraryCategory: $("#library-category"),
+  defaultLibraryCategory: $("#default-library-category"),
   pills: $("#clip-pills"),
   clipLabel: $("#clip-label"),
   clipTime: $("#clip-time"),
@@ -98,6 +100,9 @@ const state = {
   analyzingIndex: -1,
   source: null,
   library: [],
+  libraryCategory: null,
+  defaultLibraryCategory: stored("kage-default-library-category", "The Promised Neverland"),
+  libraryPlaylist: [],
   playLibrary: false,
   playFullTrack: false,
   playbackGeneration: 0,
@@ -355,15 +360,48 @@ function renderTranslationVisibility() {
   ui.translationToggle.setAttribute("title", state.showTranslation ? "Hide translation" : "Show translation");
 }
 
+function getLibraryCategory(file) {
+  const name = file.name.replace(/\.[^.]+$/, "");
+  return /\s*-\s*S\d+E\d+/i.test(name)
+    ? name.split(/\s*-\s*S\d+E\d+/i)[0].trim()
+    : "Other audio";
+}
+
+function getVisibleLibrary() {
+  return state.libraryCategory === "all"
+    ? state.library
+    : state.library.filter(file => getLibraryCategory(file) === state.libraryCategory);
+}
+
 function renderLibrary(files) {
-  files = [...files].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-  state.library = files;
+  state.library = [...files].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  const categories = [...new Set(state.library.map(getLibraryCategory))];
+  const available = category => category === "all" || categories.includes(category);
+  if (!available(state.libraryCategory)) {
+    state.libraryCategory = available(state.defaultLibraryCategory) ? state.defaultLibraryCategory : (categories[0] || "all");
+  }
+  const options = '<option value="all">All audio</option>' + categories.map(category =>
+    `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("");
+  ui.libraryCategory.disabled = false;
+  ui.defaultLibraryCategory.disabled = false;
+  ui.libraryCategory.innerHTML = options;
+  ui.libraryCategory.value = state.libraryCategory;
+  // Keep a saved preference even when its series is temporarily unavailable.
+  ui.defaultLibraryCategory.innerHTML = options + (available(state.defaultLibraryCategory) ? "" :
+    `<option value="${escapeHtml(state.defaultLibraryCategory)}">${escapeHtml(state.defaultLibraryCategory)} (unavailable)</option>`);
+  ui.defaultLibraryCategory.value = state.defaultLibraryCategory;
+  renderLibraryTracks();
+}
+
+function renderLibraryTracks() {
+  const files = getVisibleLibrary();
   const countStr = String(files.length);
   const countPop = $("#library-count");
   if (countPop) countPop.textContent = countStr;
   const countClassic = $("#library-count-classic");
   if (countClassic) countClassic.textContent = countStr;
-
+  ui.library.scrollLeft = 0;
+  ui.library.scrollTop = 0;
   if (!files.length) {
     ui.library.innerHTML = '<p class="library-empty">No compatible audio files found.</p>';
     return;
@@ -381,6 +419,7 @@ function renderLibrary(files) {
       <span class="track-name pop-only">${escapeHtml(title)}</span><span class="track-meta pop-only">${escapeHtml(label)}</span>
     </button>`;
   }).join("");
+  markActiveSource();
 }
 
 function markActiveSource() {
@@ -1093,9 +1132,12 @@ function toggleLibraryPlayback() {
   if (!state.library.length) return toast("Load the audio library first.");
   if (state.recorder?.state === "recording") return toast("Stop your recording first.");
   if (state.playLibrary && !ui.audio.paused) return cancelPracticePlayback();
-  const index = state.library.findIndex(track => track.name === state.source?.name && !state.source?.file);
+  const playlist = getVisibleLibrary();
+  if (!playlist.length) return toast("Choose a series with audio first.");
+  state.libraryPlaylist = [...playlist];
+  const index = playlist.findIndex(track => track.name === state.source?.name && !state.source?.file);
   if (index === -1) {
-    void setSource(state.library[0], { continuousLibrary: true });
+    void setSource(playlist[0], { continuousLibrary: true });
   } else {
     startFullPlayback(true);
   }
@@ -1113,9 +1155,10 @@ function syncFullPlaybackClip() {
 
 function handleAudioEnded() {
   if (!ui.audio.ended) return;
-  if (state.playLibrary && state.library.length) {
-    const index = state.library.findIndex(track => track.name === state.source?.name);
-    const next = state.library[(index + 1) % state.library.length];
+  const playlist = state.libraryPlaylist;
+  if (state.playLibrary && playlist.length) {
+    const index = playlist.findIndex(track => track.name === state.source?.name);
+    const next = playlist[(index + 1) % playlist.length];
     void setSource(next, { continuousLibrary: true });
   } else if (state.playFullTrack) {
     cancelPracticePlayback();
@@ -2015,6 +2058,15 @@ ui.fileInput.addEventListener("change", (event) => {
   const [file] = event.target.files;
   if (!file) return;
   setSource({ name: file.name, url: URL.createObjectURL(file), file });
+});
+ui.libraryCategory.addEventListener("change", () => {
+  state.libraryCategory = ui.libraryCategory.value;
+  renderLibraryTracks();
+});
+ui.defaultLibraryCategory.addEventListener("change", () => {
+  state.defaultLibraryCategory = ui.defaultLibraryCategory.value;
+  localStorage.setItem("kage-default-library-category", state.defaultLibraryCategory);
+  toast("Default library saved for your next visit.");
 });
 ui.library.addEventListener("click", (event) => {
   const item = event.target.closest(".library-item");

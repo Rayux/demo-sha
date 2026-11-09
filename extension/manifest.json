@@ -1,19 +1,22 @@
 {
   "manifest_version": 3,
   "name": "Kage Shadowing Extension",
-  "version": "1.7.6",
-  "description": "Japanese shadowing extension for Netflix, YouTube, and Bilibili with real-time AI translations.",
+  "version": "1.7.26",
+  "description": "Japanese shadowing extension for Netflix, YouTube, Bilibili, and Anime1.me with real-time AI translations.",
   "permissions": [
     "storage",
     "alarms"
   ],
   "host_permissions": [
     "https://api.groq.com/*",
+    "https://*.anime1.me/*",
+    "https://*.v.anime1.me/*",
     "http://127.0.0.1/*",
     "http://localhost/*",
     "https://127.0.0.1/*",
     "https://localhost/*"
   ],
+  "optional_host_permissions": ["https://*.googlevideo.com/*"],
   "action": {
     "default_title": "Kage Shadowing"
   },
@@ -26,14 +29,11 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://*.netflix.com/*",
-        "*://*.youtube.com/*",
-        "*://*.bilibili.com/*"
-      ],
+      "matches": ["*://*.youtube.com/*"],
       "js": [
-        "content/netflix-tracks.js",
-        "content/inject.js"
+        "vendor/googlevideo/sabr.js",
+        "content/youtube-sabr-main.js",
+        "content/youtube-audio-main.js"
       ],
       "run_at": "document_start",
       "world": "MAIN"
@@ -45,10 +45,34 @@
         "*://*.bilibili.com/*"
       ],
       "js": [
+        "content/netflix-tracks.js",
+        "content/bilibili-audio-main.js",
+        "content/inject.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["*://*.anime1.me/*"],
+      "js": [
+        "content/anime1-audio-main.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://*.netflix.com/*",
+        "*://*.youtube.com/*",
+        "*://*.bilibili.com/*",
+        "*://*.anime1.me/*"
+      ],
+      "js": [
         "vendor/kuromoji/kuromoji.js",
         "content/subtitles.js",
         "content/readings.js",
         "content/prepare.js",
+        "content/browser-audio.js",
         "content/imported.js",
         "content/tutor.js",
         "content/content.js"
@@ -68,7 +92,8 @@
       "matches": [
         "*://*.netflix.com/*",
         "*://*.youtube.com/*",
-        "*://*.bilibili.com/*"
+        "*://*.bilibili.com/*",
+        "*://*.anime1.me/*"
       ]
     }
   ]

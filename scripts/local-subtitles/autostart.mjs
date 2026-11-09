@@ -5,6 +5,7 @@ import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { activateAgent } from './launch-agent.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const label = 'com.kage.local-subtitles';
@@ -65,12 +66,17 @@ try {
 <key>StandardErrorPath</key><string>${xml(path.join(data,'logs/helper-error.log'))}</string>
 </dict></plist>
 `;
-    const temp = `${plist}.tmp`;
-    await fs.writeFile(temp,contents,{mode:0o600});
-    execFileSync('/usr/bin/plutil',['-lint',temp],{stdio:'pipe'});
-    await fs.rename(temp,plist);
-    if (isLoaded) launch('bootout',`${domain}/${label}`);
-    launch('bootstrap',domain,plist);
+    let previous;
+    try { previous = await fs.readFile(plist, 'utf8'); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+    const unchanged = previous === contents;
+    if (!unchanged) {
+      const temp = `${plist}.tmp`;
+      await fs.writeFile(temp,contents,{mode:0o600});
+      execFileSync('/usr/bin/plutil',['-lint',temp],{stdio:'pipe'});
+      await fs.rename(temp,plist);
+    }
+    await activateAgent({ launch, domain, label, plist, isLoaded, unchanged });
     console.log('Kage subtitle helper now starts at login and restarts if it exits. No terminal is needed.');
     console.log('Keep Ollama running for Chinese translation.');
   }

@@ -8,11 +8,12 @@ const functions = app.slice(app.indexOf('function renderFullPlaybackButtons()'),
 const cancel = app.slice(app.indexOf('function cancelPracticePlayback()'), app.indexOf('\nfunction renderPlaybackMode('));
 function harness() {
   const button = () => ({ textContent: '', setAttribute() {} });
-  const state = { library: Array.from({ length: 12 }, (_, i) => ({ name: `episode${i + 1}.mp3`, url: `/audio/${i + 1}` })), clips: [], rate: 1.15, playbackGeneration: 0 };
+  const state = { library: Array.from({ length: 12 }, (_, i) => ({ name: `episode${i + 1}.mp3`, url: `/audio/${i + 1}` })), clips: [], rate: 1.15, playbackGeneration: 0, libraryPlaylist: [] };
   state.source = state.library[0];
   const calls = { sources: [], recording: 0, practiceEnds: 0, renders: [] };
   const audio = { paused: true, ended: false, currentTime: 10, pause() { this.paused = true; }, play() { this.paused = false; this.ended = false; return Promise.resolve(); } };
   const context = vm.createContext({ state, ui: { audio, playFull: button(), playLibrary: button() },
+    getVisibleLibrary() { return state.visibleLibrary || state.library; },
     playbackLoopId: 0, cancelAnimationFrame() {}, cancelPendingRecording() {}, toast() {},
     finishClipPlayback() { calls.practiceEnds++; }, renderActiveClip(preserve) { calls.renders.push(preserve); },
     async setSource(track, options) { context.cancelPracticePlayback(); state.source = track; audio.currentTime = 0; audio.ended = false; calls.sources.push(track.name); if (options?.continuousLibrary) context.startFullPlayback(true); }
@@ -82,4 +83,20 @@ test('a stale play rejection cannot cancel a newly selected episode', async () =
   await Promise.resolve(); await Promise.resolve();
   assert.equal(state.playLibrary, true);
   assert.equal(audio.paused, false);
+});
+
+
+test('Play Full loops only the selected collection, even after browsing another series', async () => {
+  const { context, state, calls, audio } = harness();
+  state.visibleLibrary = state.library.slice(2, 4);
+  context.toggleLibraryPlayback();
+  assert.equal(state.source.name, 'episode3.mp3');
+  state.visibleLibrary = state.library.slice(7, 9);
+  audio.ended = true;
+  context.handleAudioEnded();
+  await Promise.resolve();
+  assert.equal(state.source.name, 'episode4.mp3');
+  audio.ended = true;
+  context.handleAudioEnded();
+  assert.deepEqual(calls.sources, ['episode3.mp3', 'episode4.mp3', 'episode3.mp3']);
 });

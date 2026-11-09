@@ -6,6 +6,8 @@ and automatically translates ready sections into Traditional Chinese through the
 configured local Ollama endpoint and model. The extension adds furigana with its existing dictionary. The original web app's
 Groq settings are independent of this helper.
 
+Extension 1.7.24 automatically tries this helper when the browser Groq connection receives HTTP 403 or a network failure; Settings also retains a manual **Groq connection → Local helper (for browser VPNs)** override. This sends tutor/explicit Groq backup prompts to Groq through the Mac's connection while video playback uses the browser VPN. The browser's saved API key is forwarded per request in memory and is not saved or logged by the helper. This optional cloud route does not change local media processing; Groq's normal API usage limits and charges apply to these requests. It requires the Groq relay update introduced in 1.7.23 and restarting the updated helper when idle. Once installed, the automatic route requires no Settings changes or reloads when toggling a browser VPN. A system-wide VPN still affects the helper's connection.
+
 The software and model have no per-minute or API charges. You supply an Apple Silicon
 Mac, disk space, and electricity. Initial installation downloads Python packages and
 about 1.6 GB of model weights; transcription subsequently runs offline. There is no
@@ -37,6 +39,11 @@ cancelled. Results persist for three days after processing finishes so closing a
 Interrupted transcription retains ready sections but requires downloading/importing again for the complete video.
 Interrupted translation retains Japanese and completed Chinese lines; use **Retry Chinese translations**
 to resume missing lines. Refreshing or closing the browser tab after upload does not stop the job.
+Translation requests use a JSON schema to constrain response fields and subtitle IDs. Responses are still checked for missing, duplicate, or empty translations; numeric IDs are accepted when they match exactly. A malformed line does not stop later lines from translating, and gaps encountered during transcription receive a final pass with the full transcript context.
+
+Timeouts, connection failures, and temporary HTTP errors (408, 429, 500, 502, 503, 504) receive at most two automatic retries, after one and three seconds. Each attempt has a three-minute timeout. The shared Ollama slot is released during the delay, and Stop cancels the delay or request. Permanent HTTP errors such as an unavailable model (404) need a settings/install fix before retrying.
+
+Each saved `.local-subtitles/jobs/<job-id>/job.json` keeps the latest 50 `translationDiagnostics` events, including timestamps, affected subtitle IDs, format rejection reasons, token-limit truncation, and retry outcomes. Diagnostics omit subtitle text and raw model output and expire with the job. These changes take effect after restarting the helper while idle; `npm run subtitles:autostart` safely refuses a restart during active processing. Ollama must support JSON-schema structured outputs.
 Abandoned uploads expire after one hour without a successful chunk. The last
 200 job records are retained at most; storage limits can evict older records before three days.
 
@@ -61,6 +68,7 @@ successfully produce an empty subtitle list. An automatic job conservatively res
 Stop any manually started helper, then run `npm run subtitles:autostart`. The installer writes `~/Library/LaunchAgents/com.kage.local-subtitles.plist`, validates it, and loads it for the current macOS user. It uses absolute Node/Python/model paths and logs to `.local-subtitles/logs/`. No administrator access or terminal window is required. The agent starts at login and restarts after an exit. Ollama must also be running.
 
 Use `npm run subtitles:status` to check readiness. Rerun `npm run subtitles:autostart` while idle to restart after a helper update. Use `npm run subtitles:autostart:remove` to stop and remove the login agent; transcripts, models, and manually uploaded originals are preserved. The installer refuses to interrupt active work.
+When the launch configuration is unchanged, the installer restarts the registered service directly. Changed configurations use bounded retries for launchd's temporary bootstrap error 5 while the previous registration is being removed. No `sudo` is needed.
 
 ## Local API
 
@@ -79,6 +87,7 @@ token is generated each time the helper starts; all `/jobs` requests must send i
 | `PUT /jobs/:id/audio?offset=N` | Raw bytes, at most 2 MiB per sequential chunk → `{received}` |
 | `POST /jobs/:id/start` | JSON `{translation:{endpoint,model}}` → current job, queues transcription with progressive Chinese translation; retry resumes missing translations |
 | `GET /jobs/:id` | Current job; poll approximately once per second |
+| `POST /jobs/:id/prioritize` | JSON `{}` → selects Chinese translation priority for a started eligible job; queued jobs move ahead of waiting videos |
 | `DELETE /jobs/:id` | Cancels job and removes its media and transcript |
 
 Jobs contain `id`, `name`, `size`, `received`, `state`, `progress` (0–1), `message`,
@@ -120,7 +129,7 @@ Up to four videos may be active or queued. Different Bilibili tabs can submit di
 
 ## Processing timings and translation batches
 
-Chinese translation uses up to **8 subtitle lines per request**, with a 1,600-character limit on the requested Japanese text (a single longer line is handled alone). Both videos share one request slot. Missing or duplicated response IDs still receive individual retries; ready translations are kept and Japanese text/timing is untouched. For a manual helper run, `KAGE_TRANSLATION_BATCH_SIZE=4 npm run subtitles:start` restores the smaller batch size; values from 1 through 12 are supported.
+Chinese translation uses up to **8 subtitle lines per request**, with a 1,600-character limit on the requested Japanese text (a single longer line is handled alone). Both videos share one request slot. Regular queue scheduling is unchanged until **Video queue → Translate first** selects a video. Priority clears when that video finishes or stops. Priority changes apply after the current request finishes. Other videos may translate while the selected video has no ready batch; a selected queued video moves ahead of other waiting videos without interrupting running transcription. Translation responses use a compact object keyed by subtitle ID. Missing or duplicated IDs are repaired together, preserving good lines; wholly invalid groups split into smaller groups with bounded attempts. Adjacent Japanese context is retained for each gap. Legacy array responses remain accepted, and duplicate object keys cannot silently overwrite translations. Ready translations are kept and Japanese text/timing is untouched. For a manual helper run, `KAGE_TRANSLATION_BATCH_SIZE=4 npm run subtitles:start` restores the smaller batch size; values from 1 through 12 are supported.
 
 Open **Study → Subtitles → Processing timings** to see elapsed processing, queue wait, Japanese recognition, Chinese inference, translation-slot wait, audio setup, and audio wait. These measurements are saved with the subtitles and survive reopening the video. They include failed attempts and translation retries. Recognition includes the first Whisper call's model-loading cost. Audio wait measures blocking for the next prefetched audio window, including network/decoding; it is not a separate measure of download throughput. The worker's total wall time is also recorded in the helper result as `timings.workerWallMs`.
 
@@ -133,3 +142,17 @@ node scripts/local-subtitles/benchmark-translation.mjs --model gemma2
 ```
 
 Run while the helper is idle. The benchmark warms the model, then translates the same 24 synthetic Japanese lines with batches of 4, 8, and 12, in forward and reverse order. It writes request counts, retries, timings, and all translations to `output/subtitle-performance/translation-benchmark.json`. Completeness checks do not certify semantic accuracy; review the saved translations. No model downloads or cloud requests are made.
+
+## Browser-proxy audio import
+
+Chrome proxy extensions such as UfunR configure the browser's connection. Python/yt-dlp and FFmpeg do not inherit that connection, so browser playback can succeed while the helper's page lookup is region-blocked. **Prepare browser audio** retrieves the already playable DASH audio through the page's browser connection, then uses the existing bounded local upload path. It never sends signed CDN URLs or browser cookies to the helper, and recognition/translation remain local. Keep the tab open until audio fetching and upload finish. Full playback is not required. The browser route is capped at 128 MiB and supports unencrypted, browser-accessible audio streams only.
+
+
+## YouTube audio preparation
+
+The helper also accepts canonical YouTube video pages for `sourceUrl`, `pageUrl`, and `/recover`. Watch, Shorts, and `/live/<id>` URLs normalize to `https://www.youtube.com/watch?v=<id>`; playlists and malformed IDs are rejected. `/health` advertises `youtubeDownload: true` independently of the Bilibili capability. Audio resolution uses yt-dlp, validates direct Google Video CDN streams, and feeds the existing progressive transcription and translation pipeline. Download jobs retain the same queue, cancellation, expiry, and recovery behavior.
+
+Run setup again for `yt-dlp[default]`, which includes the YouTube JavaScript solver. YouTube additionally requires Node 22+ or Deno 2.3+ ([upstream setup](https://github.com/yt-dlp/yt-dlp/wiki/EJS)). The worker enables the helper's Node executable and Deno. The helper does not export browser cookies. Direct URL extraction may fail for restricted videos or unsupported stream formats; manual import remains available.
+
+
+When direct YouTube resolution fails for a video that plays in Chrome, extension 1.7.17 offers **Prepare browser audio**. This uses the existing bounded file-import API: the helper receives audio bytes associated with the canonical YouTube video, without cookies or signed CDN URLs. Native audio metadata must match the current video; complete contiguous ranges are checked before upload. Browser restrictions can still require manual import. Resolution errors are classified into fixed safe messages; raw downloader diagnostics are never persisted to jobs.

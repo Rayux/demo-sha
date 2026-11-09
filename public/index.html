@@ -128,7 +128,7 @@
 
         <div class="collection-caption pop-only">
           <p>Anime rabbit holes. Podcast favorites. A voice worth borrowing.</p>
-          <span><strong id="library-count">0</strong> TRACKS / LOCAL LIBRARY</span>
+          <span><strong id="library-count">0</strong> TRACKS / SELECTED COLLECTION</span>
         </div>
 
         <!-- Classic top controls in sidebar -->
@@ -138,6 +138,11 @@
           <p class="helper">Short clips, split at natural pauses. Ready to repeat.</p>
           <div class="library-divider"><span>Available audio</span><span id="library-count-classic" class="count-badge">0</span></div>
         </div>
+
+        <label class="library-filter" for="library-category">
+          <span>Browse series</span>
+          <select id="library-category" aria-controls="library-list" disabled><option>Loading series…</option></select>
+        </label>
 
         <!-- The Track List / Record Shelf -->
         <div id="library-list" class="library-list" aria-live="polite"></div>
@@ -270,7 +275,7 @@
                   <button id="forward-3" class="transport-small" type="button">+<span id="forward-label">5s</span></button>
                   <div class="track-play-actions">
                     <button id="play-full" class="quiet-button track-play-button" type="button" aria-pressed="false" title="Play the rest of this episode">Play All</button>
-                    <button id="play-library" class="quiet-button track-play-button" type="button" aria-pressed="false" title="Play episodes continuously, looping back to the first episode">Play Full</button>
+                    <button id="play-library" class="quiet-button track-play-button" type="button" aria-pressed="false" title="Play the selected collection continuously, looping back to its first track">Play Full</button>
                   </div>
                   <div class="speed-group" aria-label="Playback speed">
                     <button type="button" data-rate="0.5">0.5×</button>
@@ -464,6 +469,12 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
       </div>
+
+      <label class="setting-row library-default-setting" for="default-library-category">
+        <span>Default library</span>
+        <select id="default-library-category" aria-describedby="library-default-hint" disabled><option>Loading series…</option></select>
+      </label>
+      <p id="library-default-hint" class="settings-note">The collection shown when you open the app. Saved on this browser.</p>
 
       <!-- Design Switcher -->
       <label class="setting-row">

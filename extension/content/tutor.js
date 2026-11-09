@@ -1,22 +1,167 @@
 (() => {
-  let root, panel, launcher, input, messages, contextJP, contextZH, contextSource;
+  let root, panel, launcher, launcherGroup, downloadLauncher, input, messages, contextJP, contextZH, contextSource;
   let live = null;
   let pinned = null;
   let panelOpen = false;
+  let activeTab = 'tutor';
   let autoExplainedText = '';
   let activeRequest = null;
   let sequence = 0;
+  let subtitleFailure = '';
+  let positionLauncher = () => {};
+  function enableLauncherDrag() {
+    const storageKey = 'kageStudyPositionV1';
+    const margin = 8;
+    let position = null, drag = null, suppressClick = false, edited = false;
+    const clamp = value => Math.max(0, Math.min(1, value));
+    function bounds() {
+      const rect = launcherGroup.getBoundingClientRect();
+      return { width: Math.max(0, window.innerWidth - rect.width - 2 * margin),
+        height: Math.max(0, window.innerHeight - rect.height - 2 * margin) };
+    }
+    positionLauncher = () => {
+      if (!position) return;
+      const area = bounds();
+      root.style.right = 'auto';
+      root.style.left = `${margin + position.x * area.width}px`;
+      root.style.top = `${margin + position.y * area.height}px`;
+    };
+    function move(left, top) {
+      const area = bounds();
+      position = { x: area.width ? clamp((left - margin) / area.width) : 0,
+        y: area.height ? clamp((top - margin) / area.height) : 0 };
+      edited = true;
+      positionLauncher();
+    }
+    function save() {
+      chrome.storage.local.set({ [storageKey]: position }).catch(() => {});
+    }
+    chrome.storage.local.get(storageKey).then(state => {
+      const saved = state[storageKey];
+      if (edited || !Number.isFinite(saved?.x) || !Number.isFinite(saved?.y)) return;
+      position = { x: clamp(saved.x), y: clamp(saved.y) };
+      positionLauncher();
+    }).catch(() => {});
+    for (const control of [launcher, downloadLauncher]) {
+      control.addEventListener('pointerdown', event => {
+        if (event.button !== 0 || event.isPrimary === false || drag) return;
+        const rect = launcherGroup.getBoundingClientRect();
+        drag = { id: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false };
+        suppressClick = false;
+        control.setPointerCapture(event.pointerId);
+        event.stopPropagation();
+      });
+      control.addEventListener('pointermove', event => {
+        if (!drag || event.pointerId !== drag.id) return;
+        const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+        if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+        drag.moved = true;
+        root.classList.add('kage-launcher-dragging');
+        move(drag.left + dx, drag.top + dy);
+        event.preventDefault(); event.stopPropagation();
+      });
+      function finish(event) {
+        if (!drag || event.pointerId !== drag.id) return;
+        const ended = drag; drag = null;
+        suppressClick = ended.moved;
+        root.classList.remove('kage-launcher-dragging');
+        if (control.hasPointerCapture(ended.id)) control.releasePointerCapture(ended.id);
+        if (ended.moved) save();
+        event.stopPropagation();
+      }
+      for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) control.addEventListener(name, finish);
+      control.addEventListener('click', event => {
+        // Pointer drags also emit a click; keyboard activation must still work.
+        if (suppressClick && event?.detail !== 0) {
+          suppressClick = false; event.preventDefault(); event.stopPropagation(); return;
+        }
+        if (control === downloadLauncher) {
+          globalThis.KageImport?.download();
+        } else show(panel.hidden);
+      });
+      control.addEventListener('keydown', event => {
+        const direction = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
+        if (!event.altKey || !direction) return;
+        const rect = launcherGroup.getBoundingClientRect(), step = event.shiftKey ? 40 : 10;
+        move(rect.left + direction[0] * step, rect.top + direction[1] * step);
+        save(); event.preventDefault(); event.stopPropagation();
+      });
+    }
+    window.addEventListener('resize', positionLauncher);
+  }
+  function renderSubtitleError() {
+    if (!launcher) return;
+    root.querySelector('.kage-launcher-badge').hidden = !subtitleFailure;
+    launcher.title = subtitleFailure ? `Subtitle error: ${subtitleFailure}` : 'Click to study · Drag to move · Alt + arrow keys to move';
+    launcher.setAttribute('aria-label', subtitleFailure ? 'Open Kage study panel: subtitle error' : 'Open Kage study panel');
+  }
   let sourceMessage = 'Netflix subtitles are used when a Traditional Chinese text track is available.';
   const icon = path => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
   const closeIcon = icon('<path d="m6 6 12 12M18 6 6 18"/>');
   function setText(node, text) { if (node && node.textContent !== text) node.textContent = text; }
+  // Build only known DOM elements; model output is never interpreted as HTML.
+  function renderAnswer(body, text) {
+    function inline(parent, value) {
+      const tokens = /(`+)([^`]+?)\1|\*\*([^\n]+?)\*\*|__([^\n]+?)__|\*([^*\n]+?)\*|\\([\\`*_])/g;
+      let offset = 0;
+      for (const match of value.matchAll(tokens)) {
+        parent.appendChild(document.createTextNode(value.slice(offset, match.index)));
+        if (match[6]) parent.appendChild(document.createTextNode(match[6]));
+        else {
+          const tag = match[1] ? 'code' : match[3] || match[4] ? 'strong' : 'em';
+          const element = document.createElement(tag);
+          const content = match[2] || match[3] || match[4] || match[5];
+          if (tag === 'code') element.textContent = content;
+          else inline(element, content);
+          parent.appendChild(element);
+        }
+        offset = match.index + match[0].length;
+      }
+      parent.appendChild(document.createTextNode(value.slice(offset)));
+    }
+    body.replaceChildren();
+    let paragraph = null, list = null, code = null;
+    for (const line of String(text || '').replace(/\r\n?/g, '\n').split('\n')) {
+      if (/^\s*```/.test(line)) {
+        if (code) code = null;
+        else {
+          const pre = document.createElement('pre'); code = document.createElement('code');
+          pre.appendChild(code); body.appendChild(pre);
+        }
+        paragraph = list = null; continue;
+      }
+      if (code) { code.textContent += `${line}\n`; continue; }
+      if (!line.trim()) { paragraph = list = null; continue; }
+      const heading = line.match(/^#{1,6}\s+(.+?)(?:\s+#+)?$/);
+      const entry = line.match(/^\s*(?:([-+*])|(\d+)[.)])\s+(.+)$/);
+      if (heading) {
+        const element = document.createElement('h4'); inline(element, heading[1]); body.appendChild(element);
+        paragraph = list = null;
+      } else if (entry) {
+        const tag = entry[2] ? 'ol' : 'ul';
+        if (!list || list.tagName.toLowerCase() !== tag) {
+          list = document.createElement(tag);
+          if (entry[2]) list.setAttribute('start', entry[2]);
+          body.appendChild(list);
+        }
+        const item = document.createElement('li'); inline(item, entry[3]); list.appendChild(item); paragraph = null;
+      } else {
+        list = null;
+        if (!paragraph) { paragraph = document.createElement('p'); body.appendChild(paragraph); }
+        else paragraph.appendChild(document.createTextNode('\n'));
+        inline(paragraph, line);
+      }
+    }
+  }
   function selectTab(name) {
+    activeTab = name;
     for (const tab of root.querySelectorAll('[role="tab"]')) {
       const selected = tab.dataset.tab === name;
       tab.setAttribute('aria-selected', String(selected));
       tab.tabIndex = selected ? 0 : -1;
     }
     for (const view of root.querySelectorAll('[role="tabpanel"]')) view.hidden = view.dataset.view !== name;
+    if (panelOpen && name === 'tutor') { if (!pinned) capture(); explainCurrent(); }
   }
   function renderPinnedJapanese() {
     const text = pinned?.text || 'Play a Japanese subtitle to begin.';
@@ -51,8 +196,10 @@
     panelOpen = open;
     panel.hidden = !open;
     launcher.setAttribute('aria-expanded', String(open));
+    root.classList.toggle('kage-study-open', open);
     document.body.classList.toggle('kage-panel-open', open);
-    if (open) { capture(); explainCurrent(); input.focus(); }
+    if (open && subtitleFailure) { selectTab('subtitles'); root.querySelector('[data-tab="subtitles"]').focus(); }
+    else if (open) { capture(); selectTab('tutor'); input.focus(); }
     else { stopAnswer(); launcher.focus(); }
   }
   function message(text, role, sentence = '') {
@@ -75,8 +222,10 @@
     if (!activeRequest) return;
     const request = activeRequest;
     activeRequest = null;
+    if (request.timer) clearTimeout(request.timer);
     request.port?.disconnect();
-    request.answer.textContent = request.text ? `${request.text}\n\nStopped.` : 'Stopped.';
+    request.text = request.shown || '';
+    renderAnswer(request.answer, request.text ? `${request.text}\n\nStopped.` : 'Stopped.');
     request.answer.removeAttribute('role');
     if (request.automatic && autoExplainedText === request.sentence) autoExplainedText = '';
   }
@@ -88,21 +237,32 @@
     const sentence = pinned?.text || '';
     if (!automatic) input.value = '';
     if (!automatic) message(question, 'user', sentence);
-    const answer = message('Thinking with your local model…', 'ai');
+    const answer = message('Thinking with Groq…', 'ai');
     answer.setAttribute('role', 'status');
-    const request = { answer, sentence, automatic, text: '', port: null };
+    const request = { answer, sentence, automatic, text: '', shown: '', timer: null, done: false, port: null };
     activeRequest = request;
     function finish(error) {
       if (activeRequest !== request) return;
       activeRequest = null;
+      if (request.timer) clearTimeout(request.timer);
       if (error) {
-        answer.textContent = `${request.text ? `${request.text}\n\n` : ''}Unable to answer. ${error}`;
+        renderAnswer(answer, `${request.text ? `${request.text}\n\n` : ''}Unable to answer. ${error}`);
         answer.classList.add('kage-message-error');
         if (automatic && autoExplainedText === sentence) autoExplainedText = '';
       }
       answer.removeAttribute('role');
       request.port?.disconnect();
       messages.scrollTop = messages.scrollHeight;
+    }
+    function reveal() {
+      request.timer = null;
+      if (activeRequest !== request) return;
+      const remaining = Array.from(request.text.slice(request.shown.length));
+      request.shown += remaining.slice(0, 2).join('');
+      renderAnswer(answer, request.shown);
+      messages.scrollTop = messages.scrollHeight;
+      if (request.shown !== request.text) request.timer = setTimeout(reveal, 65);
+      else if (request.done) finish();
     }
     try {
       const port = chrome.runtime.connect({ name: 'kage-tutor' });
@@ -111,17 +271,19 @@
         if (activeRequest !== request) return;
         if (response.type === 'delta' || response.type === 'done') {
           request.text = response.answer;
-          answer.textContent = request.text;
-          messages.scrollTop = messages.scrollHeight;
+          request.done = response.type === 'done';
+          if (typeof setTimeout !== 'function') { request.shown = request.text; renderAnswer(answer, request.text); }
+          else if (!request.timer) reveal();
         }
-        if (response.type === 'done') finish();
+        if (response.type === 'done' && request.shown === request.text) finish();
         else if (response.type === 'error') finish(response.error);
       });
       port.onDisconnect.addListener(() => {
         const error = chrome.runtime.lastError?.message;
+        if (request.done) return;
         finish(error || 'Connection lost. Reload this tab after reloading the extension.');
       });
-      port.postMessage({ type: 'ASK_AI', sentence, question, ...(pinned?.localOnly ? { localOnly: true } : {}) });
+      port.postMessage({ type: 'ASK_AI', sentence, question, provider: 'groq' });
     } catch {
       finish('Connection lost. Reload this tab after reloading the extension.');
     }
@@ -131,9 +293,14 @@
       if (root) return;
       root = document.createElement('div'); root.className = 'kage-ai-widget'; root.id = 'kage-study';
       root.innerHTML = `
-        <button type="button" class="kage-launcher" aria-label="Open Kage study panel" aria-expanded="false" aria-controls="kagePanel">
-          ${icon('<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5zm0 13A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 11h5"/>')}<span>Study</span>
-        </button>
+        <div class="kage-launcher-group" role="group" aria-label="Kage tools">
+          <button type="button" class="kage-launcher" aria-label="Open Kage study panel" aria-expanded="false" aria-controls="kagePanel">
+            ${icon('<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5zm0 13A2.5 2.5 0 0 1 6.5 16H20M8 7h8M8 11h5"/>')}<span class="kage-launcher-badge" aria-hidden="true" hidden></span>
+          </button>
+          <button type="button" class="kage-download-launcher" aria-label="Download audio and prepare subtitles" title="Download audio & prepare subtitles" aria-controls="kagePanel" hidden>
+            ${icon('<path d="M12 3v12m-5-5 5 5 5-5M5 16v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/>')}
+          </button>
+        </div>
         <aside id="kagePanel" class="kage-chat-panel" aria-label="Kage study panel" hidden>
           <header class="kage-chat-header"><div class="kage-brand"><span class="kage-brand-mark" aria-hidden="true">影</span><div><h2>Kage</h2><span class="kage-brand-caption">Your Japanese companion</span></div></div><button type="button" class="kage-icon-button kage-chat-close" aria-label="Close study panel">${closeIcon}</button></header>
           <nav class="kage-tabs" role="tablist" aria-label="Study tools">
@@ -150,18 +317,19 @@
             <div class="kage-view-heading"><h3>Subtitles</h3><p>Everything you need to follow along.</p></div>
             <div class="kage-import-slot"></div>
             <section class="kage-source-card"><span class="kage-eyebrow">Translation</span><h3>Subtitle source</h3><p id="kageSourceStatus" role="status"></p></section>
-            <section class="kage-reading-card"><span class="kage-eyebrow">Readings</span><h3>Offline furigana</h3><p>Japanese readings come from a bundled dictionary on your device. They stay visible when translations change.</p><span id="kageDictionaryStatus" role="status">Loading local dictionary…</span></section>
+            <section class="kage-reading-card"><span class="kage-eyebrow">Readings</span><h3>Offline furigana</h3><p>Japanese readings come from a bundled dictionary on your device. They stay visible when translations change. Readings are inferred from the Japanese text, not the audio; names and ambiguous kanji can be incorrect.</p><span id="kageDictionaryStatus" role="status">Loading local dictionary…</span></section>
             <div class="kage-prepare-slot"></div>
           </section>
-          <footer class="kage-panel-footer"><span id="kageModelStatus">Local · Gemma 2</span><button type="button" class="kage-text-button" id="kageSettings">Settings ${icon('<path d="m9 5 7 7-7 7"/>')}</button></footer>
+          <footer class="kage-panel-footer"><span id="kageModelStatus">Groq · GPT OSS 120B</span><button type="button" class="kage-text-button" id="kageSettings">Settings ${icon('<path d="m9 5 7 7-7 7"/>')}</button></footer>
         </aside>`;
       document.body.appendChild(root);
       panel = root.querySelector('.kage-chat-panel'); launcher = root.querySelector('.kage-launcher');
+      launcherGroup = root.querySelector('.kage-launcher-group'); downloadLauncher = root.querySelector('.kage-download-launcher');
       input = root.querySelector('#kageChatInput'); messages = root.querySelector('#kageChatBody');
       contextJP = root.querySelector('.kage-context-jp'); contextZH = root.querySelector('.kage-context-zh'); contextSource = root.querySelector('.kage-context-source');
-      capture(); this.sourceStatus(sourceMessage);
+      capture(); this.sourceStatus(sourceMessage); renderSubtitleError();
       globalThis.KageImport?.mount(root.querySelector('.kage-import-slot'));
-      launcher.addEventListener('click', () => show(panel.hidden));
+      enableLauncherDrag();
       root.querySelector('.kage-chat-close').addEventListener('click', () => show(false));
       root.querySelector('#kageUseCurrent').addEventListener('click', () => {
         if (!live?.text) return;
@@ -184,26 +352,39 @@
         if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); send(); }
       });
       root.querySelector('#kageSettings').addEventListener('click', () => chrome.runtime.sendMessage({ type: 'OPEN_OPTIONS' }).catch(() => {}));
-      const refreshModel = () => chrome.storage.local.get(['apiModel', 'groqFallback']).then(state => {
-        setText(root.querySelector('#kageModelStatus'), `Local · ${state.apiModel || 'gemma2'}${state.groqFallback === true ? ' · backup enabled' : ''}`);
+      const refreshModel = () => chrome.storage.local.get(['groqApiKey']).then(state => {
+        setText(root.querySelector('#kageModelStatus'), state.groqApiKey ? 'Groq · GPT OSS 120B' : 'Groq · API key required');
       });
       refreshModel();
-      chrome.storage.onChanged.addListener(changes => { if (changes.apiModel || changes.groqFallback) refreshModel(); });
+      chrome.storage.onChanged.addListener(changes => { if (changes.groqApiKey) refreshModel(); });
       globalThis.KageReadings?.ready.then(() => { renderPinnedJapanese(); setText(root.querySelector('#kageDictionaryStatus'), KageReadings.state === 'ready' ? 'Dictionary ready · offline' : 'Dictionary unavailable · refresh this tab'); });
       document.addEventListener('fullscreenchange', () => {
         const target = document.fullscreenElement || document.body;
         if (target.tagName !== 'VIDEO') target.appendChild(root);
+        positionLauncher();
       });
     },
     update(text, data, source, localOnly = false) {
       live = { text, translation: data.sentence_translation || '', source, localOnly };
       if (!panelOpen) return;
-      if (!pinned) { capture(); explainCurrent(); }
+      if (!pinned) { capture(); if (activeTab === 'tutor') explainCurrent(); }
       else if (pinned.text === text) {
         pinned = { ...live }; setText(contextZH, live.translation); setText(contextSource, source);
       }
     },
     clearCurrent() { live = null; },
+    openSubtitles() {
+      show(true); selectTab('subtitles');
+    },
+    downloadState(available, busy) {
+      if (!downloadLauncher) return;
+      downloadLauncher.hidden = !available;
+      downloadLauncher.disabled = busy;
+      downloadLauncher.setAttribute('aria-busy', String(busy));
+      downloadLauncher.title = busy ? 'Loading or preparing subtitles…' : 'Download audio & prepare subtitles';
+      positionLauncher();
+    },
+    subtitleError(text) { subtitleFailure = String(text || ''); renderSubtitleError(); },
     sourceStatus(text) { sourceMessage = text; if (root) setText(root.querySelector('#kageSourceStatus'), text); }
   };
 })();

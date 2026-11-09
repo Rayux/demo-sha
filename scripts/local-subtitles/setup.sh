@@ -16,7 +16,7 @@ if [[ ! -x "$task_data/venv/bin/python" ]]; then
 fi
 "$task_data/venv/bin/python" -m pip install --upgrade pip
 "$task_data/venv/bin/python" -m pip install 'mlx-whisper==0.4.3' 'imageio-ffmpeg==0.6.0'
-"$task_data/venv/bin/python" -m pip install --upgrade yt-dlp
+"$task_data/venv/bin/python" -m pip install --upgrade 'yt-dlp[default]'
 echo 'Downloading the free Whisper model (about 1.6 GB). Setup needs the internet; transcription runs offline.'
 KAGE_SETUP_MODEL_DIR="$task_data/model" KAGE_SETUP_CACHE_DIR="$task_data/cache" \
   "$task_data/venv/bin/python" - <<'PY'

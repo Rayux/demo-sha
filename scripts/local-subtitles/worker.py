@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""MLX Whisper worker. Reads local or Bilibili audio and emits timestamped sections.
+"""MLX Whisper worker. Reads local, Bilibili, or YouTube audio and emits timestamped sections.
 
 Only setup.sh downloads model weights. This worker requires a complete local model
-and forces Hugging Face offline mode. Bilibili audio still needs network access.
+and forces Hugging Face offline mode. Remote audio still needs network access.
 """
 import argparse
 import json
@@ -125,8 +125,8 @@ def transcribe(source, target, model, ffmpeg, url=None):
     duration_hint = None
     command = [ffmpeg, "-nostdin", "-hide_banner", "-loglevel", "error"]
     if url:
-        from download import resolve_audio
-        progress(0, "Connecting to Bilibili audio…")
+        from download import resolve_audio, source_platform
+        progress(0, f"Connecting to {source_platform(url)} audio…")
         media = resolve_audio(url)
         duration_hint = media['duration']
         print(json.dumps({'type': 'metadata', 'duration': duration_hint, 'mediaMode': media['mode']}), flush=True)
@@ -188,7 +188,7 @@ def transcribe(source, target, model, ffmpeg, url=None):
             if duration <= 0 or duration > MAX_DURATION:
                 raise RuntimeError('Choose media with audio between 0 and six hours long.')
             if duration_hint and duration < duration_hint - 2:
-                raise RuntimeError('Bilibili audio ended before the video finished. Retry the download.')
+                raise RuntimeError('The audio ended before the video finished. Retry the download.')
             target.write_text(json.dumps({'duration': duration, 'cues': cues}, ensure_ascii=False), encoding='utf-8')
             progress(1, 'Japanese subtitles are ready.')
         finally:

@@ -106,9 +106,9 @@ test('Groq fallback only runs after a local failure with explicit opt-in', async
   const send = backgroundHarness({ groqFallback: true, groqApiKey: 'test' }, async url => {
     calls.push(url);
     if (calls.length === 1) throw new Error('offline');
-    return { ok: true, json: async () => ({ choices: [{ message: { content: 'answer' } }] }) };
+    return { ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify(result('字幕').data) } }] }) };
   });
-  assert.equal((await send({ type: 'ASK_AI', question: 'Explain' })).success, true);
+  assert.equal((await send({ type: 'PROCESS_SUBTITLE', text: '字幕' })).success, true);
   assert.equal(calls.length, 2);
   assert.ok(calls[1].startsWith('https://api.groq.com/'));
 });
@@ -346,12 +346,12 @@ test('Gemma 2 restoration runs once, then preserves subsequent model choices', a
   const models = [];
   const fetch = async (_, options) => {
     models.push(JSON.parse(options.body).model);
-    return { ok: true, json: async () => ({ choices: [{ message: { content: 'answer' } }] }) };
+    return { ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify(result('字幕').data) } }] }) };
   };
-  await backgroundHarness(state, fetch)({ type: 'ASK_AI', question: 'test' });
+  await backgroundHarness(state, fetch)({ type: 'PROCESS_SUBTITLE', text: '字幕' });
   assert.equal(models[0], 'gemma2');
   state.apiModel = 'custom-local-model';
-  await backgroundHarness(state, fetch)({ type: 'ASK_AI', question: 'test' });
+  await backgroundHarness(state, fetch)({ type: 'PROCESS_SUBTITLE', text: '字幕' });
   assert.equal(models[1], 'custom-local-model');
 });
 

@@ -16,7 +16,7 @@
 </head>
 <body>
   <h1>Settings</h1>
-  <p>Subtitles appear immediately. Translations and tutor answers use your local model. Groq is only contacted if you enable fallback below.</p>
+  <p>Subtitles and translations use your local Gemma model. Tutor explanations and questions use Groq (GPT OSS 120B) and require the API key below. Subtitle backup is optional and controlled separately.</p>
   <div class="field">
     <label for="apiEndpoint">Local API endpoint</label>
     <input type="text" id="apiEndpoint" placeholder="http://127.0.0.1:11434/v1/chat/completions">
@@ -30,11 +30,20 @@
     <input type="password" id="apiKey" placeholder="Leave blank for Ollama">
   </div>
   <div class="field">
-    <label><input type="checkbox" id="groqFallback"> Enable Groq backup when the local request fails</label>
+    <label><input type="checkbox" id="groqFallback"> Enable Groq subtitle backup when the local request fails</label>
   </div>
   <div class="field">
-    <label for="groqApiKey">Groq backup API key (optional)</label>
-    <input type="password" id="groqApiKey" placeholder="Only used when backup is enabled">
+    <label for="groqApiKey">Groq API key (required for tutor)</label>
+    <input type="password" id="groqApiKey" placeholder="Used for tutor answers and optional subtitle backup">
+  </div>
+  <div class="field">
+    <label for="groqConnection">Groq connection</label>
+    <select id="groqConnection">
+      <option value="auto">Automatic (recommended)</option>
+      <option value="browser">Browser connection</option>
+      <option value="helper">Local helper (for browser VPNs)</option>
+    </select>
+    <p>Automatic chooses a working connection while your browser VPN is on or off. If the browser is blocked, Kage tries your local helper and remembers the working route briefly. Your key stays saved in Kage; the helper forwards it per request without saving it.</p>
   </div>
   <div class="field">
     <label for="autoTranslate">Auto-show Translation</label>
@@ -47,8 +56,15 @@
     <label><input type="checkbox" id="detailedSubtitles"> Include AI word meanings (slower)</label>
     <p>Furigana is always generated locally, even with this option off. Leave off for faster Traditional Chinese subtitles. Upcoming lines are translated ahead when a matching timed track is available. Pause briefly to give preloading a head start.</p>
   </div>
+  <details class="field">
+    <summary>YouTube media access (advanced)</summary>
+    <p>Video preparation chooses its audio route automatically. Most YouTube playback sessions need no setting here. Optional media access is remembered by this browser and used automatically when available.</p>
+    <button type="button" id="youtubeDownloadsBtn" disabled>Checking access…</button>
+    <p id="youtubeDownloadsStatus" role="status" aria-live="polite"></p>
+  </details>
   <button id="saveBtn">Save Settings</button>
   <div id="status"></div>
   <script src="options.js"></script>
+  <script src="youtube-downloads.js"></script>
 </body>
 </html>

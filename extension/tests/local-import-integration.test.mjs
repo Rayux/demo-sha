@@ -68,6 +68,40 @@ test('starting an import against an old helper requires an update instead of sil
   await assert.rejects(request({ action: 'start', id: 'job-123456789012' }), /Restart the local helper/);
 });
 
+test('queue priority uses the authenticated helper endpoint without changing the model', async () => {
+  const calls = [];
+  const request = bridge(async (url, options) => {
+    calls.push({ url, options });
+    return http(url.endsWith('/health')
+      ? { token: 'a'.repeat(48), capabilities: { jobQueue: true, translationPriority: true } }
+      : { translationPriorityJobId: 'job-123456789012', jobs: [] });
+  });
+  const queue = await request({ action: 'list' });
+  assert.equal(queue.translationPrioritySupported, true);
+  assert.equal(queue.translationPriorityJobId, 'job-123456789012');
+  assert.equal(queue.token, undefined);
+  await request({ action: 'prioritize', id: 'job-123456789012', model: 'another-model' });
+  assert.equal(calls.at(-1).url, 'http://127.0.0.1:8766/jobs/job-123456789012/prioritize');
+  assert.equal(calls.at(-1).options.method, 'POST');
+  assert.equal(calls.at(-1).options.headers['X-Kage-Token'], 'a'.repeat(48));
+  assert.deepEqual(JSON.parse(calls.at(-1).options.body), {});
+  const count = calls.length;
+  await assert.rejects(request({ action: 'prioritize', id: '../health' }), /Invalid/);
+  assert.equal(calls.length, count, 'invalid IDs never reach the helper');
+});
+
+test('older helpers retain their queue but cannot receive priority mutations', async () => {
+  const calls = [];
+  const request = bridge(async (url, options) => {
+    calls.push({ url, options });
+    return http(url.endsWith('/health') ? { token: 'a'.repeat(48), capabilities: { jobQueue: true } }
+      : { jobs: [{ id: 'job-123456789012', state: 'translating' }] });
+  });
+  assert.equal((await request({ action: 'list' })).translationPrioritySupported, false);
+  await assert.rejects(request({ action: 'prioritize', id: 'job-123456789012' }), /Let current processing finish before restarting/);
+  assert.equal(calls.some(call => call.options.method === 'POST'), false);
+});
+
 function worker(fetch, state = { groqFallback: true, groqApiKey: 'test' }) {
   let listener;
   const event = { addListener() {} };
@@ -79,11 +113,10 @@ function worker(fetch, state = { groqFallback: true, groqApiKey: 'test' }) {
   vm.runInContext(read('background/service_worker.js'), context);
   return message => new Promise(resolve => { if (!listener(message, sender, resolve)) resolve(); });
 }
-test('imported foreground, batch, tutor and rolling requests stay local even with Groq backup enabled', async () => {
+test('imported foreground, batch and rolling requests stay local even with Groq backup enabled', async () => {
   for (const message of [
     { type: 'PROCESS_SUBTITLE', text: '日本語' },
     { type: 'PREPARE_SUBTITLES', texts: ['日本語', '字幕'] },
-    { type: 'ASK_AI', sentence: '日本語', question: '解釋' },
     { type: 'PRELOAD_TRACK', texts: ['日本語', '字幕'] }
   ]) {
     const calls = [];
@@ -198,4 +231,67 @@ test('an older helper gives update instructions instead of trying a download', a
     return http({ token: 'a'.repeat(48), capabilities: { translation: true } });
   });
   await assert.rejects(request({ action: 'download' }), /Update and restart/);
+});
+
+test('helper recovery and uploaded media are bound to the sender video rather than a caller URL', async () => {
+  const calls = [];
+  const request = bridge(async (url, options) => {
+    calls.push({ url, options });
+    return http(url.endsWith('/health') ? { token: 'a'.repeat(48), capabilities: { recovery: true } } : { job: null });
+  });
+  await request({ action: 'recover', sourceUrl: 'https://example.com' });
+  assert.equal(new URL(calls.at(-1).url).searchParams.get('url'), sender.url + '?p=1');
+  await request({ action: 'create', name: 'clip.mp4', size: 3, sourceUrl: 'https://example.com' });
+  assert.equal(JSON.parse(calls.at(-1).options.body).pageUrl, sender.url + '?p=1');
+});
+
+test('SPA part switches use the current content URL for download, upload association and recovery', async () => {
+  const calls = [];
+  const request = bridge(async (url, options) => {
+    calls.push({ url, options });
+    return http(url.endsWith('/health') ? { token: 'a'.repeat(48), capabilities: { bilibiliDownload: true, recovery: true } } : { id: 'job-current-part' });
+  });
+  const initial = { ...sender, frameId: 0, url: 'https://www.bilibili.com/video/BV1T6eq6gENU?p=1',
+    tab: { id: 1, url: 'https://www.bilibili.com/video/BV1T6eq6gENU?p=1' } };
+  const pageUrl = 'https://www.bilibili.com/video/BV1T6eq6gENU/?p=7&spm_id_from=test#reply';
+  const expected = 'https://www.bilibili.com/video/BV1T6eq6gENU?p=7';
+  await request({ action: 'download', pageUrl }, initial);
+  assert.deepEqual(JSON.parse(calls.at(-1).options.body), { sourceUrl: expected });
+  await request({ action: 'create', pageUrl, name: 'part7.mp4', size: 3 }, initial);
+  assert.equal(JSON.parse(calls.at(-1).options.body).pageUrl, expected);
+  await request({ action: 'recover', pageUrl }, initial);
+  assert.equal(new URL(calls.at(-1).url).searchParams.get('url'), expected);
+  await request({ action: 'download', pageUrl: initial.url }, initial);
+  assert.equal(JSON.parse(calls.at(-1).options.body).sourceUrl, initial.url);
+});
+
+test('current page URLs cannot cross origins, use credentials or invalid parts', async () => {
+  const request = bridge(async () => http({ token: 'a'.repeat(48), capabilities: { bilibiliDownload: true } }));
+  for (const pageUrl of ['https://evil.test/video/BVtest?p=7', 'https://www.bilibili.com.evil.test/video/BVtest?p=7',
+    'https://user:secret@www.bilibili.com/video/BVtest?p=7', 'https://www.bilibili.com/video/BVtest?p=7oops']) {
+    await assert.rejects(request({ action: 'download', pageUrl }), /Bilibili/);
+  }
+  await assert.rejects(request({ action: 'download', pageUrl: sender.url }, { ...sender, frameId: 2 }), /Bilibili/);
+});
+
+test('YouTube downloads and recovery bind to the current video after SPA navigation', async () => {
+  const calls = [];
+  const request = bridge(async (url, options) => {
+    calls.push({ url, options });
+    return http(url.endsWith('/health') ? { token: 'a'.repeat(48), capabilities: { youtubeDownload: true, recovery: true } } : { id: 'youtube-job-123456' });
+  });
+  const owner = { ...sender, frameId: 0, url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' };
+  await request({ action: 'download', pageUrl: 'https://www.youtube.com/shorts/abcdefghijk?feature=share' }, owner);
+  assert.deepEqual(JSON.parse(calls.at(-1).options.body), { sourceUrl: 'https://www.youtube.com/watch?v=abcdefghijk' });
+  await request({ action: 'recover', pageUrl: 'https://www.youtube.com/watch?v=abcdefghijk&t=10' }, owner);
+  assert.equal(new URL(calls.at(-1).url).searchParams.get('url'), 'https://www.youtube.com/watch?v=abcdefghijk');
+  for (const pageUrl of ['https://evil.test/watch?v=abcdefghijk', 'https://www.youtube.com:444/watch?v=abcdefghijk',
+    'https://user:pass@www.youtube.com/watch?v=abcdefghijk', 'https://www.youtube.com/playlist?list=abc', 'https://www.youtube.com/watch?v=bad']) {
+    await assert.rejects(request({ action: 'download', pageUrl }, owner));
+  }
+});
+
+test('YouTube downloads require an updated helper capability', async () => {
+  const request = bridge(async () => http({ token: 'a'.repeat(48), capabilities: { bilibiliDownload: true } }));
+  await assert.rejects(request({ action: 'download' }, { ...sender, url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' }), /enable YouTube downloads/);
 });

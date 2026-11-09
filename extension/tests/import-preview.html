@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kage local import preview</title>
-<link rel="stylesheet" href="/content/content.css?v=1.7.6">
+<link rel="stylesheet" href="/content/content.css?v=1.7.11">
 <style>
 body{margin:0;background:#16221e;color:#e6eee8;font:14px system-ui}.stage{position:relative;height:100vh;background:radial-gradient(ellipse at 20% 30%,#506b4d,transparent 55%),linear-gradient(130deg,#283d34,#10221e)}video{width:100%;height:100%}.fixture{position:absolute;left:28px;top:28px;z-index:1;max-width:52%}.fixture h1{font-size:20px;font-weight:500}.fixture p{max-width:480px;color:#adbfb3;line-height:1.6}.fixture button{background:#273d34;color:#e6eee8;border:1px solid #698070;border-radius:6px;padding:8px 12px;margin:0 6px 8px 0;cursor:pointer}.fixture small{display:block;color:#adbfb3;margin-top:8px}
 :fullscreen .stage{margin:0!important;width:100vw!important;height:100vh!important;border:0!important;transform:none!important}
@@ -21,15 +21,33 @@ body{margin:0;background:#16221e;color:#e6eee8;font:14px system-ui}.stage{positi
   if (layout) saved.cues[0].text = 'ダメダメ。今日のお昼は';
   const progressive = new URL(location.href).searchParams.has('progressive');
   if (progressive) saved.job = {id:'fixture-progress',state:'preparing'};
+  const subtitleError = new URL(location.href).searchParams.has('error');
+  if (subtitleError) saved.job = {id:'fixture-error',state:'translation_error',message:'Ollama returned a missing translation for 1 subtitle line. Other completed translations are saved.'};
   const state = {enabled:true,apiModel:'gemma2',autoTranslate:'true',groqFallback:false,kageImportedTracksV1:[saved]};
   const settings = [], incoming = [];
   let queueJobs = [{id:'fixture-other-video',name:'Bilibili · Another video',state:'preparing',progress:.4},{id:'fixture-waiting-video',name:'Bilibili · Next lesson',state:'queued',queuePosition:1}];
+  let translationPriorityJobId = null;
   const translation = text => ({chunks:[{japanese:text}],sentence_translation:layout ? (text.includes('ダメ')?'不行不行。今天中午':'我們一起學習日文，每天慢慢練習，讓自己越來越熟悉自然的日語對話。') : text.includes('天気')?'今天天氣真好呢。':'一起學日文吧。'});
+  window.KageBrowserAudio = {download: async ({signal,onProgress}) => {
+    if(signal?.aborted)throw new DOMException('Stopped','AbortError');
+    const bytes=new Uint8Array(1024);
+    onProgress?.({received:bytes.length,total:bytes.length});
+    return new File([bytes],'Bilibili fixture (browser audio).m4a',{type:'audio/mp4'});
+  }};
   window.chrome = {runtime:{connect:window.fixtureTutorConnect,getURL:path=>location.origin+'/'+path,onMessage:{addListener:fn=>incoming.push(fn)},sendMessage:async message=>{
-    if(message.type==='LOCAL_SUBTITLES' && message.action==='list')return {success:true,data:{limit:4,concurrency:2,jobs:queueJobs}};
-    if(message.type==='LOCAL_SUBTITLES' && message.action==='cancel'){queueJobs=queueJobs.filter(job=>job.id!==message.id);return {success:true,data:{state:'cancelled'}};}
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='health')return {success:true,data:{ready:true,capabilities:{translation:true}}};
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='recover')return {success:true,data:{job:null}};
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='create')return {success:true,data:{id:'fixture-browser-audio'}};
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='upload')return {success:true,data:{received:message.offset+atob(message.data).length}};
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='start' && message.id==='fixture-browser-audio')return {success:true,data:{state:'queued'}};
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='status' && message.id==='fixture-browser-audio')return {success:true,data:{state:'complete',cues:saved.cues.map(cue=>({...cue,translation:translation(cue.text).sentence_translation}))}};
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='list')return {success:true,data:{limit:4,concurrency:2,translationPrioritySupported:true,translationPriorityJobId,jobs:queueJobs.map(job=>({...job,canPrioritizeTranslation:true,translationPriority:job.id===translationPriorityJobId}))}};
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='prioritize'){translationPriorityJobId=message.id;return {success:true,data:{translationPriorityJobId}};}
+    if(message.type==='LOCAL_SUBTITLES' && message.action==='cancel'){queueJobs=queueJobs.filter(job=>job.id!==message.id);if(message.id===translationPriorityJobId)translationPriorityJobId=null;return {success:true,data:{state:'cancelled'}};}
     if(message.type==='PROCESS_SUBTITLE')return {success:true,data:translation(message.text)};
     if(message.type==='PREPARE_SUBTITLES'){const results=message.texts.map(text=>({text,data:translation(text)}));incoming.forEach(fn=>fn({type:'SUBTITLES_READY',context:message.context,results}));return {success:true,results};}
+    if(message.type==='LOCAL_SUBTITLES' && subtitleError && message.action==='start')return {success:true,data:{state:'queued'}};
+    if(message.type==='LOCAL_SUBTITLES' && subtitleError && message.action==='status')return {success:true,data:{state:'complete',cues:saved.cues.map(cue=>({...cue,translation:translation(cue.text).sentence_translation}))}};
     if(message.type==='LOCAL_SUBTITLES' && progressive && message.action==='status')return {success:true,data:{state:'preparing',transcriptionComplete:false,processedThrough:60,duration:360,translationCompleted:1,translationTotal:2,cues:saved.cues.map((cue,index)=>({...cue,...(index===0?{translation:'今天天氣真好呢。'}:{})}))}};
     if(message.type==='LOCAL_SUBTITLES')return {success:false,error:'This fixture previews saved subtitles. Use a Bilibili tab to import real media.'};
     return {success:true};

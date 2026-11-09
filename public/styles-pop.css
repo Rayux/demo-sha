@@ -687,3 +687,10 @@ svg { display: block; }
 .track-play-actions { display: flex; align-items: center; gap: 6px; }
 .track-play-button { border: 1px solid var(--border); border-radius: 16px; padding: 4px 12px; min-height: 32px; font-size: 0.8em; font-weight: 500; white-space: nowrap; }
 .track-play-button[aria-pressed="true"] { color: var(--bg, #fff); background: var(--text, #243223); }
+
+/* Collection browsing */
+.library-filter { display: grid; gap: 8px; margin: 0 0 18px; min-width: 0; }
+.library-filter > span { font-size: 11px; font-weight: 600; color: var(--ink); }
+.library-filter select { width: 100%; max-width: 440px; min-width: 0; min-height: 42px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--ink); font-size: 13px; text-overflow: ellipsis; }
+.setting-row.library-default-setting { display: grid; gap: 8px; }
+.setting-row.library-default-setting select { width: 100%; max-width: 100%; min-width: 0; text-overflow: ellipsis; }

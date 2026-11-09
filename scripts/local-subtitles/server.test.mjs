@@ -14,7 +14,8 @@ const fixture = fileURLToPath(new URL('./fixtures/worker.mjs', import.meta.url))
 const extensionOrigin = `chrome-extension://${'a'.repeat(32)}`;
 async function start(t, options = {}) {
   const dataDir = options.dataDir || await fs.mkdtemp(path.join(os.tmpdir(), 'kage-subtitles-test-'));
-  const service = await createSubtitleService({ dataDir, python: process.execPath, worker: fixture, modelDir: dataDir, ...options });
+  const service = await createSubtitleService({ dataDir, python: process.execPath, worker: fixture, modelDir: dataDir,
+    translationWaitBeforeRetry: async () => {}, ...options });
   const address = await service.listen(0);
   const base = `http://127.0.0.1:${address.port}`;
   const health = await (await fetch(`${base}/health`)).json();
@@ -231,7 +232,7 @@ const translation = { endpoint: 'http://127.0.0.1:11434/v1/chat/completions', mo
 function requestedItems(init) {
   const payload = JSON.parse(init.body);
   const content = payload.messages.at(-1).content;
-  return JSON.parse(content.slice(content.indexOf('{'))).items;
+  return JSON.parse(content.split('\n').at(-1)).items;
 }
 function translatedResponse(items) {
   return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ translations: items.map(({ id }) => ({ id, translation: `繁體中文${id}。` })) }) } }] }), { headers: { 'Content-Type': 'application/json' } });
@@ -284,7 +285,7 @@ test('invalid translation endpoint is rejected before transcription starts', asy
   await missing(path.join(client.dataDir, 'workers.log'));
 });
 
-test('missing ids use individual fallback, discard unknown ids and retain successful batch translations', async t => {
+test('missing ids retry together, discard unknown ids and retain successful batch translations', async t => {
   const requests = [];
   const client = await start(t, { fetchImpl: async (_url, init) => {
     const items = requestedItems(init);
@@ -295,7 +296,7 @@ test('missing ids use individual fallback, discard unknown ids and retain succes
   const id = await upload(client, 'multi');
   await client.call(`/jobs/${id}/start`, { method: 'POST', json: { translation } });
   assert.equal((await waitJob(client, id)).state, 'complete');
-  assert.deepEqual(requests, [['0', '1', '2', '3', '4'], ['3'], ['4']]);
+  assert.deepEqual(requests, [['0', '1', '2', '3', '4'], ['3', '4']]);
 });
 
 test('malformed model output gets a format retry and cannot complete with missing Chinese', async t => {
@@ -303,7 +304,7 @@ test('malformed model output gets a format retry and cannot complete with missin
   const client = await start(t, { fetchImpl: async (_url, init) => {
     requests++;
     if (requests === 1) return new Response(JSON.stringify({ choices: [{ message: { content: 'Sorry, not JSON' } }] }));
-    assert.match(JSON.parse(init.body).messages.at(-1).content, /previous answer/);
+    assert.match(JSON.parse(init.body).messages.at(-1).content, /remaining items/);
     return translatedResponse(requestedItems(init));
   } });
   const id = await upload(client);
@@ -311,16 +312,21 @@ test('malformed model output gets a format retry and cannot complete with missin
   const job = await waitJob(client, id);
   assert.equal(job.state, 'complete');
   assert.equal(requests, 2);
+  const saved = JSON.parse(await fs.readFile(path.join(client.dataDir, 'jobs', id, 'job.json')));
+  assert.equal(saved.translationDiagnostics.length, 1);
+  assert.deepEqual(saved.translationDiagnostics[0].issues, ['malformed_json']);
+  assert.deepEqual(saved.translationDiagnostics[0].missingIds, ['0']);
+  assert.ok(!JSON.stringify(saved.translationDiagnostics).includes('Sorry'));
 });
 
 test('network failure saves Japanese and partial Chinese; retry resumes missing lines without retranscribing', async t => {
   const requests = [];
-  let failNext = false;
+  let failuresRemaining = 0;
   const client = await start(t, { translationBatchSize: 4, fetchImpl: async (_url, init) => {
     const items = requestedItems(init);
     requests.push(items.map(item => item.id));
-    if (failNext) { failNext = false; throw new TypeError('fetch failed'); }
-    if (requests.length === 1) failNext = true;
+    if (failuresRemaining) { failuresRemaining--; throw new TypeError('fetch failed'); }
+    if (requests.length === 1) failuresRemaining = 3;
     return translatedResponse(items);
   } });
   const id = await upload(client, 'multi');
@@ -334,7 +340,9 @@ test('network failure saves Japanese and partial Chinese; retry resumes missing 
   await client.call(`/jobs/${id}/start`, { method: 'POST', json: { translation } });
   const job = await waitJob(client, id);
   assert.equal(job.state, 'complete');
-  assert.deepEqual(requests, [['0', '1', '2', '3'], ['4'], ['4']]);
+  assert.deepEqual(requests, [['0', '1', '2', '3'], ['4'], ['4'], ['4'], ['4']]);
+  const saved = JSON.parse(await fs.readFile(path.join(client.dataDir, 'jobs', id, 'job.json')));
+  assert.deepEqual(saved.translationDiagnostics.map(event => event.retry), [true, true, false]);
   assert.equal((await fs.readFile(path.join(client.dataDir, 'workers.log'), 'utf8')).trim().split('\n').length, 2);
 });
 
@@ -752,6 +760,209 @@ test('two videos share one translation request slot and both retain their own tr
   assert.ok(completed.every(job => job.state === 'complete' && job.cues.length === 5 && job.cues.every(cue => cue.translation)));
 });
 
+// Saved Japanese tracks make scheduling tests independent of worker timing.
+async function savedTranslationJobs(t, labels, options = {}) {
+  const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'kage-priority-test-'));
+  const ids = [];
+  for (const label of labels) {
+    const id = randomUUID(), directory = path.join(dataDir, 'jobs', id);
+    await fs.mkdir(directory, { recursive: true });
+    await fs.writeFile(path.join(directory, 'job.json'), JSON.stringify({ id, name: label, state: 'complete',
+      size: 1, duration: 4, transcriptionComplete: true, updatedAt: new Date().toISOString(),
+      cues: Array.from({ length: 3 }, (_, index) => ({ id: String(index), start: index, end: index + 0.9, text: `${label}の字幕${index}。` })) }));
+    ids.push(id);
+  }
+  return { ...await start(t, { dataDir, translationBatchSize: 1, ...options }), ids };
+}
+function gatedTranslations() {
+  const calls = [];
+  return {
+    calls,
+    fetchImpl: async (_url, init) => {
+      const call = { items: requestedItems(init), aborted: false };
+      calls.push(call);
+      await new Promise((resolve, reject) => {
+        call.release = resolve;
+        init.signal.addEventListener('abort', () => { call.aborted = true; reject(init.signal.reason); }, { once: true });
+      });
+      return translatedResponse(call.items);
+    },
+    async next(index, label) {
+      for (let attempt = 0; attempt < 200 && !calls[index]; attempt++) await new Promise(resolve => setTimeout(resolve, 5));
+      assert.ok(calls[index], `Translation request ${index} was not scheduled.`);
+      assert.equal(calls[index].items[0].text[0], label, `Unexpected video for translation request ${index}.`);
+      return calls[index];
+    },
+  };
+}
+
+test('regular translation preserves FIFO batches until a video is explicitly prioritized', async t => {
+  const gate = gatedTranslations();
+  const client = await savedTranslationJobs(t, ['甲', '乙'], { fetchImpl: gate.fetchImpl });
+  const [first, second] = client.ids;
+  await client.call(`/jobs/${first}/start`, { method: 'POST', json: { translation } });
+  await gate.next(0, '甲');
+  await client.call(`/jobs/${second}/start`, { method: 'POST', json: { translation } });
+  await waitJob(client, second, ['translating']);
+  // The state is published before its asynchronous status write and cleanup.
+  // Hold the first request until the second video's first batch is queued.
+  await new Promise(resolve => setTimeout(resolve, 50));
+  for (let index = 0; index < 6; index++) {
+    const queue = (await client.call('/jobs')).value;
+    assert.equal(queue.translationPriorityJobId, null);
+    assert.ok(queue.jobs.every(job => !job.translationPriority));
+    (await gate.next(index, index % 2 === 0 ? '甲' : '乙')).release();
+  }
+  assert.ok((await Promise.all(client.ids.map(id => waitJob(client, id)))).every(job => job.state === 'complete'));
+});
+
+test('explicit translation priority keeps the selected video across batch continuations then returns to FIFO', async t => {
+  const gate = gatedTranslations();
+  const client = await savedTranslationJobs(t, ['乙', '甲'], { fetchImpl: gate.fetchImpl });
+  const [second, first] = client.ids;
+  assert.equal(client.health.capabilities.translationPriority, true);
+  await client.call(`/jobs/${first}/start`, { method: 'POST', json: { translation } });
+  await gate.next(0, '甲');
+  await client.call(`/jobs/${second}/start`, { method: 'POST', json: { translation } });
+  await waitJob(client, second, ['translating']);
+  assert.equal((await client.call('/jobs')).value.translationPriorityJobId, null);
+  assert.equal((await client.call(`/jobs/${first}/prioritize`, { method: 'POST', json: {} })).status, 200);
+  assert.equal((await client.call('/jobs')).value.translationPriorityJobId, first);
+  for (let index = 0; index < 6; index++) {
+    const call = await gate.next(index, index < 3 ? '甲' : '乙');
+    if (index === 3) {
+      assert.equal((await waitJob(client, first)).state, 'complete');
+      assert.equal((await client.call('/jobs')).value.translationPriorityJobId, null);
+      assert.equal((await client.call(`/jobs/${second}`)).value.translationPriority, false);
+    }
+    call.release();
+  }
+  const results = await Promise.all(client.ids.map(id => waitJob(client, id)));
+  assert.ok(results.every(job => job.state === 'complete' && job.cues.every(cue => cue.translation)));
+  assert.equal((await client.call('/jobs')).value.translationPriorityJobId, null);
+});
+
+test('changing translation priority finishes the current request and preserves its saved translation', async t => {
+  const gate = gatedTranslations();
+  const client = await savedTranslationJobs(t, ['甲', '乙'], { fetchImpl: gate.fetchImpl });
+  const [first, second] = client.ids;
+  await client.call(`/jobs/${first}/start`, { method: 'POST', json: { translation } });
+  const inFlight = await gate.next(0, '甲');
+  await client.call(`/jobs/${first}/prioritize`, { method: 'POST', json: {} });
+  await client.call(`/jobs/${second}/start`, { method: 'POST', json: { translation } });
+  await waitJob(client, second, ['translating']);
+  const selected = await client.call(`/jobs/${second}/prioritize`, { method: 'POST', json: {} });
+  assert.equal(selected.status, 200);
+  assert.equal(selected.value.translationPriorityJobId, second);
+  assert.equal(gate.calls.length, 1);
+  assert.equal(inFlight.aborted, false);
+  inFlight.release();
+  for (let index = 1; index < 6; index++) {
+    const call = await gate.next(index, index < 4 ? '乙' : '甲');
+    call.release();
+  }
+  assert.equal((await waitJob(client, first)).state, 'complete');
+  assert.equal((await waitJob(client, second)).state, 'complete');
+  assert.deepEqual(gate.calls.filter(call => call.items[0].text[0] === '甲').map(call => call.items[0].id), ['0', '1', '2']);
+});
+
+test('cancelling the selected video clears priority and immediately continues regular translation', async t => {
+  const gate = gatedTranslations();
+  const client = await savedTranslationJobs(t, ['甲', '乙'], { fetchImpl: gate.fetchImpl });
+  const [first, second] = client.ids;
+  await client.call(`/jobs/${first}/start`, { method: 'POST', json: { translation } });
+  await gate.next(0, '甲');
+  await client.call(`/jobs/${first}/prioritize`, { method: 'POST', json: {} });
+  await client.call(`/jobs/${second}/start`, { method: 'POST', json: { translation } });
+  await waitJob(client, second, ['translating']);
+  assert.equal((await client.call(`/jobs/${first}`, { method: 'DELETE' })).value.state, 'cancelled');
+  assert.equal(gate.calls[0].aborted, true);
+  assert.equal((await client.call('/jobs')).value.translationPriorityJobId, null);
+  assert.equal((await client.call(`/jobs/${second}`)).value.translationPriority, false);
+  for (let index = 1; index < 4; index++) (await gate.next(index, '乙')).release();
+  assert.equal((await waitJob(client, second)).state, 'complete');
+});
+
+test('a priority video waiting for audio leaves the translation slot available to another video', async t => {
+  const gate = gatedTranslations();
+  const client = await savedTranslationJobs(t, ['乙'], { fetchImpl: gate.fetchImpl });
+  const slow = await upload(client, 'slow');
+  await client.call(`/jobs/${slow}/start`, { method: 'POST', json: { translation } });
+  await waitJob(client, slow, ['transcribing']);
+  await client.call(`/jobs/${slow}/prioritize`, { method: 'POST', json: {} });
+  await client.call(`/jobs/${client.ids[0]}/start`, { method: 'POST', json: { translation } });
+  assert.equal((await client.call('/jobs')).value.translationPriorityJobId, slow);
+  for (let index = 0; index < 3; index++) (await gate.next(index, '乙')).release();
+  assert.equal((await waitJob(client, client.ids[0])).state, 'complete');
+  assert.equal((await client.call(`/jobs/${slow}`)).value.state, 'transcribing');
+  await client.call(`/jobs/${slow}`, { method: 'DELETE' });
+});
+
+test('priority never reserves the translation slot indefinitely during a retry delay', async t => {
+  const gate = gatedTranslations();
+  let failed = false, retryEntered, releaseRetry;
+  const waitingForRetry = new Promise(resolve => { retryEntered = resolve; });
+  const client = await savedTranslationJobs(t, ['甲', '乙'], {
+    fetchImpl: async (url, init) => {
+      if (!failed && requestedItems(init)[0].text.startsWith('甲')) { failed = true; throw new TypeError('fetch failed'); }
+      return gate.fetchImpl(url, init);
+    },
+    translationWaitBeforeRetry: async (_ms, signal) => {
+      retryEntered();
+      await new Promise((resolve, reject) => {
+        releaseRetry = resolve;
+        signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+      });
+    },
+  });
+  const [first, second] = client.ids;
+  await client.call(`/jobs/${first}/start`, { method: 'POST', json: { translation } });
+  await waitingForRetry;
+  await client.call(`/jobs/${first}/prioritize`, { method: 'POST', json: {} });
+  await client.call(`/jobs/${second}/start`, { method: 'POST', json: { translation } });
+  const other = await gate.next(0, '乙');
+  assert.equal((await client.call('/jobs')).value.translationPriorityJobId, first);
+  releaseRetry();
+  other.release();
+  for (let index = 1; index < 6; index++) (await gate.next(index, index < 4 ? '甲' : '乙')).release();
+  assert.ok((await Promise.all(client.ids.map(id => waitJob(client, id)))).every(job => job.state === 'complete'));
+});
+
+test('a selected queued video moves ahead without interrupting either running worker', async t => {
+  const gate = gatedTranslations();
+  const client = await savedTranslationJobs(t, ['甲', '乙'], { fetchImpl: gate.fetchImpl });
+  const slow = await Promise.all([upload(client, 'slow'), upload(client, 'slow')]);
+  for (const id of slow) await client.call(`/jobs/${id}/start`, { method: 'POST', json: {} });
+  await Promise.all(slow.map(id => waitJob(client, id, ['transcribing'])));
+  for (const id of client.ids) await client.call(`/jobs/${id}/start`, { method: 'POST', json: { translation } });
+  const [waiting, selected] = client.ids;
+  assert.equal((await client.call(`/jobs/${selected}`)).value.queuePosition, 2);
+  assert.equal((await client.call(`/jobs/${selected}/prioritize`, { method: 'POST', json: {} })).value.queuePosition, 1);
+  assert.equal((await client.call(`/jobs/${waiting}`)).value.queuePosition, 2);
+  assert.ok((await client.call('/jobs')).value.jobs.filter(job => slow.includes(job.id)).every(job => job.state === 'transcribing'));
+  await client.call(`/jobs/${slow[0]}`, { method: 'DELETE' });
+  for (let index = 0; index < 6; index++) (await gate.next(index, index < 3 ? '乙' : '甲')).release();
+  await Promise.all(client.ids.map(id => waitJob(client, id)));
+  assert.equal((await client.call(`/jobs/${slow[1]}`)).value.state, 'transcribing');
+  await client.call(`/jobs/${slow[1]}`, { method: 'DELETE' });
+});
+
+test('translation priority requires authentication, valid settings, and an active translation job', async t => {
+  const client = await start(t);
+  const id = await upload(client, 'slow');
+  const prioritize = (json = {}, auth = true) => client.call(`/jobs/${id}/prioritize`, { method: 'POST', json, auth });
+  assert.equal((await prioritize({}, false)).status, 401);
+  assert.equal((await prioritize()).status, 409);
+  await client.call(`/jobs/${id}/start`, { method: 'POST', json: {} });
+  assert.equal((await prioritize()).status, 409);
+  assert.equal((await prioritize(null)).status, 400);
+  assert.equal((await prioritize({ model: 'other-model' })).status, 400);
+  assert.equal((await client.call(`/jobs/${randomUUID()}/prioritize`, { method: 'POST', json: {} })).status, 404);
+  await client.call(`/jobs/${id}`, { method: 'DELETE' });
+  assert.equal((await prioritize()).status, 409);
+  assert.equal((await client.call(`/jobs/${id}`)).value.canPrioritizeTranslation, false);
+});
+
 test('cancelling a video waiting for Chinese releases its slot without aborting the other translation', async t => {
   let release, entered;
   const started = new Promise(resolve => { entered = resolve; });
@@ -817,4 +1028,67 @@ test('stage timings include cumulative worker measurements, separate translation
   assert.equal(saved.timings.recognitionMs, 45);
   assert.equal(saved.timings.batchSize, 8);
   assert.ok(saved.timings.processingMs > 0);
+});
+
+test('recover finds exact video parts and local imports after restart without resurrecting expired jobs', async t => {
+  let now = Date.now();
+  const client = await start(t, { now: () => now });
+  const pageUrl = 'https://www.bilibili.com/video/BVrecover?p=2';
+  const created = await client.call('/jobs', { method: 'POST', json: { name: 'saved.mp4', size: 5, pageUrl } });
+  const id = created.value.id;
+  await client.call(`/jobs/${id}/audio?offset=0`, { method: 'PUT', bytes: 'hello' });
+  await client.call(`/jobs/${id}/start`, { method: 'POST', json: {} });
+  const done = await waitJob(client, id);
+  await client.stop();
+  const reopened = await start(t, { dataDir: client.dataDir, now: () => now });
+  const recover = url => reopened.call(`/recover?url=${encodeURIComponent(url)}`);
+  const result = await recover(pageUrl + '&tracking=ignored');
+  assert.equal(result.value.job.id, id);
+  assert.deepEqual(result.value.job.cues, done.cues);
+  assert.equal((await recover('https://www.bilibili.com/video/BVrecover?p=1')).value.job, null);
+  assert.equal((await recover('https://example.com/video/BVrecover')).status, 400);
+  now = done.expiresAt;
+  assert.equal((await recover(pageUrl)).value.job, null);
+});
+
+test('malformed Chinese in an early audio section does not block later sections and gets a final retry', async t => {
+  for (const repair of [false, true]) {
+    let firstAttempts = 0;
+    const client = await start(t, { worker: streamingFixture, fetchImpl: async (_url, init) => {
+      const items = requestedItems(init);
+      if (items.some(item => item.id === '0')) firstAttempts++;
+      return translatedResponse(items.filter(item => item.id !== '0' || (repair && firstAttempts > 2)));
+    } });
+    const id = await downloadJob(client, 'https://www.bilibili.com/video/BVrecover');
+    await client.call(`/jobs/${id}/start`, { method: 'POST', json: { translation } });
+    const job = await waitJob(client, id);
+    assert.equal(job.transcriptionComplete, true);
+    assert.equal(job.cues[1].translation, '繁體中文1。');
+    assert.equal(job.state, repair ? 'complete' : 'translation_error');
+    assert.equal(job.translationCompleted, repair ? 2 : 1);
+    assert.ok(firstAttempts <= 4);
+    if (!repair) assert.match(job.message, /1 subtitle line/);
+  }
+});
+
+test('YouTube audio jobs prepare both languages and recover by exact canonical video identity', async t => {
+  const client = await start(t, { downloader: downloadFixture, fetchImpl: async (_url, init) => translatedResponse(requestedItems(init)) });
+  assert.equal(client.health.capabilities.youtubeDownload, true);
+  const id = await downloadJob(client, 'https://www.youtube.com/shorts/dQw4w9WgXcQ?feature=share');
+  const sourceUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+  const created = (await client.call(`/jobs/${id}`)).value;
+  assert.equal(created.sourceUrl, sourceUrl);
+  assert.equal(created.name, 'YouTube dQw4w9WgXcQ (audio)');
+  await client.call(`/jobs/${id}/start`, { method: 'POST', json: { translation } });
+  const job = await waitJob(client, id);
+  assert.equal(job.state, 'complete');
+  assert.equal(job.cues[0].translation, '繁體中文0。');
+  const recover = url => client.call(`/recover?url=${encodeURIComponent(url)}`);
+  assert.equal((await recover(sourceUrl + '&t=20&list=ignored')).value.job.id, id);
+  assert.equal((await recover('https://www.youtube.com/watch?v=abcdefghijk')).value.job, null);
+  for (const sourceUrl of ['https://www.youtube.com/playlist?list=abc', 'https://www.youtube.com/watch?v=bad',
+    'https://youtube.com.evil.test/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com:444/watch?v=dQw4w9WgXcQ',
+    'https://user:pass@www.youtube.com/watch?v=dQw4w9WgXcQ']) {
+    assert.equal((await client.call('/jobs', { method: 'POST', json: { sourceUrl } })).status, 400);
+  }
 });

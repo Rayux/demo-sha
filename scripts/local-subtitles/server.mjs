@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Loopback-only, dependency-free transport. Audio and transcripts never leave this Mac.
+// Loopback-only, dependency-free helper. Optional Groq forwarding sends only
+// explicitly requested tutor/backup prompts; imported media stays on this Mac.
 import http from 'node:http';
 import { randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { promises as fs } from 'node:fs';
@@ -7,7 +8,9 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { translateCues, validateTranslationConfig, DEFAULT_BATCH_SIZE } from './translation.mjs';
-import { bilibiliURL, downloadBilibili } from './bilibili.mjs';
+import { downloadBilibili } from './bilibili.mjs';
+import { videoURL, downloadableVideoURL, videoName, videoPlatform } from './video-source.mjs';
+import { createGroqRelay } from './groq-relay.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
@@ -36,9 +39,9 @@ async function body(req, limit) {
   }
   return Buffer.concat(chunks, size);
 }
-async function jsonBody(req) {
+async function jsonBody(req, limit = 4096) {
   if (!(req.headers['content-type'] || '').startsWith('application/json')) fail(415, 'Use application/json.');
-  try { return JSON.parse((await body(req, 4096)).toString('utf8')); }
+  try { return JSON.parse((await body(req, limit)).toString('utf8')); }
   catch (error) { if (error instanceof HttpError) throw error; fail(400, 'Invalid JSON.'); }
 }
 function safeEqual(left, right) {
@@ -100,6 +103,7 @@ export function splitLongCues(cues) {
 }
 
 export async function createSubtitleService(options = {}) {
+  const groqRelay = createGroqRelay({ request: options.groqRequest, timeoutMs: options.groqTimeoutMs });
   const dataDir = path.resolve(options.dataDir || process.env.KAGE_SUBTITLES_DIR || path.join(ROOT, '.local-subtitles'));
   const jobsDir = path.join(dataDir, 'jobs');
   const python = options.python || process.env.KAGE_SUBTITLES_PYTHON || path.join(dataDir, 'venv/bin/python');
@@ -118,6 +122,10 @@ export async function createSubtitleService(options = {}) {
   let reservedBytes = 0;
   const running = new Map();
   const translationQueue = [];
+  let translationPriorityJobId = null;
+  let translationDrainScheduled = false;
+  let translationContinuationUntil = 0;
+  let translationContinuationTimer;
   let translating = false;
   let closing = false;
   let ready = false;
@@ -132,6 +140,18 @@ export async function createSubtitleService(options = {}) {
     ? queue.filter(id => jobs.get(id)?.state === 'queued').indexOf(job.id) + 1 : 0;
   const deadline = job => Number(job.expiresAt) || (Date.parse(job.updatedAt) || now()) + RETENTION_MS;
   const expired = job => TERMINAL.has(job.state) && deadline(job) <= now();
+  const canPrioritizeTranslation = job => Boolean(job?.translation && job.state !== 'uploading' && !TERMINAL.has(job.state));
+  function refreshTranslationPriority() {
+    if (!canPrioritizeTranslation(jobs.get(translationPriorityJobId))) {
+      translationPriorityJobId = null;
+      translationContinuationUntil = 0;
+    }
+    return translationPriorityJobId;
+  }
+  function prioritySnapshot(job) {
+    return { translationPriority: refreshTranslationPriority() === job.id,
+      canPrioritizeTranslation: canPrioritizeTranslation(job) };
+  }
   const addTime = (job, key, value) => { job.timings ||= {}; job.timings[key] = (job.timings[key] || 0) + Math.max(0, value); };
   function timingSnapshot(job) {
     const timings = { ...job.timings };
@@ -168,6 +188,8 @@ export async function createSubtitleService(options = {}) {
   }
   async function cancel(job, message = 'Cancelled. Uploaded media deleted.') {
     job.state = 'cancelled';
+    refreshTranslationPriority();
+    requestTranslationDrain();
     const operation = running.get(job.id);
     if (operation) { operation.controller.abort(); stopChild(operation.child); }
     job.message = message;
@@ -212,7 +234,7 @@ export async function createSubtitleService(options = {}) {
   }
 
   const workerEnv = () => ({ ...process.env, HF_HUB_OFFLINE: '1', HF_HUB_DISABLE_TELEMETRY: '1',
-    TOKENIZERS_PARALLELISM: 'false', PYTHONUNBUFFERED: '1' });
+    TOKENIZERS_PARALLELISM: 'false', PYTHONUNBUFFERED: '1', KAGE_NODE: process.execPath });
   async function probe() {
     if (probePromise) return probePromise;
     probePromise = new Promise(resolve => {
@@ -240,7 +262,7 @@ export async function createSubtitleService(options = {}) {
   async function transcribe(job, operation, onChunk) {
     const remote = job.sourceUrl && !options.downloader;
     job.state = remote ? 'downloading' : 'transcribing';
-    job.message = remote ? 'Connecting to Bilibili audio…' : 'Reading audio locally…';
+    job.message = remote ? `Connecting to ${videoPlatform(job.sourceUrl)} audio…` : 'Reading audio locally…';
     job.transcriptionComplete = false;
     job.progress = 0;
     await save(job);
@@ -345,29 +367,58 @@ export async function createSubtitleService(options = {}) {
     job.message = `Translating to Traditional Chinese locally: ${job.translationCompleted} of ${job.translationTotal} lines…`;
   }
 
-  // Share one Ollama request slot between videos, releasing it after each batch.
+  // Share one Ollama request slot in FIFO order until the user selects a video.
   // A cancelled waiter must not wait for another video's inference to finish.
-  function scheduleTranslation(run, signal) {
+  function scheduleTranslation(job, run, signal) {
     return new Promise((resolve, reject) => {
-      const entry = { run, resolve, reject, signal, abort: () => {
+      const entry = { jobId: job.id, run, resolve, reject, signal, abort: () => {
         const index = translationQueue.indexOf(entry);
         if (index !== -1) translationQueue.splice(index, 1);
         reject(signal.reason);
+        requestTranslationDrain();
       } };
       if (signal?.aborted) { reject(signal.reason); return; }
       signal?.addEventListener('abort', entry.abort, { once: true });
       translationQueue.push(entry);
-      drainTranslations();
+      requestTranslationDrain();
     });
   }
+  function requestTranslationDrain() {
+    clearTimeout(translationContinuationTimer);
+    if (closing) return;
+    // Preserve the original FIFO path unless the user has selected priority.
+    if (!refreshTranslationPriority()) { drainTranslations(); return; }
+    if (translationDrainScheduled) return;
+    translationDrainScheduled = true;
+    // Let resolved request promises apply their translations before selecting
+    // the next batch. Draining in the request's finally would alternate videos.
+    setImmediate(() => { translationDrainScheduled = false; drainTranslations(); });
+  }
   function drainTranslations() {
-    if (translating || !translationQueue.length) return;
-    const entry = translationQueue.shift();
+    if (closing || translating || !translationQueue.length) return;
+    const preferredId = refreshTranslationPriority();
+    let index = translationQueue.findIndex(entry => entry.jobId === preferredId);
+    if (index === -1 && performance.now() < translationContinuationUntil) {
+      const preferred = jobs.get(preferredId);
+      // Progress writes happen between batches. Give that short continuation a
+      // bounded grace period, but never reserve Ollama while waiting for audio.
+      if (preferred?.cues?.some(cue => !cue.translation?.trim())) {
+        translationContinuationTimer = setTimeout(requestTranslationDrain,
+          translationContinuationUntil - performance.now());
+        return;
+      }
+    }
+    if (index === -1) index = 0;
+    const [entry] = translationQueue.splice(index, 1);
+    translationContinuationUntil = 0;
     entry.signal?.removeEventListener('abort', entry.abort);
     translating = true;
     Promise.resolve().then(entry.run).then(entry.resolve, entry.reject).finally(() => {
       translating = false;
-      drainTranslations();
+      // The user can select a different video while this request runs. Its
+      // pending first batch gets the same grace as a subsequent batch.
+      if (refreshTranslationPriority()) translationContinuationUntil = performance.now() + 50;
+      requestTranslationDrain();
     });
   }
 
@@ -388,7 +439,15 @@ export async function createSubtitleService(options = {}) {
     delete job.queuedAt;
     job.timings.batchSize = translationBatchSize;
     const translationOptions = {
-      fetchImpl: options.fetchImpl, signal: operation.controller.signal, scheduleRequest: scheduleTranslation, batchSize: translationBatchSize,
+      fetchImpl: options.fetchImpl, signal: operation.controller.signal,
+      scheduleRequest: (run, signal) => scheduleTranslation(job, run, signal), batchSize: translationBatchSize,
+      waitBeforeRetry: options.translationWaitBeforeRetry,
+      onDiagnostic: async diagnostic => {
+        operation.controller.signal.throwIfAborted();
+        job.translationDiagnostics = [...(job.translationDiagnostics || []),
+          { at: new Date().toISOString(), ...diagnostic }].slice(-50);
+        await save(job);
+      },
       onMetrics: metrics => {
         addTime(job, 'translationMs', metrics.requestMs);
         addTime(job, 'translationQueueMs', metrics.queueMs);
@@ -398,14 +457,15 @@ export async function createSubtitleService(options = {}) {
     };
     let outcome;
     let translationTask = null, translationFailure = null;
-    const pendingChinese = () => job.translation && job.cues?.some(cue => !cue.translation?.trim());
+    const failedIds = new Set();
+    const pendingChinese = () => job.translation && job.cues?.some(cue => !cue.translation?.trim() && !failedIds.has(cue.id));
     function startTranslation() {
       if (!parallelStages || translationTask || translationFailure || !pendingChinese() || operation.controller.signal.aborted) return;
       // Whisper can run for both videos; Ollama batches share a single slot.
       translationTask = (async () => {
         while (pendingChinese()) {
-          await translateCues(job.cues.slice(), job.translation, {
-            ...translationOptions,
+          try { await translateCues(job.cues.slice(), job.translation, {
+            ...translationOptions, failedIds,
             onProgress: async () => {
               operation.controller.signal.throwIfAborted();
               job.translationTotal = job.cues.length;
@@ -413,14 +473,18 @@ export async function createSubtitleService(options = {}) {
               if (job.state === 'translating') updateTranslationProgress(job);
               await save(job);
             },
-          });
+          }); } catch (error) {
+            // One malformed cue must not block later audio sections. The final
+            // pass retries these gaps once with the complete transcript context.
+            if (error.code !== 'INVALID_SUBTITLE_RESPONSE') throw error;
+          }
         }
       })().catch(error => { translationFailure = error; }).finally(() => { translationTask = null; });
     }
     try {
       if (options.downloader && job.sourceUrl && !Array.isArray(job.cues)) {
         job.state = 'downloading';
-        job.message = 'Connecting to Bilibili for a 360p download…';
+        job.message = `Connecting to ${videoPlatform(job.sourceUrl)} for an audio download…`;
         job.progress = 0;
         await save(job);
         const downloadStarted = performance.now();
@@ -429,7 +493,7 @@ export async function createSubtitleService(options = {}) {
           onProgress: async event => {
             if (job.state !== 'downloading' || operation.controller.signal.aborted) return;
             if (Number.isFinite(event.progress)) job.progress = Math.max(0, Math.min(0.99, event.progress));
-            job.message = 'Downloading Bilibili video and audio (up to 360p)…';
+            job.message = `Downloading ${videoPlatform(job.sourceUrl)} audio…`;
             await save(job);
           },
         }); } finally { addTime(job, 'downloadMs', performance.now() - downloadStarted); }
@@ -490,6 +554,8 @@ export async function createSubtitleService(options = {}) {
       }
       catch (error) { console.error('Unable to save subtitle status:', error.message); }
       running.delete(job.id);
+      refreshTranslationPriority();
+      requestTranslationDrain();
       finishOperation();
       void pump().catch(error => console.error('Subtitle queue error:', error.message));
     }
@@ -518,27 +584,42 @@ export async function createSubtitleService(options = {}) {
       }
       const url = new URL(req.url, `http://127.0.0.1:${port}`);
       if (req.method === 'GET' && url.pathname === '/health') {
-        return reply(200, { ok: true, ready, model: MODEL, token, capabilities: { translation: true, bilibiliDownload: true, progressiveSubtitles: true, audioOnly: true, jobQueue: true }, processing: { sectionSeconds: 60, parallelStages, concurrency: VIDEO_CONCURRENCY, translationConcurrency: 1, translationBatchSize }, status: ready ? 'ready' : 'setup_required',
+        return reply(200, { ok: true, ready, model: MODEL, token, capabilities: { groqRelay: true, translation: true, translationPriority: true, bilibiliDownload: true, youtubeDownload: true, anime1Pages: true, progressiveSubtitles: true, audioOnly: true, jobQueue: true, recovery: true }, processing: { sectionSeconds: 60, parallelStages, concurrency: VIDEO_CONCURRENCY, translationConcurrency: 1, translationBatchSize }, status: ready ? 'ready' : 'setup_required',
           ...(!ready ? { error: readinessError } : {}) });
       }
       if (!safeEqual(req.headers['x-kage-token'], token)) fail(401, 'Local service token is missing or expired. Reconnect and retry.');
+      if (url.pathname === '/groq/chat/completions' && req.method === 'POST') {
+        await groqRelay.handle(req, res, await jsonBody(req, 128 * 1024));
+        return;
+      }
+      if (url.pathname === '/recover' && req.method === 'GET') {
+        let pageUrl;
+        try { pageUrl = videoURL(url.searchParams.get('url')); } catch (error) { fail(400, error.message); }
+        const matches = [...jobs.values()].filter(job => (job.pageUrl || job.sourceUrl) === pageUrl && !expired(job));
+        matches.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        const job = matches[0];
+        return reply(200, { job: job ? { ...job, timings: timingSnapshot(job), queuePosition: queuePosition(job), ...prioritySnapshot(job) } : null });
+      }
       if (url.pathname === '/jobs' && req.method === 'GET') {
         const active = [...jobs.values()].filter(job => !TERMINAL.has(job.state));
-        return reply(200, { limit: 4, concurrency: VIDEO_CONCURRENCY, jobs: active.map(job => ({
+        return reply(200, { limit: 4, concurrency: VIDEO_CONCURRENCY, translationPriorityJobId: refreshTranslationPriority(), jobs: active.map(job => ({
           id: job.id, name: job.name, state: job.state, progress: job.progress,
           message: job.message, sourceUrl: job.sourceUrl,
-          queuePosition: queuePosition(job)
+          queuePosition: queuePosition(job), ...prioritySnapshot(job)
         })) });
       }
       if (url.pathname === '/jobs' && req.method === 'POST') {
         if (!ready) { await probe(); if (!ready) fail(503, readinessError); }
         const spec = await jsonBody(req);
-        let sourceUrl;
+        let sourceUrl, pageUrl;
+        if (spec && Object.hasOwn(spec, 'pageUrl')) {
+          try { pageUrl = videoURL(spec.pageUrl); } catch (error) { fail(400, error.message); }
+        }
         if (spec && Object.hasOwn(spec, 'sourceUrl')) {
-          try { sourceUrl = bilibiliURL(spec.sourceUrl); } catch (error) { fail(400, error.message); }
+          try { sourceUrl = downloadableVideoURL(spec.sourceUrl); } catch (error) { fail(400, error.message); }
           // URL jobs stream audio only when scheduled; queued URLs use no upload budget.
           spec.size = MAX_UPLOAD;
-          spec.name = `Bilibili ${new URL(sourceUrl).pathname.split('/').pop()}${new URL(sourceUrl).search} (audio)`;
+          spec.name = videoName(sourceUrl);
         }
         if (!spec || typeof spec.name !== 'string' || !spec.name.trim() || spec.name.length > 512 ||
             !Number.isSafeInteger(spec.size) || spec.size < 1 || spec.size > MAX_UPLOAD) fail(400, 'Choose a video or audio file between 1 byte and 4 GiB.');
@@ -556,7 +637,7 @@ export async function createSubtitleService(options = {}) {
           if (oldest) { await fs.rm(jobDir(oldest.id), { recursive: true, force: true }); jobs.delete(oldest.id); }
         }
         const job = { id: randomUUID(), name: spec.name.trim(), size: spec.size, received: 0, state: 'uploading',
-          ...(sourceUrl ? { sourceUrl } : {}),
+          ...(sourceUrl ? { sourceUrl } : {}), ...(pageUrl ? { pageUrl } : {}),
           progress: 0, message: 'Uploading to this Mac…', createdAt: new Date().toISOString() };
         await fs.mkdir(jobDir(job.id), { mode: 0o700 });
         await fs.writeFile(mediaPath(job.id), '', { mode: 0o600, flag: 'wx' });
@@ -565,7 +646,7 @@ export async function createSubtitleService(options = {}) {
         return reply(201, { id: job.id });
         } finally { reservedJobs--; reservedBytes -= uploadBytes; }
       }
-      const match = url.pathname.match(/^\/jobs\/([a-f0-9-]+)(?:\/(audio|start))?$/);
+      const match = url.pathname.match(/^\/jobs\/([a-f0-9-]+)(?:\/(audio|start|prioritize))?$/);
       if (!match || !UUID.test(match[1])) fail(404, 'Not found.');
       const job = jobs.get(match[1]);
       if (!job) fail(404, 'This job is no longer available. Import the file again.');
@@ -573,7 +654,21 @@ export async function createSubtitleService(options = {}) {
         await removeExpired(job);
         fail(404, 'Saved subtitles expired after 3 days. Prepare this video again.');
       }
-      if (!match[2] && req.method === 'GET') return reply(200, { ...job, timings: timingSnapshot(job), queuePosition: queuePosition(job) });
+      if (!match[2] && req.method === 'GET') return reply(200, { ...job, timings: timingSnapshot(job), queuePosition: queuePosition(job), ...prioritySnapshot(job) });
+      if (match[2] === 'prioritize' && req.method === 'POST') {
+        const spec = await jsonBody(req);
+        if (!spec || typeof spec !== 'object' || Array.isArray(spec) || Object.keys(spec).length) fail(400, 'Use an empty object to choose translation priority.');
+        if (!canPrioritizeTranslation(job)) fail(409, 'Start Chinese translation for this video before giving it priority.');
+        translationPriorityJobId = job.id;
+        translationContinuationUntil = 0;
+        if (job.state === 'queued') {
+          const index = queue.indexOf(job.id);
+          if (index !== -1) queue.splice(index, 1);
+          queue.unshift(job.id);
+        }
+        requestTranslationDrain();
+        return reply(200, { id: job.id, translationPriorityJobId, queuePosition: queuePosition(job), ...prioritySnapshot(job) });
+      }
       if (!match[2] && req.method === 'DELETE') {
         if (TERMINAL.has(job.state)) return reply(200, job);
         if (uploadLocks.has(job.id)) fail(409, 'An upload chunk is being written. Retry cancellation.');
@@ -581,7 +676,7 @@ export async function createSubtitleService(options = {}) {
         return reply(200, job);
       }
       if (match[2] === 'audio' && req.method === 'PUT') {
-        if (job.sourceUrl) fail(409, 'This job downloads its media from Bilibili.');
+        if (job.sourceUrl) fail(409, 'This job downloads its media from the video page.');
         if (job.state !== 'uploading') fail(409, 'This job is no longer accepting uploads.');
         if (uploadLocks.has(job.id)) fail(409, 'Another upload chunk is being written.');
         const offsetText = url.searchParams.get('offset');
@@ -622,10 +717,11 @@ export async function createSubtitleService(options = {}) {
         if (job.state === 'uploading' && !job.sourceUrl && (uploadLocks.has(job.id) || job.received !== job.size)) fail(409, 'Upload the complete file before starting.');
         if (translation) job.translation = translation;
         job.state = 'queued';
+        refreshTranslationPriority();
         job.queuedAt = Date.now();
-        job.message = Array.isArray(job.cues) ? 'Waiting for local Chinese translation…' : job.sourceUrl ? 'Waiting to prepare Bilibili audio…' : 'Waiting for local transcription…';
+        job.message = Array.isArray(job.cues) ? 'Waiting for local Chinese translation…' : job.sourceUrl ? `Waiting to prepare ${videoPlatform(job.sourceUrl)} audio…` : 'Waiting for local transcription…';
         await save(job);
-        queue.push(job.id);
+        if (!queue.includes(job.id)) queue.push(job.id);
         reply(202, job);
         void pump().catch(error => console.error('Subtitle queue error:', error.message));
         return;
@@ -658,6 +754,8 @@ export async function createSubtitleService(options = {}) {
     },
     async close() {
       closing = true;
+      groqRelay.close();
+      clearTimeout(translationContinuationTimer);
       clearInterval(sweep);
       const operations = [...running.values()];
       for (const operation of operations) { operation.controller.abort(); stopChild(operation.child); }

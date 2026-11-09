@@ -313,7 +313,7 @@ function sync() {
   if (video?.seeking && !wasSeeking) resetBuffer();
   wasSeeking = !!video?.seeking;
   globalThis.KageImport?.observe(video);
-  if (getPlatform() === 'bilibili') globalThis.KageTutor?.sourceStatus(globalThis.KageImport?.track(video)
+  if (getPlatform() === 'bilibili' || getPlatform() === 'youtube') globalThis.KageTutor?.sourceStatus(globalThis.KageImport?.track(video)
     ? globalThis.KageImport?.preparingChinese ? 'Japanese subtitles are ready. The local helper is preparing Traditional Chinese automatically.'
       : nativeChinese().available ? 'Imported Japanese and Traditional Chinese subtitles · saved on this device.'
         : 'Imported Japanese subtitles · local Chinese translation. Whole track prepares translations for older imports.'
@@ -407,6 +407,14 @@ window.addEventListener('message', event => {
   if (event.data.type !== 'KAGE_RAW_SUBTITLES') return;
   if (event.data.page !== location.href || typeof event.data.text !== 'string' || event.data.text.length > 2000000) return;
   try {
+    if (page !== location.href) sync();
+    if (getPlatform() === 'youtube') {
+      const captionURL = new URL(event.data.url);
+      if (captionURL.hostname.endsWith('.youtube.com') && captionURL.pathname === '/api/timedtext'
+          && /^ja(?:-|$)/i.test(captionURL.searchParams.get('lang') || '') && !captionURL.searchParams.has('tlang')) {
+        globalThis.KageImport?.captionSource?.(captionURL.searchParams.get('kind') === 'asr' ? 'asr' : 'manual');
+      }
+    }
     const cues = parse(event.data.text);
     if (cues.length) {
       if (page !== location.href) sync();
