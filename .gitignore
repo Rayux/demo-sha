@@ -19,3 +19,15 @@ import-data/prepared/*
 # Python bytecode caches
 __pycache__/
 *.py[cod]
+
+# Your own media and the study files made from it stay on your computer.
+# They are never uploaded to GitHub.
+audio/*
+!audio/README.md
+transcripts/
+public/transcripts/
+public/data/library.json
+output/
+
+# Personal tool configuration (see .agents/mcp_config.example.json)
+.agents/mcp_config.json
