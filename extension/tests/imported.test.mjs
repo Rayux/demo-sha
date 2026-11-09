@@ -11,7 +11,7 @@ const track = (extra = {}) => ({ key, name: 'lesson.mp4', enabled: true, offset:
   cues: [{ start: 1, end: 2, text: 'こんにちは', id: 0 }, { start: 3, end: 4, text: 'こんにちは', id: 1 }], ...extra });
 
 function harness({ documents = [], sharedStorage, send, get, browserAudio, now = Date.now, href = 'https://www.bilibili.com/video/BV1test/?p=1' } = {}) {
-  const elements = [], events = [], requests = [], timers = new Map(), timerDelays = new Map();
+  const elements = [], events = [], requests = [], timers = new Map(), timerDelays = new Map(), intervals = new Map();
   let nextTimer = 0;
   class Element {
     constructor(tag) { this.tag = tag; this.textContent = ''; this.children = []; this.handlers = {}; this.dataset = {}; this.hidden = false; this.value = ''; this.disabled = false; this.classList = { toggle() {} }; elements.push(this); }
@@ -29,6 +29,8 @@ function harness({ documents = [], sharedStorage, send, get, browserAudio, now =
     window: { dispatchEvent: event => events.push(event.type) },
     setTimeout: (fn, delay) => { const id = ++nextTimer; timers.set(id, fn); timerDelays.set(id, delay); return id; },
     clearTimeout: id => { timers.delete(id); timerDelays.delete(id); },
+    setInterval: fn => { const id = ++nextTimer; intervals.set(id, fn); return id; },
+    clearInterval: id => { intervals.delete(id); },
     document: { createElement: tag => new Element(tag), activeElement: null },
     chrome: { storage: { local: {
       get: get || (async () => JSON.parse(JSON.stringify(storage))),
@@ -43,7 +45,7 @@ function harness({ documents = [], sharedStorage, send, get, browserAudio, now =
   const video = { currentTime: 1.5 };
   context.KageImport.observe(video);
   context.KageImport.mount(new Element('slot'));
-  return { context, api: context.KageImport, video, storage, elements, events, requests, timers, timerDelays,
+  return { context, api: context.KageImport, video, storage, elements, events, requests, timers, timerDelays, intervals,
     saved: () => storage[storagePrefix + key],
     documents: () => Object.entries(storage).filter(([name, value]) => name.startsWith(storagePrefix) && !value.deleted).map(([, value]) => value),
     button: text => elements.find(el => el.tag === 'button' && el.textContent === text),
@@ -1229,4 +1231,27 @@ test('YouTube preparation failure refers to the single visible preparation contr
   await flush(); await h.api.download();
   assert.match(h.status(), /try Download audio & prepare subtitles again/);
   assert.doesNotMatch(h.status(), /select Prepare browser audio/);
+});
+
+test('lines transcribed during a streamed upload appear before the upload finishes', async () => {
+  let releaseLast, uploadsSeen = 0;
+  const lastChunk = new Promise(resolve => { releaseLast = resolve; });
+  const h = harness({ send: async message => {
+    if (message.action === 'create') return { success: true, data: { id: 'job-1' } };
+    if (message.action === 'upload') {
+      if (++uploadsSeen === 3) await lastChunk;
+      return { success: true, data: { received: message.offset + Buffer.from(message.data, 'base64').length } };
+    }
+    if (message.action === 'status') return { success: true, data: { state: 'preparing', streaming: true,
+      cues: [{ start: 0, end: 2, text: 'はい。' }] } };
+    return { success: true, data: { ready: true } };
+  } });
+  await flush(); await h.choose();
+  assert.equal(h.requests.filter(message => message.action === 'start').length, 0, 'upload is still in progress');
+  for (const tick of [...h.intervals.values()]) await tick();
+  await flush();
+  assert.equal(h.api.current({ currentTime: 1 }).text, 'はい。');
+  releaseLast();
+  for (let i = 0; i < 20; i++) await flush();
+  assert.equal(h.intervals.size, 0, 'the live peek stops with the upload');
 });

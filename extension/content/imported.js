@@ -422,7 +422,7 @@
     uploadSession = session;
     const transferring = () => validContext(key, generation) && uploadSession === session && !session.cancelled && !stopping;
     const name = download ? isYouTube() ? `YouTube ${key.slice(8)} (audio)` : `Bilibili ${key.slice(9)} (audio)` : file.name;
-    let jobId = null, ownedDocument = null, started = false, failure = null;
+    let jobId = null, ownedDocument = null, started = false, failure = null, live = null;
     uploading = true; setNotice('Connecting to the local subtitle helper…');
     try {
       const health = await request('health');
@@ -440,6 +440,28 @@
       documentState.timings = null;
       documentState.expiresAt = Date.now() + RETENTION_MS;
       await saveCurrent();
+      // A streamed upload is transcribed while it arrives. Show each new line as
+      // soon as the helper has it, so subtitles are already on screen when the
+      // download finishes instead of appearing after it.
+      if (!download) {
+        let peeking = false;
+        live = setInterval(async () => {
+          if (peeking || !transferring() || documentState?.job?.id !== jobId) return;
+          peeking = true;
+          try {
+            const status = await request('status', { id: jobId });
+            if (status?.streaming === false) { clearInterval(live); live = null; return; }
+            if (!transferring() || documentState?.job?.id !== jobId || !Array.isArray(status?.cues) || !status.cues.length) return;
+            const cues = normalizeCues(status.cues);
+            if (!cues.length || JSON.stringify(cues) === JSON.stringify(documentState.cues)) return;
+            documentState.cues = cues; documentState.revision++;
+            documentState.enabled = documentState.job.cuesSaved ? documentState.enabled : true;
+            documentState.job.cuesSaved = true;
+            emit(); render();
+          } catch { /* The upload reports helper failures; a missed peek is retried. */ }
+          finally { peeking = false; }
+        }, FIRST_LINES_POLL_MS);
+      }
       for (let offset = 0; !download && offset < file.size; offset += CHUNK_BYTES) {
         if (!transferring() || documentState?.job?.id !== jobId) return;
         const bytes = new Uint8Array(await file.slice(offset, offset + CHUNK_BYTES).arrayBuffer());
@@ -467,6 +489,7 @@
         if (/queue|upload.*limit/i.test(cause.message) && ui) { ui.queue.open = true; void refreshQueue(); }
       }
     } finally {
+      if (live) { clearInterval(live); live = null; }
       // A page navigation or failed transfer must not leave a partial media file behind.
       // Jobs that have started transcription can finish and reconnect on a later visit.
       try { file?.close?.(); } catch { /* Streaming sources close themselves when read to the end. */ }
