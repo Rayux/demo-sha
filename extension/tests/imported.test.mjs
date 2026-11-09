@@ -10,8 +10,8 @@ const storagePrefix = 'kageImportedTrackV2:';
 const track = (extra = {}) => ({ key, name: 'lesson.mp4', enabled: true, offset: 0, revision: 1, updatedAt: Date.now(),
   cues: [{ start: 1, end: 2, text: 'こんにちは', id: 0 }, { start: 3, end: 4, text: 'こんにちは', id: 1 }], ...extra });
 
-function harness({ documents = [], sharedStorage, send, get, browserAudio, now = Date.now, href = 'https://www.bilibili.com/video/BV1test/?p=1' } = {}) {
-  const elements = [], events = [], requests = [], timers = new Map(), timerDelays = new Map(), intervals = new Map();
+function harness({ documents = [], sharedStorage, send, get, browserAudio, now = Date.now, href = 'https://www.bilibili.com/video/BV1test/?p=1', autoPrepare = false, visibility = 'visible' } = {}) {
+  const elements = [], events = [], requests = [], timers = new Map(), timerDelays = new Map(), intervals = new Map(), visibilityHandlers = [];
   let nextTimer = 0;
   class Element {
     constructor(tag) { this.tag = tag; this.textContent = ''; this.children = []; this.handlers = {}; this.dataset = {}; this.hidden = false; this.value = ''; this.disabled = false; this.classList = { toggle() {} }; elements.push(this); }
@@ -31,9 +31,14 @@ function harness({ documents = [], sharedStorage, send, get, browserAudio, now =
     clearTimeout: id => { timers.delete(id); timerDelays.delete(id); },
     setInterval: fn => { const id = ++nextTimer; intervals.set(id, fn); return id; },
     clearInterval: id => { intervals.delete(id); },
-    document: { createElement: tag => new Element(tag), activeElement: null },
+    document: { createElement: tag => new Element(tag), activeElement: null, visibilityState: visibility,
+      addEventListener(type, fn) { if (type === 'visibilitychange') visibilityHandlers.push(fn); } },
     chrome: { storage: { local: {
-      get: get || (async () => JSON.parse(JSON.stringify(storage))),
+      // Most tests cover explicit preparation; auto-prepare tests opt in.
+      get: async (...args) => {
+        const value = await (get || (async () => JSON.parse(JSON.stringify(storage))))(...args);
+        return autoPrepare || !value || typeof value !== 'object' ? value : { autoPrepareSubtitles: false, ...value };
+      },
       set: async value => Object.assign(storage, JSON.parse(JSON.stringify(value))),
       remove: async keys => { for (const key of Array.isArray(keys) ? keys : [keys]) delete storage[key]; }
     } }, runtime: { sendMessage: async message => {
@@ -46,6 +51,7 @@ function harness({ documents = [], sharedStorage, send, get, browserAudio, now =
   context.KageImport.observe(video);
   context.KageImport.mount(new Element('slot'));
   return { context, api: context.KageImport, video, storage, elements, events, requests, timers, timerDelays, intervals,
+    show() { context.document.visibilityState = 'visible'; for (const fn of visibilityHandlers) fn(); },
     saved: () => storage[storagePrefix + key],
     documents: () => Object.entries(storage).filter(([name, value]) => name.startsWith(storagePrefix) && !value.deleted).map(([, value]) => value),
     button: text => elements.find(el => el.tag === 'button' && el.textContent === text),
@@ -1254,4 +1260,60 @@ test('lines transcribed during a streamed upload appear before the upload finish
   releaseLast();
   for (let i = 0; i < 20; i++) await flush();
   assert.equal(h.intervals.size, 0, 'the live peek stops with the upload');
+});
+
+const autoSend = (log = []) => async message => {
+  log.push(message);
+  return { success: true, data: message.action === 'create' ? { id: 'auto-job' }
+    : message.action === 'recover' ? { job: null }
+      : message.action === 'upload' ? { received: message.offset + Buffer.from(message.data, 'base64').length }
+        : message.action === 'status' ? { state: 'complete', cues: [{ start: 0, end: 2, text: 'はい。' }] }
+          : { ready: true } };
+};
+
+test('a video without saved subtitles starts preparing as soon as it opens', async () => {
+  let acquisitions = 0;
+  const h = harness({ autoPrepare: true, send: autoSend(), browserAudio: { download: async () => { acquisitions++; return browserFile(); } } });
+  for (let i = 0; i < 30; i++) await flush();
+  assert.equal(acquisitions, 1, 'no click needed');
+  assert.equal(h.requests.filter(message => message.action === 'start').length, 1);
+  assert.equal(h.api.current({ currentTime: 1 }).text, 'はい。');
+});
+
+test('auto-prepare waits for a background tab to be shown, and never repeats or runs when turned off', async () => {
+  let acquisitions = 0;
+  const browserAudio = { download: async () => { acquisitions++; return browserFile(); } };
+  const hidden = harness({ autoPrepare: true, visibility: 'hidden', send: autoSend(), browserAudio });
+  for (let i = 0; i < 20; i++) await flush();
+  assert.equal(acquisitions, 0, 'background tabs do not download');
+  hidden.show();
+  for (let i = 0; i < 30; i++) await flush();
+  assert.equal(acquisitions, 1);
+  hidden.show();
+  for (let i = 0; i < 20; i++) await flush();
+  assert.equal(acquisitions, 1, 'one automatic attempt per video visit');
+
+  const off = harness({ autoPrepare: true, sharedStorage: { autoPrepareSubtitles: false }, send: autoSend(), browserAudio });
+  for (let i = 0; i < 20; i++) await flush();
+  assert.equal(acquisitions, 1, 'the setting turns it off');
+
+  const saved = harness({ autoPrepare: true, documents: [track()], send: autoSend(), browserAudio });
+  for (let i = 0; i < 20; i++) await flush();
+  assert.equal(acquisitions, 1, 'saved subtitles are used as they are');
+});
+
+test('leaving a video stops the job Kage started on its own', async () => {
+  const log = [];
+  const h = harness({ autoPrepare: true, send: async message => {
+    log.push(message);
+    if (message.action === 'create') return { success: true, data: { id: 'auto-job-1' } };
+    if (message.action === 'status') return { success: true, data: { state: 'preparing', cues: [{ start: 0, end: 2, text: 'はい。' }] } };
+    return autoSend()(message);
+  }, browserAudio: { download: async () => browserFile() } });
+  for (let i = 0; i < 30; i++) await flush();
+  assert.ok(log.some(message => message.action === 'start'));
+  h.context.location.href = 'https://www.bilibili.com/video/BV1other/?p=1';
+  h.api.observe(h.video);
+  for (let i = 0; i < 10; i++) await flush();
+  assert.deepEqual(log.filter(message => message.action === 'cancel').map(message => message.id), ['auto-job-1']);
 });

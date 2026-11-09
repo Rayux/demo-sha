@@ -116,19 +116,39 @@
     }
   }
 
-  // Poll for the API response (Video.js fires the API when the user first clicks play).
+  // Ask for the episode source the same way the player does when play is
+  // clicked (POST d=<data-apireq> to v.anime1.me/api with the site's cookies),
+  // so preparation can start as soon as the page opens.
+  let sourceRequest = null; // { page, promise }
+  function requestSource(page) {
+    if (sourceRequest?.page === page) return sourceRequest.promise;
+    const video = globalThis.document?.querySelector?.('video[data-apireq]');
+    const apireq = video?.getAttribute('data-apireq') || '';
+    if (!/^[A-Za-z0-9%._~-]{1,4096}$/.test(apireq)) return Promise.resolve();
+    const promise = originalFetch.call(window, 'https://v.anime1.me/api', {
+      method: 'POST', credentials: 'include', redirect: 'error',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `d=${apireq}`
+    }).then(response => response.ok ? response.json() : null)
+      .then(data => { if (data && canonicalPage() === page) recordCandidate(data); })
+      .catch(() => { /* The player's own request on play still works. */ });
+    sourceRequest = { page, promise };
+    return promise;
+  }
+
+  // Use the source the player or our own request found.
   function waitForCandidate(page, signal) {
     return new Promise((resolve, reject) => {
       // Already available from a previous click?
       if (candidate?.href === page) { resolve(candidate.src); return; }
-      let timer;
+      void requestSource(page);
+      let timer, deadline;
       const check = () => {
-        if (signal.aborted) { clearInterval(timer); reject(new DOMException('Aborted', 'AbortError')); return; }
-        if (candidate?.href === page) { clearInterval(timer); resolve(candidate.src); return; }
+        if (signal.aborted) { clearInterval(timer); clearTimeout(deadline); reject(new DOMException('Aborted', 'AbortError')); return; }
+        if (candidate?.href === page) { clearInterval(timer); clearTimeout(deadline); resolve(candidate.src); return; }
       };
       timer = setInterval(check, 200);
       // Abort after 8 s with a helpful message.
-      setTimeout(() => {
+      deadline = setTimeout(() => {
         clearInterval(timer);
         if (!signal.aborted) reject(new Error('Click play on the anime1.me video first, then click Prepare browser audio again.'));
       }, 8000);

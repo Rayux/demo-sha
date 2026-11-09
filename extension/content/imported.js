@@ -6,6 +6,10 @@
   const MAX_STORAGE_BYTES = 3 * 1024 * 1024;
   const CHUNK_BYTES = 256 * 1024;
   const FIRST_LINES_POLL_MS = 100;
+  // Preparing starts when a video opens, so the first lines already exist when
+  // playback starts. Only the visible tab starts, and leaving the video stops
+  // work Kage started on its own. Settings can turn this off.
+  const AUTO_PREPARE_KEY = 'autoPrepareSubtitles';
   const MAX_FILE_BYTES = 4 * 1024 * 1024 * 1024;
   const ACTIVE_STATES = new Set(['uploading', 'queued', 'downloading', 'preparing', 'transcribing', 'translating']);
   let loading = null;
@@ -19,6 +23,12 @@
   let notice = '', error = false, storageQueue = Promise.resolve(), ui = null;
   let queueTimer = null, queueLoading = false;
   let queuePriorityPending = '', queuePriorityButtons = [];
+  let autoPrepare = null, autoAttempt = '', autoJob = null, visibilityWatch = false;
+  try {
+    chrome.storage.onChanged?.addListener((changes, area) => {
+      if (area === 'local' && (changes[AUTO_PREPARE_KEY] || changes.enabled)) autoPrepare = null;
+    });
+  } catch { /* Reloaded extension: this page keeps its last setting. */ }
   const jsonBytes = value => new TextEncoder().encode(JSON.stringify(value)).length;
   const hasTranslation = cue => typeof cue.translation === 'string' && !!cue.translation.trim();
   const expiresAt = saved => Number(saved?.expiresAt) || (Number(saved?.updatedAt) || Date.now()) + RETENTION_MS;
@@ -267,7 +277,8 @@
       if (expired) { notice = 'Saved subtitles expired after 3 days. Prepare this video again to continue.'; void persist(null, key).catch(() => {}); }
       loaded = true; emit(); render();
       if (documentState?.job && ACTIVE_STATES.has(documentState.job.state)) poll(key, generation, documentState.job.id);
-      else if (!saved || wrongPart) void recover(key, generation);
+      else if (!saved || wrongPart) void recover(key, generation).then(() => autoPrepareCurrent(key, generation));
+      else if (expired) void autoPrepareCurrent(key, generation);
     } catch (cause) {
       if (validContext(key, generation)) { loaded = true; setNotice(`Could not load saved subtitles. ${cause.message}`, true); }
     }
@@ -282,6 +293,37 @@
       await saveCurrent();
       if (validContext(key, generation)) await poll(key, generation, job.id);
     } catch { /* Saved Chrome tracks work even when the helper is offline or older. */ }
+  }
+  async function autoPrepareCurrent(key, generation) {
+    if (!validContext(key, generation) || !loaded || autoAttempt === `${key}#${generation}`) return;
+    if (documentState?.cues?.length || ACTIVE_STATES.has(documentState?.job?.state) || browserAcquisition || uploading || stopping) return;
+    if (!(isAnime1Page() || isYouTube() || isBilibiliPage())) return;
+    if (autoPrepare === null) {
+      try {
+        const state = await chrome.storage.local.get([AUTO_PREPARE_KEY, 'enabled']);
+        autoPrepare = state[AUTO_PREPARE_KEY] !== false && state.enabled !== false;
+      } catch { autoPrepare = false; }
+      if (!validContext(key, generation)) return;
+    }
+    if (!autoPrepare) return;
+    if (globalThis.document?.visibilityState === 'hidden') {
+      // Background tabs start when they are shown.
+      if (!visibilityWatch && globalThis.document?.addEventListener) {
+        visibilityWatch = true;
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState !== 'hidden') void autoPrepareCurrent(pageKey, epoch);
+        });
+      }
+      return;
+    }
+    autoAttempt = `${key}#${generation}`;
+    await prepareBrowserAudio({ fallbackToDownload: true, auto: true });
+  }
+  function stopAutoJob() {
+    // Work Kage started on its own stops when you leave that video; ready lines are kept.
+    const job = autoJob;
+    autoJob = null;
+    if (job?.jobId) void request('cancel', { id: job.jobId }).catch(() => {});
   }
   function expireCurrent() {
     const key = pageKey;
@@ -307,6 +349,7 @@
     }
     browserAcquisition?.controller.abort(); browserAcquisition = null;
     if (uploadSession) uploadSession.cancelled = true;
+    if (autoJob && autoJob.key !== key) stopAutoJob();
     uploadSession = null;
     youtubeCaptionKind = '';
     pageKey = key; epoch++;
@@ -347,7 +390,7 @@
     for (let offset = 0; offset < bytes.length; offset += 8192) binary += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
     return btoa(binary);
   }
-  async function prepareBrowserAudio({ fallbackToDownload = false } = {}) {
+  async function prepareBrowserAudio({ fallbackToDownload = false, auto = false } = {}) {
     observe(video);
     if (!pageKey || !loaded || browserAcquisition || uploading || stopping || ACTIVE_STATES.has(documentState?.job?.state)) return;
     // An old Reconnect response must not replace this attempt's progress or error.
@@ -369,14 +412,16 @@
       if (browserAcquisition !== acquisition || !validContext(key, generation) || acquisition.controller.signal.aborted) return;
       browserAcquisition = null;
       // Reuse the bounded local upload and normal subtitle persistence path.
-      try { await importFile(file); }
+      try { await importFile(file, false, { auto }); }
       finally { try { file?.close?.(); } catch { /* Streaming sources close once. */ } }
     } catch (cause) {
       if (fallbackToDownload && cause.name !== 'AbortError' && browserAcquisition === acquisition
           && validContext(key, generation) && !acquisition.controller.signal.aborted
-          && /(?:\[YT_(?:HTTP_(?:403|410)|PAGE_NETWORK|NO_FILE_URL|WAIT_FOR_PLAYER|STREAMING_ONLY|SABR_NOT_READY|SABR_NETWORK)\]|current video’s audio metadata)/.test(cause.message)) {
+          && ((auto && isBilibiliPage())
+            || /(?:\[YT_(?:HTTP_(?:403|410)|PAGE_NETWORK|NO_FILE_URL|WAIT_FOR_PLAYER|STREAMING_ONLY|SABR_NOT_READY|SABR_NETWORK)\]|current video’s audio metadata)/.test(cause.message))) {
         browserAcquisition = null;
-        await importFile(null, true);
+        // anime1.me has no helper download; YouTube and Bilibili do.
+        if (!isAnime1Page()) await importFile(null, true, { auto });
         return;
       }
       if (browserAcquisition === acquisition && validContext(key, generation)) setNotice(cause.message, cause.name !== 'AbortError');
@@ -412,7 +457,7 @@
     if (isAnime1Page()) return prepareBrowserAudio();
     return isYouTube() ? prepareBrowserAudio({ fallbackToDownload: true }) : importFile(null, true);
   }
-  async function importFile(file, download = false) {
+  async function importFile(file, download = false, { auto = false } = {}) {
     observe(video);
     if ((!file && !download) || !pageKey || !loaded || browserAcquisition || uploading || stopping || ACTIVE_STATES.has(documentState?.job?.state)) return;
     if (!download && (!file.size || file.size > MAX_FILE_BYTES)) { setNotice('Choose a video or audio file smaller than 4 GiB (up to 6 hours).', true); return; }
@@ -432,6 +477,7 @@
       if (typeof created?.id !== 'string') throw new Error('The local helper returned an invalid job.');
       jobId = created.id;
       session.jobId = jobId;
+      if (auto) autoJob = { key, jobId };
       if (!transferring()) return;
       documentState ||= { key, name, cues: [], enabled: true, offset: 0, revision: 1, updatedAt: Date.now(), job: null };
       ownedDocument = documentState;
