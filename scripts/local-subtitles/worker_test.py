@@ -79,3 +79,42 @@ class ChunkOwnershipTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FastTimestampRulesTests(unittest.TestCase):
+    def test_gpu_rules_match_mlx_whisper_on_random_histories(self):
+        try:
+            import mlx.core as mx
+            from mlx_whisper import decoding
+            from mlx_whisper.tokenizer import get_tokenizer
+        except ImportError:
+            self.skipTest('mlx_whisper is installed only in the helper environment')
+        import random
+        import worker
+        worker.install_fast_timestamp_rules()
+        tokenizer = get_tokenizer(True, num_languages=100, language='ja', task='transcribe')
+        begin, eot = tokenizer.timestamp_begin, tokenizer.eot
+        vocab = begin + 1501
+        rng = random.Random(7)
+        for sample_begin in (3, 4):
+            for max_initial in (None, 50):
+                rules = decoding.ApplyTimestampRules(tokenizer, sample_begin, max_initial)
+                for length in (0, 1, 2, 5, 12):
+                    for _ in range(12):
+                        rows = []
+                        for _ in range(3):
+                            row = [tokenizer.sot] * sample_begin
+                            stamp = begin
+                            for _ in range(length):
+                                if rng.random() < 0.4:
+                                    stamp = min(vocab - 1, stamp + rng.randint(0, 40))
+                                    row.append(stamp)
+                                else:
+                                    row.append(rng.choice([rng.randint(0, eot - 1), eot]))
+                            rows.append(row)
+                        tokens = mx.array(rows)
+                        logits = mx.array([[rng.uniform(-8, 8) for _ in range(vocab)] for _ in rows])
+                        expected = rules._kage_original_apply(logits, tokens)
+                        actual = rules.apply(logits, tokens)
+                        self.assertTrue(bool(mx.array_equal(expected, actual, equal_nan=True).item()),
+                                        f'mismatch at sample_begin={sample_begin} length={length}')

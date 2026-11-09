@@ -104,10 +104,101 @@ def owned_segment(segment, offset, owner_start, owner_end, duration):
     return {"start": start, "end": end, "text": text[:4000]}
 
 
+_encoder_cache_installed = False
+
+
+def install_encoder_cache():
+    """Reuse the audio encoding for word alignment.
+
+    mlx_whisper encodes each 30 s window to decode it, then encodes the same
+    window again to align words. The encoder is the heaviest part of the model,
+    so remembering the last result removes about a third of the work.
+    """
+    global _encoder_cache_installed
+    if _encoder_cache_installed:
+        return
+    try:
+        import mlx.core as mx
+        from mlx_whisper.whisper import AudioEncoder
+    except ImportError:
+        return  # Not the MLX runtime (tests); nothing to speed up.
+    original = AudioEncoder.__call__
+    last = {}
+
+    def cached(self, x):
+        previous = last.get(id(self))
+        if previous is not None:
+            source, features = previous
+            if source.shape == x.shape and source.dtype == x.dtype and bool(mx.array_equal(source, x).item()):
+                return features
+        features = original(self, x)
+        last[id(self)] = (x, features)
+        return features
+
+    AudioEncoder.__call__ = cached
+    _encoder_cache_installed = True
+
+
+def install_fast_timestamp_rules():
+    """Apply Whisper's timestamp rules on the GPU, without a per-token sync.
+
+    mlx_whisper's ApplyTimestampRules copies the token history to Python on
+    every decoding step, so the CPU waits for each token and the decoder's
+    pipelining never overlaps. This computes the same mask with array
+    operations; the decoded tokens are identical.
+    """
+    try:
+        import mlx.core as mx
+        from mlx_whisper import decoding
+    except ImportError:
+        return  # Not the MLX runtime (tests); nothing to speed up.
+    rules = decoding.ApplyTimestampRules
+    if getattr(rules, '_kage_fast', False):
+        return
+
+    def apply(self, logits, tokens):
+        tokenizer = self.tokenizer
+        begin, eot = tokenizer.timestamp_begin, tokenizer.eot
+        n_batch, n_vocab = logits.shape
+        cols = mx.arange(n_vocab)[None, :]
+        blocked = mx.zeros((n_batch, n_vocab), dtype=mx.bool_)
+        if tokenizer.no_timestamps is not None:
+            blocked = blocked | (cols == tokenizer.no_timestamps)
+        length = tokens.shape[1] - self.sample_begin
+        if length >= 1:
+            seq = tokens[:, self.sample_begin:]
+            last_ts = (seq[:, -1] >= begin)[:, None]
+            penult_ts = (seq[:, -2] >= begin)[:, None] if length >= 2 else mx.ones((n_batch, 1), dtype=mx.bool_)
+            # Timestamps come in pairs, except directly before EOT.
+            blocked = blocked | (last_ts & penult_ts & (cols >= begin))
+            blocked = blocked | (last_ts & ~penult_ts & (cols < eot))
+            # mlx_whisper's "timestamps never decrease" rule masks the range
+            # [timestamp_begin, position of the last timestamp), which is always
+            # empty, so it never applies. It is left out to keep output identical.
+        else:
+            # The first token must be a timestamp, within max_initial_timestamp.
+            blocked = blocked | (cols < begin)
+            if self.max_initial_timestamp_index is not None:
+                blocked = blocked | (cols > begin + self.max_initial_timestamp_index)
+        mask = mx.where(blocked, -mx.inf, 0.0).astype(mx.float32)
+        # If timestamps together outweigh every text token, sample a timestamp.
+        logprobs = logits - mx.logsumexp(logits, axis=-1, keepdims=True)
+        timestamp_logprob = logprobs[:, begin:].logsumexp(axis=-1, keepdims=True)
+        max_text_logprob = logprobs[:, :begin].max(axis=-1, keepdims=True)
+        mask = mx.where((timestamp_logprob > max_text_logprob) & (cols < begin), -mx.inf, mask)
+        return logits + mask
+
+    rules._kage_original_apply = rules.apply
+    rules.apply = apply
+    rules._kage_fast = True
+
+
 def transcribe_window(samples, model, transcriber=None, word_timestamps=True):
     """Apply conversational context while retaining Whisper's silence safeguards."""
     if transcriber is None:
         import mlx_whisper
+        install_encoder_cache()
+        install_fast_timestamp_rules()
         transcriber = mlx_whisper.transcribe
     # MLX applies initial_prompt to the first decoding window of each call. We
     # provide it again for each audio chunk without feeding prior predictions
