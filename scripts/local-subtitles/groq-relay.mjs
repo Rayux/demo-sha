@@ -7,7 +7,7 @@ const problem = (status, message) => Object.assign(new Error(message), { status 
 
 export function validateGroqRequest(spec) {
   if (!spec || typeof spec !== 'object' || Array.isArray(spec)
-      || Object.keys(spec).some(key => !['apiKey', 'messages', 'stream', 'max_completion_tokens', 'temperature', 'response_format', 'model'].includes(key)))
+      || Object.keys(spec).some(key => !['apiKey', 'messages', 'stream', 'max_completion_tokens', 'temperature', 'response_format', 'model', 'reasoning_effort'].includes(key)))
     throw problem(400, 'Invalid Groq tutor request.');
   if (typeof spec.apiKey !== 'string' || !/^[\x21-\x7e]{20,512}$/.test(spec.apiKey))
     throw problem(400, 'Add a valid Groq API key in Kage Settings.');
@@ -18,11 +18,13 @@ export function validateGroqRequest(spec) {
       || typeof spec.stream !== 'boolean' || !Number.isInteger(spec.max_completion_tokens)
       || spec.max_completion_tokens < 1 || spec.max_completion_tokens > 2048
       || spec.temperature !== 0.1
-      || spec.response_format !== undefined && spec.response_format?.type !== 'json_object')
+      || spec.response_format !== undefined && spec.response_format?.type !== 'json_object'
+      || spec.reasoning_effort !== undefined && !['low', 'medium', 'high'].includes(spec.reasoning_effort))
     throw problem(400, 'Invalid Groq tutor request.');
   return { model: MODEL, messages: spec.messages.map(({ role, content }) => ({ role, content })),
     stream: spec.stream, temperature: 0.1, max_completion_tokens: spec.max_completion_tokens,
-    ...(spec.response_format ? { response_format: { type: 'json_object' } } : {}) };
+    ...(spec.response_format ? { response_format: { type: 'json_object' } } : {}),
+    ...(spec.reasoning_effort ? { reasoning_effort: spec.reasoning_effort } : {}) };
 }
 
 function safeFailure(status, bytes) {

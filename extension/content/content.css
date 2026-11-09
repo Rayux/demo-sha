@@ -93,6 +93,13 @@ body.kage-has-subtitle .bilibili-player-video-subtitle { opacity: 0 !important; 
 #kage-study .kage-chat-message { margin-bottom: 16px; font-size: 15px; line-height: 1.5; }
 #kage-study .kage-chat-message.user { margin-left: 26px; padding: 12px 16px; background: #333; border: 0; border-radius: 6px; color: #fff; box-shadow: none; }
 #kage-study .kage-chat-message.ai { padding: 0 2px; }
+#kage-study .kage-message-loading { display: flex; align-items: center; min-height: 22px; }
+#kage-study .kage-loading-dots { display: inline-flex; gap: 5px; }
+#kage-study .kage-loading-dots i { width: 6px; height: 6px; border-radius: 50%; background: #9a9a9a; animation: kage-loading-pulse 900ms ease-in-out infinite; }
+#kage-study .kage-loading-dots i:nth-child(2) { animation-delay: 150ms; }
+#kage-study .kage-loading-dots i:nth-child(3) { animation-delay: 300ms; }
+@keyframes kage-loading-pulse { 0%, 80%, 100% { opacity: .25; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { #kage-study .kage-loading-dots i { animation: none; opacity: .7; } }
 #kage-study .kage-message-label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--kage-muted); margin-bottom: 6px; }
 #kage-study .ai .kage-message-label { color: var(--kage-accent); }
 

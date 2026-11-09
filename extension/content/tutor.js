@@ -218,14 +218,80 @@
     item.appendChild(body); messages.appendChild(item); messages.scrollTop = messages.scrollHeight;
     return body;
   }
+  // Answers are fetched whole and kept per sentence and question, so asking
+  // again (or clicking a quick action that was prefetched on hover) shows the
+  // answer in the same frame. Nothing is revealed word by word.
+  const answers = new Map();
+  const ANSWER_CACHE_LIMIT = 40;
+  const lostConnection = 'Connection lost. Reload this tab after reloading the extension.';
+  function fetchAnswer(sentence, question) {
+    const key = JSON.stringify([sentence, question]);
+    const cached = answers.get(key);
+    if (cached) return cached;
+    const entry = { key, text: '', done: false, error: '', port: null, listeners: new Set() };
+    const notify = () => { for (const listener of [...entry.listeners]) listener(entry); };
+    const fail = error => {
+      if (entry.done || entry.error) return;
+      entry.error = error || lostConnection;
+      if (answers.get(key) === entry) answers.delete(key);
+      const port = entry.port; entry.port = null;
+      port?.disconnect();
+      notify();
+    };
+    answers.set(key, entry);
+    while (answers.size > ANSWER_CACHE_LIMIT) answers.delete(answers.keys().next().value);
+    try {
+      const port = chrome.runtime.connect({ name: 'kage-tutor' });
+      entry.port = port;
+      port.onMessage.addListener(response => {
+        if (entry.done || entry.error) return;
+        if (response.type === 'delta' || response.type === 'done') {
+          entry.text = response.answer;
+          if (response.type === 'done') {
+            entry.done = true; entry.port = null;
+            port.disconnect();
+            notify();
+          }
+        } else if (response.type === 'error') fail(response.error);
+      });
+      port.onDisconnect.addListener(() => fail(chrome.runtime.lastError?.message));
+      port.postMessage({ type: 'ASK_AI', sentence, question, provider: 'groq' });
+    } catch { fail(lostConnection); }
+    return entry;
+  }
+  function cancelAnswer(entry) {
+    if (entry.done || entry.error) return;
+    if (answers.get(entry.key) === entry) answers.delete(entry.key);
+    entry.error = 'Stopped.';
+    const port = entry.port; entry.port = null;
+    port?.disconnect();
+  }
+  function prefetch(prompt) {
+    if (!panelOpen || !prompt) return;
+    if (!pinned) capture();
+    if (pinned?.text) fetchAnswer(pinned.text, prompt);
+  }
+  function loading(body) {
+    body.replaceChildren();
+    body.classList.add('kage-message-loading');
+    const dots = document.createElement('span');
+    dots.className = 'kage-loading-dots';
+    dots.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 3; i++) dots.appendChild(document.createElement('i'));
+    const label = document.createElement('span');
+    label.className = 'kage-sr-only';
+    label.textContent = 'Thinking…';
+    body.appendChild(dots);
+    body.appendChild(label);
+  }
   function stopAnswer() {
     if (!activeRequest) return;
     const request = activeRequest;
     activeRequest = null;
-    if (request.timer) clearTimeout(request.timer);
-    request.port?.disconnect();
-    request.text = request.shown || '';
-    renderAnswer(request.answer, request.text ? `${request.text}\n\nStopped.` : 'Stopped.');
+    request.entry.listeners.delete(request.render);
+    cancelAnswer(request.entry);
+    request.answer.classList.remove('kage-message-loading');
+    renderAnswer(request.answer, request.entry.text ? `${request.entry.text}\n\nStopped.` : 'Stopped.');
     request.answer.removeAttribute('role');
     if (request.automatic && autoExplainedText === request.sentence) autoExplainedText = '';
   }
@@ -237,56 +303,27 @@
     const sentence = pinned?.text || '';
     if (!automatic) input.value = '';
     if (!automatic) message(question, 'user', sentence);
-    const answer = message('Thinking with Groq…', 'ai');
+    const answer = message('', 'ai');
     answer.setAttribute('role', 'status');
-    const request = { answer, sentence, automatic, text: '', shown: '', timer: null, done: false, port: null };
+    loading(answer);
+    const entry = fetchAnswer(sentence, question);
+    const request = { answer, sentence, automatic, entry, render: null };
     activeRequest = request;
-    function finish(error) {
-      if (activeRequest !== request) return;
+    request.render = () => {
+      if (activeRequest !== request || (!entry.done && !entry.error)) return;
       activeRequest = null;
-      if (request.timer) clearTimeout(request.timer);
-      if (error) {
-        renderAnswer(answer, `${request.text ? `${request.text}\n\n` : ''}Unable to answer. ${error}`);
+      entry.listeners.delete(request.render);
+      answer.classList.remove('kage-message-loading');
+      if (entry.error) {
+        renderAnswer(answer, `${entry.text ? `${entry.text}\n\n` : ''}Unable to answer. ${entry.error}`);
         answer.classList.add('kage-message-error');
         if (automatic && autoExplainedText === sentence) autoExplainedText = '';
-      }
+      } else renderAnswer(answer, entry.text);
       answer.removeAttribute('role');
-      request.port?.disconnect();
       messages.scrollTop = messages.scrollHeight;
-    }
-    function reveal() {
-      request.timer = null;
-      if (activeRequest !== request) return;
-      const remaining = Array.from(request.text.slice(request.shown.length));
-      request.shown += remaining.slice(0, 2).join('');
-      renderAnswer(answer, request.shown);
-      messages.scrollTop = messages.scrollHeight;
-      if (request.shown !== request.text) request.timer = setTimeout(reveal, 65);
-      else if (request.done) finish();
-    }
-    try {
-      const port = chrome.runtime.connect({ name: 'kage-tutor' });
-      request.port = port;
-      port.onMessage.addListener(response => {
-        if (activeRequest !== request) return;
-        if (response.type === 'delta' || response.type === 'done') {
-          request.text = response.answer;
-          request.done = response.type === 'done';
-          if (typeof setTimeout !== 'function') { request.shown = request.text; renderAnswer(answer, request.text); }
-          else if (!request.timer) reveal();
-        }
-        if (response.type === 'done' && request.shown === request.text) finish();
-        else if (response.type === 'error') finish(response.error);
-      });
-      port.onDisconnect.addListener(() => {
-        const error = chrome.runtime.lastError?.message;
-        if (request.done) return;
-        finish(error || 'Connection lost. Reload this tab after reloading the extension.');
-      });
-      port.postMessage({ type: 'ASK_AI', sentence, question, provider: 'groq' });
-    } catch {
-      finish('Connection lost. Reload this tab after reloading the extension.');
-    }
+    };
+    entry.listeners.add(request.render);
+    request.render(); // A cached answer appears immediately.
   }
   globalThis.KageTutor = {
     mount() {
@@ -342,7 +379,12 @@
           const name = tab.dataset.tab === 'tutor' ? 'subtitles' : 'tutor'; selectTab(name); root.querySelector(`[data-tab="${name}"]`).focus();
         });
       });
-      root.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => send(button.dataset.prompt)));
+      root.querySelectorAll('[data-prompt]').forEach(button => {
+        button.addEventListener('click', () => send(button.dataset.prompt));
+        // Start the answer while the pointer is on its way to the click.
+        button.addEventListener('pointerenter', () => prefetch(button.dataset.prompt));
+        button.addEventListener('focus', () => prefetch(button.dataset.prompt));
+      });
       root.querySelector('form').addEventListener('submit', event => { event.preventDefault(); send(); });
       root.addEventListener('keydown', event => {
         event.stopPropagation();

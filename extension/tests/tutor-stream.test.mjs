@@ -168,19 +168,21 @@ test('partial stream failures retain the answer and do not start a cloud answer'
   assert.equal(port.received.at(-1).type, 'error');
 });
 
-test('tutor preempts speculative preparation, which resumes after the answer', async () => {
+test('tutor answers start at once with low reasoning effort and never stop local subtitle preparation', async () => {
   const calls = [];
   const h = harness((url, options) => new Promise((resolve, reject) => {
-    calls.push({ ...options, body: JSON.parse(options.body), resolve });
+    calls.push({ url, ...options, body: JSON.parse(options.body), resolve });
     options.signal.addEventListener('abort', () => reject(options.signal.reason));
   }));
   const preparation = h.send({ type: 'PREPARE_SUBTITLES', texts: ['字幕1', '字幕2'], context: 'page:1' }); await flush();
   const port = h.connect(); port.onMessage.emit(ask); await flush();
-  assert.equal(calls[0].signal.aborted, true);
+  assert.equal(calls.length, 2, 'the tutor does not wait for the local model queue');
+  assert.equal(calls[0].signal.aborted, false, 'local preparation keeps running');
+  assert.equal(calls[0].body.reasoning_effort, undefined);
   assert.equal(calls[1].body.stream, true);
+  assert.equal(calls[1].body.reasoning_effort, 'low');
   calls[1].resolve(Response.json({ choices: [{ message: { content: '解釋' } }] })); await flush();
-  assert.equal(calls.length, 3);
-  calls[2].resolve(Response.json({ choices: [{ message: { content: JSON.stringify({ translations: [{ id: 0, sentence_translation: '一' }, { id: 1, sentence_translation: '二' }] }) } }] }));
+  calls[0].resolve(Response.json({ choices: [{ message: { content: JSON.stringify({ translations: [{ id: 0, sentence_translation: '一' }, { id: 1, sentence_translation: '二' }] }) } }] }));
   assert.equal((await preparation).success, true);
 });
 
@@ -201,7 +203,7 @@ function panelHarness({ saved = {}, getPosition, timers } = {}) {
       appendChild(child) { this.children.push(child); }, replaceChildren(...children) { this.children = children; },
       addEventListener(name, fn) { this.handlers[name] = fn; },
       querySelector(selector) { if (!nodes.has(selector)) nodes.set(selector, node()); return nodes.get(selector); },
-      querySelectorAll() { return []; }
+      querySelectorAll(selector) { return selector === '[data-prompt]' ? [this.querySelector('[data-prompt]')] : []; }
     };
   }
   const context = vm.createContext({ ...(timers || {}), window, document: { createTextNode: text => ({ textContent: text }), createElement(tag) { const el = node(tag); root ||= el; return el; }, body: node(), addEventListener(name, fn) { documentHandlers[name] = fn; } }, chrome: {
@@ -244,9 +246,11 @@ test('typed questions interrupt automatic explanations; late chunks cannot overw
   assert.equal(h.ports[1].message.sentence, '最初');
   const messages = h.nodes.get('#kageChatBody').children;
   const answer = messages.at(-1).children.at(-1);
+  assert.equal(answer.textContent, 'Thinking…', 'a loading state appears at once');
   h.ports[1].onMessage.emit({ type: 'delta', answer: '助詞解釋' });
+  assert.equal(answer.textContent, 'Thinking…', 'partial text is never revealed word by word');
   old.onMessage.emit({ type: 'done', answer: 'STALE' });
-  assert.equal(answer.textContent, '助詞解釋');
+  assert.equal(answer.textContent, 'Thinking…');
   h.ports[1].onMessage.emit({ type: 'done', answer: '助詞解釋完成' });
   assert.equal(answer.textContent, '助詞解釋完成');
   assert.equal(h.ports.length, 2);
@@ -343,12 +347,13 @@ function descendants(node, tag) {
   return (node.children || []).flatMap(child => [ ...(child.tagName === tag ? [child] : []), ...descendants(child, tag) ]);
 }
 
-test('streamed tutor Markdown formats bold, headings, lists and code without interpreting HTML', () => {
+test('tutor Markdown formats bold, headings, lists and code without interpreting HTML; stopping keeps what arrived', () => {
   const h = panelHarness(); h.update('字幕'); h.click('.kage-launcher');
   const answer = h.nodes.get('#kageChatBody').children.at(-1).children.at(-1);
   h.ports[0].onMessage.emit({ type: 'delta', answer: '**未完成' });
-  assert.equal(answer.textContent, '**未完成');
+  assert.equal(answer.textContent, 'Thinking…');
   h.ports[0].onMessage.emit({ type: 'delta', answer: '### 文法\n**完成** 與 __語氣__\n\n- *柔和*\n- `**literal**`\n\n1. 練習\n2. 重複\n\n<script>alert(1)</script>\n\n```html\n<img src=x onerror=alert(1)>\n```' });
+  h.click('.kage-chat-close');
   assert.deepEqual(descendants(answer, 'STRONG').map(node => node.textContent), ['完成', '語氣']);
   assert.equal(descendants(answer, 'H4')[0].textContent, '文法');
   assert.equal(descendants(answer, 'LI').length, 4);
@@ -356,8 +361,6 @@ test('streamed tutor Markdown formats bold, headings, lists and code without int
   assert.equal(descendants(answer, 'SCRIPT').length, 0);
   assert.equal(descendants(answer, 'IMG').length, 0);
   assert.match(answer.textContent, /<script>alert\(1\)<\/script>/);
-  h.click('.kage-chat-close');
-  assert.equal(descendants(answer, 'STRONG').length, 2);
   assert.match(answer.textContent, /Stopped\.$/);
 });
 
@@ -405,24 +408,24 @@ test('download shortcut stays closed and disables during preparation; dragging n
 });
 
 
-test('large completed answers reveal gradually and interruption clears pending animation', () => {
-  const pending = new Map(); let id = 0;
-  const h = panelHarness({ timers: {
-    setTimeout(fn, delay) { assert.equal(delay, 65); pending.set(++id, fn); return id; },
-    clearTimeout(timer) { pending.delete(timer); }
-  } });
+test('completed answers appear whole at once; repeated and hovered quick questions answer instantly', () => {
+  const h = panelHarness(); h.update('字幕'); h.click('.kage-launcher');
+  h.ports[0].onMessage.emit({ type: 'done', answer: '解釋' });
   h.submit('質問');
-  const answer = h.nodes.get('#kageChatBody').children.at(-1).children.at(-1);
-  h.ports[0].onMessage.emit({ type: 'done', answer: '一二三四五六' });
-  assert.equal(answer.textContent, '一二');
-  assert.equal(h.ports[0].disconnected, false);
-  const tick = () => { const [timer, fn] = pending.entries().next().value; pending.delete(timer); fn(); };
-  tick(); assert.equal(answer.textContent, '一二三四');
-  tick(); assert.equal(answer.textContent, '一二三四五六');
-  assert.equal(h.ports[0].disconnected, true);
-  h.submit('次');
-  h.ports[1].onMessage.emit({ type: 'delta', answer: '甲乙丙丁戊己' });
-  assert.equal(pending.size, 1);
-  h.submit('新しい質問');
-  assert.equal(pending.size, 0);
+  const answer = () => h.nodes.get('#kageChatBody').children.at(-1).children.at(-1);
+  h.ports[1].onMessage.emit({ type: 'done', answer: '一二三四五六' });
+  assert.equal(answer().textContent, '一二三四五六', 'no gradual reveal');
+  assert.equal(h.ports[1].disconnected, true);
+  h.submit('質問');
+  assert.equal(h.ports.length, 2, 'the same question reuses its answer');
+  assert.equal(answer().textContent, '一二三四五六');
+  const quick = h.nodes.get('[data-prompt]');
+  quick.dataset.prompt = '助詞を説明して';
+  quick.handlers.pointerenter();
+  assert.equal(h.ports.length, 3, 'hovering a quick action starts its answer');
+  assert.equal(h.ports[2].message.question, '助詞を説明して');
+  h.ports[2].onMessage.emit({ type: 'done', answer: '助詞の答え' });
+  quick.handlers.click();
+  assert.equal(h.ports.length, 3);
+  assert.equal(answer().textContent, '助詞の答え', 'the prefetched answer shows on click');
 });

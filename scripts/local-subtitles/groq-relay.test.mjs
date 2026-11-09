@@ -104,3 +104,12 @@ test('disconnecting the browser stops its upstream stream', async t => {
   await response.body.getReader().read(); controller.abort();
   await Promise.race([stopped, new Promise((_, reject) => setTimeout(() => reject(new Error('Upstream was not cancelled')), 1500))]);
 });
+
+test('the relay forwards a valid reasoning effort and rejects other values', async () => {
+  const { validateGroqRequest } = await import('./groq-relay.mjs');
+  const base = { apiKey: 'gsk_' + 'a'.repeat(40), model: 'openai/gpt-oss-120b', messages: [{ role: 'user', content: '質問' }],
+    stream: true, temperature: 0.1, max_completion_tokens: 512 };
+  assert.equal(validateGroqRequest({ ...base, reasoning_effort: 'low' }).reasoning_effort, 'low');
+  assert.equal('reasoning_effort' in validateGroqRequest(base), false);
+  assert.throws(() => validateGroqRequest({ ...base, reasoning_effort: 'extreme' }), /Invalid Groq tutor request/);
+});
