@@ -2,7 +2,7 @@
 
 ## GPT-6 & OpenAI Assistance in Antigravity
 When the user asks to "use GPT-6", "consult GPT-6", or asks for GPT-6 / OpenAI's perspective:
-- Use the MCP tool `consult_gpt` configured in `.agents/mcp_config.json` with parameter `model: "gpt-6"`.
+- Use the MCP tool `consult_gpt` configured in `.agents/mcp_config.json` with parameter `model: "gpt-6"`. (That file is personal and not in git; copy `.agents/mcp_config.example.json` and set the full path to this folder.)
 - The MCP server will query the OpenAI API (with automatic fallback to `gpt-4o` if OpenAI has not yet activated `gpt-6`).
 - Synthesize or present the response directly to the user.
 

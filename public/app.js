@@ -433,9 +433,11 @@ function markActiveSource() {
 }
 
 async function loadLibrary() {
+  let reachable = false;
   try {
     const response = await fetch("./api/library");
     if (response.ok) {
+      reachable = true;
       const data = await response.json();
       if (data.files && data.files.length) {
         renderLibrary(data.files);
@@ -455,7 +457,10 @@ async function loadLibrary() {
     }
   } catch {}
 
-  ui.library.innerHTML = '<p class="library-empty">The audio library could not be read.</p>';
+  // A new install has no episodes yet; say how to add them instead of an error.
+  ui.library.innerHTML = reachable
+    ? '<p class="library-empty">Your library is empty. Put MP3 or MP4 files in the <strong>audio</strong> folder and reload this page, or use the upload button.</p>'
+    : '<p class="library-empty">The audio library could not be read.</p>';
 }
 
 function updateModelIndicator() {

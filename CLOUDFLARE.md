@@ -9,20 +9,17 @@ and Firebase accounts continue to supply AI and saved data within their own quot
 
 ## Publish from this Mac
 
-Use **Node.js 22 or newer**. This Mac's default Node is currently 21; the Node 24
-runtime bundled with Codex is available for this terminal session:
+Use **Node.js 22 or newer** (check with `node --version`). In Terminal, go to
+the folder you downloaded (type `cd `, drag the folder onto the window, press Return):
 
 ```sh
-export PATH="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin:$PATH"
 node --version
-cd /Users/ray/shadowing
 npm ci
 npx wrangler login
 npm run deploy:cloudflare
 npm run secrets:cloudflare
 ```
 
-If that bundled runtime is no longer installed, use your own Node 22+ installation.
 `wrangler login` opens Cloudflare authorization in your browser. Choose your
 account and stay on the **Workers Free** plan. The deploy command prints your
 actual website URL; use that URL rather than a guessed hostname.
