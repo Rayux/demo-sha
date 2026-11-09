@@ -57,10 +57,11 @@ test('explicit preparation crosses main/content/worker worlds and downloads medi
   const h = harness();
   assert.equal(h.networkRequests.length, 0);
   const file = await h.api.download();
-  await tick();
   assert.equal(file.type, 'audio/mp4');
   assert.equal(file.size, h.bytes.length);
-  assert.deepEqual(new Uint8Array(await file.arrayBuffer()), h.bytes);
+  // The download streams: the source resolves on the first bytes and reads in order.
+  assert.deepEqual(new Uint8Array(await file.slice(0, file.size).arrayBuffer()), h.bytes);
+  for (let i = 0; i < 10; i++) await tick();
   assert.equal(h.pageRequests.length, 0, 'extension transport avoids the page CORS path');
   assert.equal(h.networkRequests.length, 1);
   assert.ok(h.networkRequests.every(call => call.options.credentials === 'omit' && call.options.redirect === 'error'));
@@ -71,8 +72,11 @@ test('explicit preparation crosses main/content/worker worlds and downloads medi
 
 test('Chrome relay can discover an unknown size, close its probe, then download the full matching stream', async () => {
   const h = harness({ size: 3, unknownSize: true });
-  const file = await h.api.download(); await tick();
-  assert.equal(file.size, 3); assert.equal(h.networkRequests.length, 2);
+  const file = await h.api.download();
+  assert.equal(file.size, 3);
+  assert.equal((await file.slice(0, 3).arrayBuffer()).byteLength, 3);
+  for (let i = 0; i < 10; i++) await tick();
+  assert.equal(h.networkRequests.length, 2);
   assert.equal(new URL(h.networkRequests[0].url).searchParams.get('range'), '0-0');
   assert.equal(new URL(h.networkRequests[1].url).searchParams.get('range'), '0-2');
   assert.equal(h.timers.size, 0);

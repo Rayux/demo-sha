@@ -291,9 +291,10 @@
       else await discard(response);
     }
   }
+  const audioName = (selected, request) => `YouTube-${new URL(request.page).searchParams.get('v')}.${selected.mime === 'audio/mp4' ? 'm4a' : selected.mime === 'video/mp4' ? 'mp4' : 'webm'}`;
   function publishAudio(bytes, selected, request) {
     check(request);
-    post('RESULT', request, { bytes, mimeType: selected.mime, name: `YouTube-${new URL(request.page).searchParams.get('v')}.${selected.mime === 'audio/mp4' ? 'm4a' : selected.mime === 'video/mp4' ? 'mp4' : 'webm'}` }, [bytes]);
+    post('RESULT', request, { bytes, mimeType: selected.mime, name: audioName(selected, request) }, [bytes]);
   }
   async function downloadSelected(selected, request) {
     let reader;
@@ -308,8 +309,12 @@
           selected.size = full.size;
         }
       }
-      const output = new Uint8Array(selected.size);
-      let received = 0;
+      // Streaming hands each verified piece over as it arrives so the helper can
+      // transcribe during the download. It begins with the first accepted bytes,
+      // so a refused link can still fall back to the next candidate.
+      const streaming = request.stream === true;
+      const output = streaming ? null : new Uint8Array(selected.size);
+      let received = 0, announced = false;
       post('PROGRESS', request, { received, total: selected.size });
       // YouTube throttles large un-ranged requests. Fetch bounded, contiguous ranges
       // and reject short/mismatched responses rather than importing partial audio.
@@ -331,6 +336,14 @@
             check(request); idle.touch();
             if (done) break;
             if (!(value instanceof Uint8Array) || received + value.byteLength > end + 1) throw new Error('size');
+            if (streaming) {
+              if (!announced) { announced = true; post('STREAM', request, { total: selected.size, mimeType: selected.mime, name: audioName(selected, request) }); }
+              const piece = value.slice();
+              received += value.byteLength;
+              request.mediaBytes = received;
+              post('CHUNK', request, { bytes: piece.buffer, received }, [piece.buffer]);
+              continue;
+            }
             output.set(value, received); received += value.byteLength;
             request.mediaBytes = received;
             post('PROGRESS', request, { received, total: selected.size });
@@ -339,6 +352,7 @@
         } finally { idle.stop(); if (reader) { reader.cancel().catch(() => {}); reader = null; } else await discard(response); }
       }
       check(request);
+      if (streaming) { post('END', request, { received }); return; }
       publishAudio(output.buffer, selected, request);
     } finally { if (reader) reader.cancel().catch(() => {}); }
   }

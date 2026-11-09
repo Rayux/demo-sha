@@ -61,7 +61,7 @@
     const requestId = Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
     return new Promise((resolve, reject) => {
       let finished = false, timeout = null, navigation = null;
-      let relayUsed = false, mediaPort = null;
+      let relayUsed = false, mediaPort = null, stream = null, handedOff = false;
       const post = type => window.postMessage({ type, requestId, page: currentPage }, origin);
       function complete(error, result, cancel = false) {
         if (finished) return;
@@ -74,6 +74,7 @@
         }
         if (mediaPort) { try { mediaPort.disconnect(); } catch { /* already closed */ } mediaPort = null; }
         if (cancel) post('KAGE_BROWSER_AUDIO_CANCEL');
+        if (stream && error) stream.fail(error);
         if (error) reject(error); else resolve(result);
       }
       const aborted = () => complete(abortError(), null, true);
@@ -105,6 +106,8 @@
           return;
         }
         if (data.type === 'KAGE_BROWSER_AUDIO_STREAM') { startStream(data); return; }
+        if (data.type === 'KAGE_BROWSER_AUDIO_CHUNK') { stream?.chunk(data.bytes); return; }
+        if (data.type === 'KAGE_BROWSER_AUDIO_END') { stream?.end(); return; }
         if (!TYPES.has(data.type)) return;
         if (data.type === 'KAGE_BROWSER_AUDIO_ERROR') {
           complete(new Error(typeof data.error === 'string' && data.error.trim() ? data.error.slice(0, 1000) : 'Could not fetch audio from this player.'));
@@ -129,10 +132,13 @@
           complete(null, new File([data.bytes], fileName, { type: mimeType }));
         }
       }
-      // Bilibili: the page streams pieces while it downloads. Resolve at once
-      // with a File-like source the importer uploads in order, so the helper
-      // transcribes during the download instead of after it.
+      // Bilibili and YouTube: the page streams pieces while it downloads. Resolve
+      // at once with a File-like source the importer uploads in order, so the
+      // helper transcribes during the download instead of after it. The request
+      // stays open (its listener also serves the YouTube Chrome relay) until the
+      // stream ends, fails, or is closed.
       function startStream(data) {
+        if (stream || handedOff) return;
         const size = data.total;
         const mimeType = String(data.mimeType || '').toLowerCase().split(';')[0].trim();
         const extension = MIME_EXTENSIONS.get(mimeType);
@@ -143,13 +149,13 @@
         const name = typeof data.name === 'string' ? data.name.replace(/[\x00-\x1f/\\]/g, '_').slice(0, 180) : '';
         const fileName = name && name.toLowerCase().endsWith(`.${extension}`) ? name : `browser-audio.${extension}`;
         const pieces = [];
-        let buffered = 0, arrived = 0, consumed = 0, ended = false, broken = null, waiting = null, open = true;
+        let buffered = 0, arrived = 0, consumed = 0, ended = false, broken = null, waiting = null;
         const settle = () => {
           if (!waiting) return;
           if (broken) { const { reject: rejectRead } = waiting; waiting = null; rejectRead(broken); return; }
           if (buffered < waiting.want && !ended) return;
           const { resolve: resolveRead, want } = waiting; waiting = null;
-          if (buffered < want) { breakStream(new Error('Browser audio download was incomplete. Refresh the episode and try again.')); return; }
+          if (buffered < want) { fail(new Error('Browser audio download was incomplete. Refresh the page and try again.')); return; }
           const out = new Uint8Array(want);
           let filled = 0;
           while (filled < want) {
@@ -158,47 +164,42 @@
             if (take === head.byteLength) pieces.shift(); else pieces[0] = head.subarray(take);
           }
           buffered -= want; consumed += want;
-          if (consumed >= size) close(false);
+          // Finish only after the page reports its end, so it can close its own
+          // requests (and the YouTube relay) before this request stops serving them.
+          if (consumed >= size && ended) complete(null, null, false);
           resolveRead(out.buffer);
         };
-        function breakStream(error) { broken ||= error; close(true); settle(); }
-        function close(cancel = true) {
-          if (!open) return;
-          open = false;
-          window.removeEventListener('message', streamed);
-          clearInterval(watch);
+        // Called by complete() for an error, timeout, abort, or navigation.
+        function fail(error) {
+          broken ||= error || abortError();
           pieces.length = 0; buffered = 0;
-          if (cancel && !ended) post('KAGE_BROWSER_AUDIO_CANCEL');
+          settle();
+          complete(broken, null, !ended);
         }
-        function streamed(event) {
-          const item = event.data;
-          if (!open || event.source !== window || event.origin !== origin || !item || item.requestId !== requestId || item.page !== currentPage) return;
-          if (item.type === 'KAGE_BROWSER_AUDIO_CHUNK') {
-            if (!(item.bytes instanceof ArrayBuffer) || !item.bytes.byteLength || arrived + item.bytes.byteLength > size) {
-              breakStream(new Error('The browser returned invalid audio. Refresh the episode and try again.')); return;
+        stream = {
+          fail,
+          chunk(bytes) {
+            if (!(bytes instanceof ArrayBuffer) || !bytes.byteLength || arrived + bytes.byteLength > size) {
+              fail(new Error('The browser returned invalid audio. Refresh the page and try again.')); return;
             }
-            pieces.push(new Uint8Array(item.bytes)); buffered += item.bytes.byteLength; arrived += item.bytes.byteLength;
+            pieces.push(new Uint8Array(bytes)); buffered += bytes.byteLength; arrived += bytes.byteLength;
             settle();
-          } else if (item.type === 'KAGE_BROWSER_AUDIO_END') {
-            if (arrived !== size) { breakStream(new Error('Browser audio download was incomplete. Refresh the episode and try again.')); return; }
+          },
+          end() {
+            if (arrived !== size) { fail(new Error('Browser audio download was incomplete. Refresh the page and try again.')); return; }
             ended = true; settle();
-          } else if (item.type === 'KAGE_BROWSER_AUDIO_ERROR') {
-            ended = true;
-            breakStream(new Error(typeof item.error === 'string' && item.error.trim() ? item.error.slice(0, 1000) : 'Could not fetch audio from this player.'));
-          }
-        }
-        const watch = setInterval(() => {
-          if (page() !== currentPage) breakStream(abortError('Browser audio stopped after leaving this video.'));
-        }, 500);
+            if (consumed >= size) complete(null, null, false);
+          },
+        };
         function pull(start, end) {
           if (broken) return Promise.reject(broken);
           const want = Math.min(end, size) - start;
           if (start !== consumed || waiting || want <= 0) return Promise.reject(new Error('Browser audio was read out of order. Start preparation again.'));
           return new Promise((resolveRead, rejectRead) => { waiting = { resolve: resolveRead, reject: rejectRead, want }; settle(); });
         }
-        window.addEventListener('message', streamed);
-        // Stop the request's own listener and timers; the stream listener owns the transfer now.
-        complete(null, { name: fileName, size, type: mimeType, close: () => close(true),
+        handedOff = true;
+        resolve({ name: fileName, size, type: mimeType,
+          close: () => { if (!finished) fail(abortError('Browser audio preparation stopped.')); },
           slice: (start = 0, end = size) => ({ arrayBuffer: () => pull(start, end) }) });
       }
       // anime1.me: the page hands over the signed MP4 URL and the extension's
@@ -269,9 +270,9 @@
       timeout = setTimeout(() => complete(new Error('Browser audio download timed out. Keep the tab open and check your connection before trying again.'), null, true), TIMEOUT_MS);
       if (currentPage.startsWith('https://www.youtube.com/watch?') && globalThis.chrome?.runtime?.sendMessage) {
         Promise.resolve().then(() => chrome.runtime.sendMessage({ type: 'CHROME_AUDIO_FETCH', action: 'status' })).then(reply => {
-          if (!finished) window.postMessage({ type: 'KAGE_BROWSER_AUDIO_REQUEST', requestId, page: currentPage,
+          if (!finished) window.postMessage({ type: 'KAGE_BROWSER_AUDIO_REQUEST', requestId, page: currentPage, stream: true,
             transport: reply?.success && reply.data?.available === true ? 'extension' : 'page' }, origin);
-        }).catch(() => { if (!finished) post('KAGE_BROWSER_AUDIO_REQUEST'); });
+        }).catch(() => { if (!finished) window.postMessage({ type: 'KAGE_BROWSER_AUDIO_REQUEST', requestId, page: currentPage, stream: true }, origin); });
       } else window.postMessage({ type: 'KAGE_BROWSER_AUDIO_REQUEST', requestId, page: currentPage, stream: true }, origin);
     });
   }

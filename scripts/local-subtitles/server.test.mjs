@@ -1136,3 +1136,25 @@ test('non-streamable MP4 uploads wait for the whole file as before', async t => 
   assert.equal(status.state, 'uploading');
   assert.equal(status.streaming, false);
 });
+
+test('a new video\'s first section pauses other transcription until its first lines exist', { skip: process.platform === 'win32' }, async t => {
+  const client = await start(t, { worker: followFixture, streamUploads: true, firstSectionPriority: true });
+  const { execFileSync } = await import('node:child_process');
+  const stat = pid => execFileSync('ps', ['-o', 'stat=', '-p', pid], { encoding: 'utf8' }).trim();
+  const media = Buffer.concat([Buffer.from('ID3\x04'), Buffer.alloc(60)]);
+  const job = async () => (await client.call('/jobs', { method: 'POST', json: { name: 'episode.mp3', size: media.length } })).value.id;
+  const a = await job();
+  await client.call(`/jobs/${a}/audio?offset=0`, { method: 'PUT', bytes: media.subarray(0, 32) });
+  await waitJob(client, a, ['preparing'], value => value.cues?.length === 1);
+  const pidA = await fs.readFile(path.join(client.dataDir, 'jobs', a, 'input.media.pid'), 'utf8');
+  assert.doesNotMatch(stat(pidA), /T/);
+  const b = await job();
+  await client.call(`/jobs/${b}/audio?offset=0`, { method: 'PUT', bytes: media.subarray(0, 4) });
+  for (let i = 0; i < 200 && !/T/.test(stat(pidA)); i++) await new Promise(resolve => setTimeout(resolve, 10));
+  assert.match(stat(pidA), /T/, 'the running video pauses for the new first section');
+  await client.call(`/jobs/${b}/audio?offset=4`, { method: 'PUT', bytes: media.subarray(4, 32) });
+  await waitJob(client, b, ['preparing'], value => value.cues?.length === 1);
+  for (let i = 0; i < 200 && /T/.test(stat(pidA)); i++) await new Promise(resolve => setTimeout(resolve, 10));
+  assert.doesNotMatch(stat(pidA), /T/, 'it resumes once the new video has lines');
+  for (const id of [a, b]) await client.call(`/jobs/${id}`, { method: 'DELETE' });
+});

@@ -25,6 +25,10 @@ const VIDEO_CONCURRENCY = 2;
 // decoded front to back (fragmented/faststart MP4, WebM, MP3, Ogg, WAV, FLAC).
 const STREAM_PROBE_BYTES = 8 * 1024 ** 2;
 const STANDBY_IDLE_MS = 10 * 60 * 1000;
+// While a new video waits for its first lines, other Whisper workers pause and
+// no new Ollama request starts, so the GPU serves that section alone. Bounded
+// so a slow download never stalls other videos for long.
+const FIRST_SECTION_PRIORITY_MS = 5000;
 export function streamableMedia(prefix, size) {
   if (prefix.length >= 4) {
     const magic = prefix.subarray(0, 4).toString('latin1');
@@ -139,6 +143,31 @@ export async function createSubtitleService(options = {}) {
   // Both default on only for the real MLX worker; test fixtures opt in.
   const streamUploads = options.streamUploads ?? !options.worker;
   const useStandby = options.standbyWorker ?? !options.worker;
+  const gpuPriority = options.firstSectionPriority ?? !options.worker;
+  const firstSection = new Map(); // job id -> expiry timer
+  const paused = new Set();
+  const signalGroup = (child, signal) => { try { process.kill(-child.pid, signal); } catch { try { child.kill(signal); } catch { /* exited */ } } };
+  function holdForFirstSection(job) {
+    if (!gpuPriority) return;
+    clearTimeout(firstSection.get(job.id));
+    const timer = setTimeout(() => releaseFirstSection(job.id), FIRST_SECTION_PRIORITY_MS);
+    timer.unref?.();
+    firstSection.set(job.id, timer);
+    for (const [id, operation] of running) {
+      const child = operation.child;
+      if (id === job.id || firstSection.has(id) || !child || child.exitCode !== null || child.signalCode !== null || paused.has(child)) continue;
+      paused.add(child); signalGroup(child, 'SIGSTOP');
+    }
+  }
+  function releaseFirstSection(id) {
+    if (!firstSection.has(id)) return;
+    clearTimeout(firstSection.get(id));
+    firstSection.delete(id);
+    if (firstSection.size) return;
+    for (const child of paused) signalGroup(child, 'SIGCONT');
+    paused.clear();
+    requestTranslationDrain();
+  }
   const parallelStages = options.parallelStages ?? process.env.KAGE_PIPELINE_PARALLEL !== '0';
   const translationBatchSize = Number(options.translationBatchSize ?? process.env.KAGE_TRANSLATION_BATCH_SIZE ?? DEFAULT_BATCH_SIZE);
   if (!Number.isInteger(translationBatchSize) || translationBatchSize < 1 || translationBatchSize > 12) throw new Error('Translation batch size must be between 1 and 12.');
@@ -230,6 +259,8 @@ export async function createSubtitleService(options = {}) {
   }
   function stopChild(child) {
     if (!child || child.exitCode !== null || child.signalCode !== null) return;
+    // A paused worker would not act on SIGTERM until resumed.
+    if (paused.delete(child)) signalGroup(child, 'SIGCONT');
     // The worker and FFmpeg share a process group, so cancellation also stops decoding.
     try { process.kill(-child.pid, 'SIGTERM'); } catch { child.kill('SIGTERM'); }
     const killTimer = setTimeout(() => {
@@ -267,7 +298,7 @@ export async function createSubtitleService(options = {}) {
   // the first section does not pay several seconds of Python and model startup.
   let standby = null, standbyTimer = null;
   function warmStandby() {
-    if (!useStandby || closing || !ready || standby) return;
+    if (!useStandby || closing || !ready || standby || running.size >= VIDEO_CONCURRENCY) return;
     let child;
     try {
       child = spawn(python, [worker, '--standby', '--model', modelDir], { env: workerEnv(), detached: true, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -326,9 +357,10 @@ export async function createSubtitleService(options = {}) {
       else child = spawn(python, [worker, ...(remote ? ['--url', job.sourceUrl] : ['--input', mediaPath(job.id)]),
         ...(follow ? ['--follow-bytes', String(follow)] : []), '--output', resultPath(job.id), '--model', modelDir],
         { env: workerEnv(), detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
-      // Keep the next job warm while this one runs.
-      if (queue.length) warmStandby();
+      // Keep a warm worker for the next video whenever another one can run.
+      if (running.size < VIDEO_CONCURRENCY) warmStandby();
       operation.child = child;
+      holdForFirstSection(job);
       let stderr = '';
       let buffer = '';
       let failure = '';
@@ -371,6 +403,7 @@ export async function createSubtitleService(options = {}) {
                 const offset = job.cues.length;
                 if (offset + result.cues.length > 30000) throw new Error('The subtitle track is too large.');
                 job.cues.push(...result.cues.map((cue, index) => ({ ...cue, id: String(offset + index) })));
+                releaseFirstSection(job.id);
                 job.duration = result.duration;
                 job.processedThrough = event.processedThrough;
                 job.state = 'preparing';
@@ -394,6 +427,8 @@ export async function createSubtitleService(options = {}) {
       async function finish(code, spawnError) {
         if (settled) return;
         settled = true;
+        releaseFirstSection(job.id);
+        paused.delete(child);
         clearTimeout(timer);
         await progressWrite;
         try {
@@ -454,6 +489,7 @@ export async function createSubtitleService(options = {}) {
   }
   function drainTranslations() {
     if (closing || translating || !translationQueue.length) return;
+    if (firstSection.size) return; // Resumed by releaseFirstSection.
     const preferredId = refreshTranslationPriority();
     let index = translationQueue.findIndex(entry => entry.jobId === preferredId);
     if (index === -1 && performance.now() < translationContinuationUntil) {
@@ -653,7 +689,7 @@ export async function createSubtitleService(options = {}) {
       if (req.method === 'GET' && url.pathname === '/health') {
         // The extension checks health when a video page opens: load Whisper now
         // so it is warm before the first audio bytes arrive.
-        if (!running.size) warmStandby();
+        if (running.size < VIDEO_CONCURRENCY) warmStandby();
         return reply(200, { ok: true, ready, model: MODEL, token, capabilities: { groqRelay: true, streamingUploads: true, translation: true, translationPriority: true, bilibiliDownload: true, youtubeDownload: true, anime1Pages: true, progressiveSubtitles: true, audioOnly: true, jobQueue: true, recovery: true }, processing: { sectionSeconds: 60, parallelStages, concurrency: VIDEO_CONCURRENCY, translationConcurrency: 1, translationBatchSize }, status: ready ? 'ready' : 'setup_required',
           ...(!ready ? { error: readinessError } : {}) });
       }

@@ -8,7 +8,8 @@ if (!expected) { console.error('Expected --follow-bytes for a streamed upload.')
 const size = async () => (await fs.stat(input)).size;
 const until = async ready => { for (let i = 0; i < 500 && !await ready(); i++) await new Promise(r => setTimeout(r, 10)); };
 const first = { start: 0.2, end: 1.8, text: 'はい。' }, second = { start: 30.2, end: 31.8, text: 'いいえ。' };
-await until(async () => await size() >= 4);
+await fs.writeFile(input + '.pid', String(process.pid));
+await until(async () => await size() >= 8);
 emit({ type: 'chunk', duration: 60, processedThrough: 30, cues: [first] });
 await until(async () => await size() >= expected);
 if (await size() < expected) { console.error('Upload stopped.'); process.exit(1); }

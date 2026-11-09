@@ -23,9 +23,11 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 MAX_DURATION = 6 * 3600
 SAMPLE_RATE = 16000
 CHUNK_SECONDS = 60
-# Whisper pads every window to 30 s, so a 30 s opening section costs about a
-# third of a 60 s one and the first lines appear several seconds sooner.
-FIRST_SECONDS = 30
+# The opening section is short and skips word alignment (about 0.9 s instead
+# of 3.4 s on an M1 Pro), so the first lines exist about a second after audio
+# starts arriving. Its lines use segment timing; every later section keeps
+# word timing.
+FIRST_SECONDS = 10
 FOLLOW_IDLE_SECONDS = 120
 CONTEXT_SECONDS = 2
 # Whisper treats this as transcription context, not a system instruction. It can
@@ -102,7 +104,7 @@ def owned_segment(segment, offset, owner_start, owner_end, duration):
     return {"start": start, "end": end, "text": text[:4000]}
 
 
-def transcribe_window(samples, model, transcriber=None):
+def transcribe_window(samples, model, transcriber=None, word_timestamps=True):
     """Apply conversational context while retaining Whisper's silence safeguards."""
     if transcriber is None:
         import mlx_whisper
@@ -115,8 +117,8 @@ def transcribe_window(samples, model, transcriber=None):
         initial_prompt=CONVERSATION_CONTEXT,
         verbose=None, temperature=0.0, condition_on_previous_text=False,
         no_speech_threshold=0.6, logprob_threshold=-1.0,
-        compression_ratio_threshold=2.4, word_timestamps=True,
-        hallucination_silence_threshold=2.0,
+        compression_ratio_threshold=2.4, word_timestamps=word_timestamps,
+        **({"hallucination_silence_threshold": 2.0} if word_timestamps else {}),
     )
 
 
@@ -212,7 +214,7 @@ def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None):
                 chunk_cues = []
                 if samples.size and float(np.max(np.abs(samples))) > 0.001:
                     with measure(timings, 'recognitionMs'):
-                        result = transcribe_window(samples, model)
+                        result = transcribe_window(samples, model, word_timestamps=window['start'] > 0)
                     for segment in result.get('segments', []):
                         if segment.get('no_speech_prob', 0) > 0.6 and segment.get('avg_logprob', 0) < -0.5:
                             continue
