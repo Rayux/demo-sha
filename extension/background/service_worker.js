@@ -2,7 +2,7 @@ const ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 const MODEL = 'openai/gpt-oss-120b';
 let groqHelperUntil = 0;
 const GROQ_ROUTE_MEMORY_MS = 2 * 60 * 1000;
-if (typeof importScripts === 'function') importScripts('local-subtitles.js', 'subtitle-retention.js', 'media-fetch.js', 'anime1-fetch.js', 'groq-transport.js');
+if (typeof importScripts === 'function') importScripts('local-subtitles.js', 'subtitle-retention.js', 'media-fetch.js', 'anime1-fetch.js', 'groq-transport.js', 'dev-reload.js');
 const settingsReady = chrome.storage.local.get('gemmaRestoredV1').then(state => {
   if (!state.gemmaRestoredV1) return chrome.storage.local.set({ apiModel: 'gemma2', gemmaRestoredV1: true, detailedSubtitles: false });
 });

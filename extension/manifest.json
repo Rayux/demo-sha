@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Kage Shadowing Extension",
-  "version": "1.7.26",
+  "version": "1.7.27",
   "description": "Japanese shadowing extension for Netflix, YouTube, Bilibili, and Anime1.me with real-time AI translations.",
   "permissions": [
     "storage",

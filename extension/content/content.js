@@ -201,8 +201,19 @@ function setEnabled(enabled) {
   clearSubtitle();
   if (enabled) sync();
 }
+// Kage reloaded itself after its files changed, and this page still runs the
+// old scripts. Refresh now, or at the next pause so playback is not interrupted.
+let updatePending = false;
+function refreshForUpdate() {
+  if (updatePending) return;
+  updatePending = true;
+  const playing = () => !!video && !video.paused && !video.ended;
+  if (!playing()) { location.reload(); return; }
+  const wait = setInterval(() => { if (!playing()) { clearInterval(wait); location.reload(); } }, 500);
+}
 chrome.runtime.onMessage.addListener(message => {
   if (message.type === 'TOGGLE_STATE') setEnabled(message.enabled);
+  if (message.type === 'KAGE_EXTENSION_UPDATED') refreshForUpdate();
   if (message.type === 'SUBTITLES_READY' && isEnabled && message.context === subtitleContext && Array.isArray(message.results)) {
     let updated = false;
     for (const result of message.results) {
