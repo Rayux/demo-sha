@@ -88,6 +88,8 @@
         return episode ? `https://www.bilibili.com/bangumi/play/${episode[1]}`
           : `https://www.bilibili.com/video/${video[1]}?p=${Number(part)}`;
       };
+      // Work Kage starts on its own asks the helper to stop if the video is not Japanese.
+      const auto = message.auto === true ? { auto: true } : {};
       if (action === 'recover') {
         const status = await health();
         if (!status.capabilities?.recovery) return { job: null };
@@ -100,12 +102,12 @@
         const status = await health();
         const platform = new URL(sourceUrl).hostname === 'www.youtube.com' ? 'YouTube' : 'Bilibili';
         if (!status.capabilities?.[platform === 'YouTube' ? 'youtubeDownload' : 'bilibiliDownload']) throw new Error(`Update and restart the local helper with npm run subtitles:setup and npm run subtitles:start to enable ${platform} downloads.`);
-        return authenticated('/jobs', 'POST', { sourceUrl });
+        return authenticated('/jobs', 'POST', { sourceUrl, ...auto });
       }
       if (action === 'create') {
         if (typeof message.name !== 'string' || !message.name.trim() || message.name.length > 512
             || !Number.isSafeInteger(message.size) || message.size <= 0 || message.size > 4 * 1024 ** 3) throw new Error('Choose an audio or video file up to 4 GB.');
-        return authenticated('/jobs', 'POST', { name: message.name, size: message.size, pageUrl: pageURL() });
+        return authenticated('/jobs', 'POST', { name: message.name, size: message.size, pageUrl: pageURL(), ...auto });
       }
       if (typeof message.id !== 'string' || !/^[a-zA-Z0-9_-]{12,80}$/.test(message.id)) throw new Error('Invalid local subtitle job.');
       const path = `/jobs/${encodeURIComponent(message.id)}`;

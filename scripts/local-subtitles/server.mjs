@@ -18,6 +18,9 @@ export const MODEL = 'mlx-community/whisper-large-v3-turbo';
 const MAX_UPLOAD = 4 * 1024 ** 3;
 const CHUNK_BYTES = 2 * 1024 ** 2;
 const MAX_DURATION = 6 * 3600;
+// Videos Kage starts on its own are checked for Japanese over the first minute.
+const LANGUAGE_CHECK_SECONDS = 60;
+const JAPANESE_PROBABILITY = 0.3;
 const TERMINAL = new Set(['complete', 'error', 'translation_error', 'cancelled']);
 const RETENTION_MS = 3 * 24 * 60 * 60 * 1000;
 const VIDEO_CONCURRENCY = 2;
@@ -351,11 +354,12 @@ export async function createSubtitleService(options = {}) {
     operation.controller.signal.throwIfAborted();
     return new Promise((resolve, reject) => {
       const follow = job.streaming && !remote ? job.size : null;
-      const spec = { ...(remote ? { url: job.sourceUrl } : { input: mediaPath(job.id) }), output: resultPath(job.id), ...(follow ? { followBytes: follow } : {}) };
+      const spec = { ...(remote ? { url: job.sourceUrl } : { input: mediaPath(job.id) }), output: resultPath(job.id), ...(follow ? { followBytes: follow } : {}),
+        ...(job.auto ? { checkLanguage: true } : {}) };
       let child = takeStandby();
       if (child) child.stdin.end(JSON.stringify(spec) + '\n');
       else child = spawn(python, [worker, ...(remote ? ['--url', job.sourceUrl] : ['--input', mediaPath(job.id)]),
-        ...(follow ? ['--follow-bytes', String(follow)] : []), '--output', resultPath(job.id), '--model', modelDir],
+        ...(follow ? ['--follow-bytes', String(follow)] : []), ...(job.auto ? ['--check-language'] : []), '--output', resultPath(job.id), '--model', modelDir],
         { env: workerEnv(), detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
       // Keep a warm worker for the next video whenever another one can run.
       if (running.size < VIDEO_CONCURRENCY) warmStandby();
@@ -412,6 +416,20 @@ export async function createSubtitleService(options = {}) {
                 job.message = 'New subtitle sections are ready while the rest prepares…';
                 await save(job);
                 onChunk();
+              } else if (event.type === 'language') {
+                if (!job.auto || job.languageConfirmed) return;
+                for (const probe of Array.isArray(event.probes) ? event.probes.slice(0, 8) : []) {
+                  if (!probe || typeof probe.language !== 'string' || !/^[a-z]{2,3}$/.test(probe.language)) continue;
+                  if (probe.language === 'ja' || probe.japanese >= JAPANESE_PROBABILITY) job.languageConfirmed = true;
+                  else job.languageHeard = probe.language;
+                }
+                if (!job.languageConfirmed && event.processedThrough >= LANGUAGE_CHECK_SECONDS) {
+                  // Music or silence throughout says nothing, so the video keeps going.
+                  if (job.languageHeard) { job.notJapanese = job.languageHeard; throw new Error('This video does not appear to be Japanese.'); }
+                  job.languageConfirmed = true;
+                }
+                await save(job);
+                if (job.languageConfirmed) onChunk();
               } else if (event.type === 'timings') {
                 await save(job);
               } else if (event.type === 'progress' && job.state !== 'preparing') {
@@ -555,6 +573,8 @@ export async function createSubtitleService(options = {}) {
     const pendingChinese = () => job.translation && job.cues?.some(cue => !cue.translation?.trim() && !failedIds.has(cue.id));
     function startTranslation() {
       if (!parallelStages || translationTask || translationFailure || !pendingChinese() || operation.controller.signal.aborted) return;
+      // Nothing is translated until a video Kage started on its own is known to be Japanese.
+      if (job.auto && !job.languageConfirmed) return;
       // Whisper can run for both videos; Ollama batches share a single slot.
       translationTask = (async () => {
         while (pendingChinese()) {
@@ -606,6 +626,11 @@ export async function createSubtitleService(options = {}) {
         }
       }
       operation.controller.signal.throwIfAborted();
+      // A video shorter than the check ends before the first-minute decision.
+      if (job.auto && !job.languageConfirmed && job.languageHeard) {
+        job.notJapanese = job.languageHeard;
+        throw new Error('This video does not appear to be Japanese.');
+      }
       // A streamed upload is complete once /start confirms it (the worker read every byte).
       if (job.streaming && !job.uploadComplete) await new Promise((resolve, reject) => {
         const signal = operation.controller.signal;
@@ -642,7 +667,13 @@ export async function createSubtitleService(options = {}) {
         operation.controller.abort();
         await translationTask;
       }
-      if (job.state !== 'cancelled' && !closing) {
+      if (job.notJapanese && job.state !== 'cancelled' && !closing) {
+        // Lines forced into Japanese from another language are not worth keeping.
+        delete job.cues;
+        delete job.translationTotal; delete job.translationCompleted;
+        outcome = { state: 'cancelled', progress: 0,
+          message: 'This video does not appear to be Japanese, so Kage stopped preparing it. Choose Download audio & prepare subtitles to prepare it anyway.' };
+      } else if (job.state !== 'cancelled' && !closing) {
         outcome = { state: job.translation && Array.isArray(job.cues) && job.transcriptionComplete !== false ? 'translation_error' : 'error',
           message: error.message.slice(-1000) };
       }
@@ -690,7 +721,7 @@ export async function createSubtitleService(options = {}) {
         // The extension checks health when a video page opens: load Whisper now
         // so it is warm before the first audio bytes arrive.
         if (running.size < VIDEO_CONCURRENCY) warmStandby();
-        return reply(200, { ok: true, ready, model: MODEL, token, capabilities: { groqRelay: true, streamingUploads: true, translation: true, translationPriority: true, bilibiliDownload: true, youtubeDownload: true, anime1Pages: true, progressiveSubtitles: true, audioOnly: true, jobQueue: true, recovery: true }, processing: { sectionSeconds: 60, parallelStages, concurrency: VIDEO_CONCURRENCY, translationConcurrency: 1, translationBatchSize }, status: ready ? 'ready' : 'setup_required',
+        return reply(200, { ok: true, ready, model: MODEL, token, capabilities: { groqRelay: true, streamingUploads: true, translation: true, translationPriority: true, bilibiliDownload: true, youtubeDownload: true, anime1Pages: true, progressiveSubtitles: true, languageCheck: true, audioOnly: true, jobQueue: true, recovery: true }, processing: { sectionSeconds: 60, parallelStages, concurrency: VIDEO_CONCURRENCY, translationConcurrency: 1, translationBatchSize }, status: ready ? 'ready' : 'setup_required',
           ...(!ready ? { error: readinessError } : {}) });
       }
       if (!safeEqual(req.headers['x-kage-token'], token)) fail(401, 'Local service token is missing or expired. Reconnect and retry.');
@@ -743,7 +774,7 @@ export async function createSubtitleService(options = {}) {
           if (oldest) { await fs.rm(jobDir(oldest.id), { recursive: true, force: true }); jobs.delete(oldest.id); }
         }
         const job = { id: randomUUID(), name: spec.name.trim(), size: spec.size, received: 0, state: 'uploading',
-          ...(sourceUrl ? { sourceUrl } : {}), ...(pageUrl ? { pageUrl } : {}),
+          ...(sourceUrl ? { sourceUrl } : {}), ...(pageUrl ? { pageUrl } : {}), ...(spec.auto === true ? { auto: true } : {}),
           progress: 0, message: 'Uploading to this Mac…', createdAt: new Date().toISOString() };
         await fs.mkdir(jobDir(job.id), { mode: 0o700 });
         await fs.writeFile(mediaPath(job.id), '', { mode: 0o600, flag: 'wx' });

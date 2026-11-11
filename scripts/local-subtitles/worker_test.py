@@ -77,6 +77,33 @@ class ChunkOwnershipTests(unittest.TestCase):
         self.assertEqual(cue["end"], 10)
 
 
+class LanguageCheckTests(unittest.TestCase):
+    def test_reports_the_most_likely_language_and_the_japanese_probability_for_thirty_seconds(self):
+        from worker import SAMPLE_RATE, detect_language
+        heard = []
+        samples = list(range(45 * SAMPLE_RATE))
+
+        def detector(audio):
+            heard.append(len(audio))
+            return {"en": 0.9, "ja": 0.04321, "ko": 0.05}
+        self.assertEqual(detect_language(samples, Path("/model"), detector), {"language": "en", "japanese": 0.0432})
+        self.assertEqual(heard, [30 * SAMPLE_RATE])
+
+    def test_only_stretches_with_lines_are_checked(self):
+        from worker import SAMPLE_RATE, language_probes
+        calls = []
+
+        def detector(audio):
+            calls.append(len(audio))
+            return {"ja": 0.97, "en": 0.03}
+        samples = [0.0] * (62 * SAMPLE_RATE)
+        # The window starts at 8 s; its only line is at 45 s, in the second stretch.
+        probes = language_probes(samples, 8, [{"start": 45.0, "end": 47.0, "text": "はい。"}], Path("/model"), detector)
+        self.assertEqual(probes, [{"language": "ja", "japanese": 0.97}])
+        self.assertEqual(calls, [30 * SAMPLE_RATE])
+        self.assertEqual(language_probes(samples, 8, [], Path("/model"), detector), [])
+
+
 if __name__ == "__main__":
     unittest.main()
 

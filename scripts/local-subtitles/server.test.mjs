@@ -1158,3 +1158,36 @@ test('a new video\'s first section pauses other transcription until its first li
   assert.doesNotMatch(stat(pidA), /T/, 'it resumes once the new video has lines');
   for (const id of [a, b]) await client.call(`/jobs/${id}`, { method: 'DELETE' });
 });
+
+async function autoJob(client, url, auto = true) {
+  const created = await client.call('/jobs', { method: 'POST', json: { sourceUrl: url, ...(auto ? { auto: true } : {}) } });
+  assert.equal(created.status, 201);
+  await client.call(`/jobs/${created.value.id}/start`, { method: 'POST', json: { translation } });
+  return created.value.id;
+}
+test('a video Kage started on its own stops after the first minute when it is not Japanese, without translating', async t => {
+  let translations = 0;
+  const client = await start(t, { worker: streamingFixture, fetchImpl: async (_url, init) => { translations++; return translatedResponse(requestedItems(init)); } });
+  assert.equal(client.health.capabilities.languageCheck, true);
+  const job = await waitJob(client, await autoJob(client, 'https://www.bilibili.com/video/BVforeign'));
+  assert.equal(job.state, 'cancelled');
+  assert.equal(job.notJapanese, 'en');
+  assert.equal(job.cues, undefined);
+  assert.match(job.message, /does not appear to be Japanese/);
+  assert.equal(translations, 0);
+  await missing(path.join(client.dataDir, 'jobs', job.id, 'result.json'));
+});
+test('the same video prepares fully when the user asks for it, and Japanese or music-only openings continue', async t => {
+  const client = await start(t, { worker: streamingFixture, fetchImpl: async (_url, init) => translatedResponse(requestedItems(init)) });
+  const manual = await waitJob(client, await autoJob(client, 'https://www.bilibili.com/video/BVforeign', false));
+  assert.equal(manual.state, 'complete');
+  assert.equal(manual.notJapanese, undefined);
+  assert.deepEqual(manual.cues.map(cue => cue.translation), ['繁體中文0。', '繁體中文1。']);
+  const japanese = await waitJob(client, await autoJob(client, 'https://www.bilibili.com/video/BVjapanese'));
+  assert.equal(japanese.state, 'complete');
+  assert.equal(japanese.languageConfirmed, true);
+  assert.equal(japanese.cues.length, 2);
+  const music = await waitJob(client, await autoJob(client, 'https://www.bilibili.com/video/BVmusic'));
+  assert.equal(music.state, 'complete');
+  assert.equal(music.cues.length, 2);
+});

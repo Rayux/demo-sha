@@ -6,7 +6,10 @@ const output=value('--output'), model=value('--model'), source=value('--url') ||
 const emit=value=>console.log(JSON.stringify(value));
 const first={start:0.2,end:1.8,text:'はい。'}, second={start:60.2,end:61.8,text:'いいえ。'};
 emit({type:'metadata',duration:120,mediaMode:'audio'});
+// Language probes are reported only when the helper asks for the check.
+const probes=source.includes('foreign') ? [{language:'en',japanese:0.01}] : source.includes('music') ? [] : [{language:'ja',japanese:0.98}];
 emit({type:'chunk',duration:120,processedThrough:60,cues: source.includes('silent') ? [] : [first],timings:{sourceSetupMs:5,audioWaitMs:10,recognitionMs:20}});
+if (args.includes('--check-language')) emit({type:'language',probes,processedThrough:60});
 await fs.writeFile(path.join(model,'first-chunk'), 'ready');
 if (source.includes('slow')) await new Promise(resolve=>setTimeout(resolve,30000));
 // The fixture waits until translation has started, proving stages overlap.

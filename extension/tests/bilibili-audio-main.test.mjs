@@ -560,3 +560,22 @@ test('a streaming request hands each downloaded piece over instead of one buffer
   assert.equal(h.errors().length, 0);
   assert.equal(h.intervals.size + h.timeouts.size, 0);
 });
+
+test('a video page that just opened waits briefly for the player instead of giving up', async () => {
+  const state = { videoData: { bvid: 'BVtest', pages: [{ page: 1, cid: 11 }] } };
+  const h = harness({ href: 'https://www.bilibili.com/video/BVtest', state });
+  h.context.performance = { now: () => 400 };
+  h.request(); await flush();
+  assert.equal(h.errors().length, 0, 'still waiting for the player');
+  await h.metadata(manifest(), 'https://api.bilibili.com/x/player/wbi/playurl?bvid=BVtest&cid=11');
+  const waiting = Math.max(...h.timeouts.keys()); // The newest timer is the short wait.
+  const tick = h.timeouts.get(waiting); h.timeouts.delete(waiting); tick();
+  await flush(); await flush();
+  assert.equal(h.results().length, 1);
+
+  // A page that has been open a while has nothing more to wait for.
+  const late = harness({ href: 'https://www.bilibili.com/video/BVtest', state });
+  late.context.performance = { now: () => 60000 };
+  late.request(); await flush();
+  assert.equal(late.errors().length, 1);
+});

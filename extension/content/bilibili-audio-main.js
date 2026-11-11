@@ -350,6 +350,18 @@
       if (reader) reader.cancel().catch(() => {});
     }
   }
+  // A video page that has just opened asks for its playback data a moment
+  // later. Waiting briefly for it is much quicker than giving up, which sends
+  // the video to the helper's own lookup (3 to 4 seconds before any audio).
+  const PLAYER_START_MS = 10000, PLAYER_WAIT_MS = 2000;
+  async function waitForPlayer(request) {
+    if (typeof performance === 'undefined' || !(performance.now() < PLAYER_START_MS)) return;
+    const deadline = Date.now() + PLAYER_WAIT_MS;
+    while (!readyCandidate() && Date.now() < deadline && !request.controller.signal.aborted) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      inspectGlobal();
+    }
+  }
   async function acquire(message) {
     syncPage();
     if (session) { post('KAGE_BROWSER_AUDIO_ERROR', message, { error: 'Audio preparation is already running in this tab.' }); return; }
@@ -361,6 +373,8 @@
     let idle, reader, chunks = [], received = 0;
     const touch = () => { clearTimeout(idle); idle = setTimeout(() => abortSession(request, 'Browser audio download stalled. Check UfunR and try again.'), IDLE_TIME); };
     try {
+      if (!readyCandidate() && !currentIdentity()?.episode) await waitForPlayer(request);
+      request.controller.signal.throwIfAborted();
       if (!readyCandidate()) {
         try { await lookupEpisode(request); }
         catch (error) {

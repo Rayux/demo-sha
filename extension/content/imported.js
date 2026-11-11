@@ -184,6 +184,21 @@
     const delay = documentState?.cues?.length ? 1000 : FIRST_LINES_POLL_MS;
     timer = setTimeout(() => { timer = null; poll(key, generation, jobId); }, delay);
   }
+  // The helper found another language in the first minute of a video Kage
+  // started on its own. Its lines were forced into Japanese, so drop them.
+  // The saved record keeps the video from starting again by itself; the
+  // download button prepares it regardless.
+  async function stopForLanguage(key, generation) {
+    if (!validContext(key, generation) || !documentState) return;
+    stopPolling();
+    const hadLines = documentState.cues.length > 0;
+    documentState.cues = []; documentState.job = null; documentState.timings = null;
+    documentState.revision++;
+    if (autoJob?.key === key) autoJob = null;
+    if (hadLines) emit();
+    try { await saveCurrent(); } catch { /* The notice below still explains what happened. */ }
+    if (validContext(key, generation)) setNotice('This video does not appear to be Japanese, so Kage stopped preparing it. Choose Download audio & prepare subtitles to prepare it anyway.');
+  }
   async function poll(key, generation, jobId) {
     if (!validContext(key, generation) || browserAcquisition || uploading || polling || documentState?.job?.id !== jobId) return;
     const revision = pollRevision;
@@ -197,6 +212,7 @@
         setNotice(`These subtitles belong to a different ${isYouTube() ? 'YouTube video' : 'Bilibili part'}. Select Download audio & prepare subtitles for the current part.`, true);
         return;
       }
+      if (status.notJapanese) { await stopForLanguage(key, generation); return; }
       if (status.sourceUrl) documentState.sourceUrl = status.sourceUrl;
       if (status.timings) documentState.timings = normalizeTimings(status.timings);
       // Use the helper's deadline even when the tab was closed at completion.
@@ -417,7 +433,7 @@
     } catch (cause) {
       if (fallbackToDownload && cause.name !== 'AbortError' && browserAcquisition === acquisition
           && validContext(key, generation) && !acquisition.controller.signal.aborted
-          && ((auto && isBilibiliPage())
+          && (isBilibiliPage()
             || /(?:\[YT_(?:HTTP_(?:403|410)|PAGE_NETWORK|NO_FILE_URL|WAIT_FOR_PLAYER|STREAMING_ONLY|SABR_NOT_READY|SABR_NETWORK)\]|current video’s audio metadata)/.test(cause.message))) {
         browserAcquisition = null;
         // anime1.me has no helper download; YouTube and Bilibili do.
@@ -455,7 +471,9 @@
       return;
     }
     if (isAnime1Page()) return prepareBrowserAudio();
-    return isYouTube() ? prepareBrowserAudio({ fallbackToDownload: true }) : importFile(null, true);
+    // The browser's own connection starts in milliseconds; the helper's lookup
+    // takes 3 to 4 seconds, so it is only the fallback.
+    return prepareBrowserAudio({ fallbackToDownload: true });
   }
   async function importFile(file, download = false, { auto = false } = {}) {
     observe(video);
@@ -473,7 +491,8 @@
       const health = await request('health');
       if (!transferring()) return;
       if (health?.ready === false) throw new Error(health.error || 'Local transcription is not installed yet. Run npm run subtitles:setup.');
-      const created = download ? await request('download') : await request('create', { name, size: file.size });
+      const created = download ? await request('download', auto ? { auto: true } : {})
+        : await request('create', { name, size: file.size, ...(auto ? { auto: true } : {}) });
       if (typeof created?.id !== 'string') throw new Error('The local helper returned an invalid job.');
       jobId = created.id;
       session.jobId = jobId;
@@ -496,6 +515,12 @@
           peeking = true;
           try {
             const status = await request('status', { id: jobId });
+            if (status?.notJapanese) {
+              if (!transferring() || documentState?.job?.id !== jobId) return;
+              session.cancelled = true;
+              await stopForLanguage(key, generation);
+              return;
+            }
             if (status?.streaming === false) { clearInterval(live); live = null; return; }
             if (!transferring() || documentState?.job?.id !== jobId || !Array.isArray(status?.cues) || !status.cues.length) return;
             const cues = normalizeCues(status.cues);
@@ -530,6 +555,14 @@
       if (validContext(key, generation)) { uploading = false; await poll(key, generation, jobId); }
     } catch (cause) {
       failure = cause;
+      // The helper may have stopped this job for its language while a chunk was on its way.
+      if (auto && jobId && transferring() && documentState?.job?.id === jobId) {
+        const status = await request('status', { id: jobId }).catch(() => null);
+        if (status?.notJapanese && transferring() && documentState?.job?.id === jobId) {
+          session.cancelled = true; failure = null;
+          await stopForLanguage(key, generation);
+        }
+      }
       if (transferring()) {
         setNotice(cause.message, true);
         if (/queue|upload.*limit/i.test(cause.message) && ui) { ui.queue.open = true; void refreshQueue(); }

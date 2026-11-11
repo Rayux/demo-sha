@@ -1069,15 +1069,16 @@ test('the uploaded browser job polls while an obsolete direct Reconnect request 
   assert.equal(h.requests.filter(message => message.action === 'status' && message.id === 'new-browser-job').length, 2);
 });
 
-test('normal direct preparation still downloads through the helper without fetching browser media', async () => {
+test('direct preparation falls back to the helper download when browser media is unavailable', async () => {
   let browserFetches = 0;
-  const h = harness({ documents: [failedDirectTrack()], browserAudio: { download: async () => { browserFetches++; return browserFile(100); } },
+  const h = harness({ documents: [failedDirectTrack()], browserAudio: { download: async () => { browserFetches++; throw new Error('Browser audio was not found for this video part.'); } },
     send: message => ({ success: true, data: message.action === 'download' ? { id: 'new-direct-job' }
       : message.action === 'status' ? { state: 'preparing', processedThrough: 60, sourceUrl: failedDirectTrack().sourceUrl,
         cues: [{ start: 0, end: 3, text: '通常の字幕', translation: '一般字幕' }] } : { ready: true } }) });
   await flush();
   await h.button('Download audio & prepare subtitles').click();
-  assert.equal(browserFetches, 0);
+  for (let i = 0; i < 10; i++) await flush();
+  assert.equal(browserFetches, 1, 'the browser connection is tried first');
   assert.equal(h.requests.filter(message => message.action === 'download').length, 1);
   assert.equal(h.requests.some(message => ['create', 'upload'].includes(message.action)), false);
   assert.equal(h.requests.filter(message => message.action === 'start').length, 1);
@@ -1316,4 +1317,72 @@ test('leaving a video stops the job Kage started on its own', async () => {
   h.api.observe(h.video);
   for (let i = 0; i < 10; i++) await flush();
   assert.deepEqual(log.filter(message => message.action === 'cancel').map(message => message.id), ['auto-job-1']);
+});
+
+test('a video Kage started on its own stops when the helper finds it is not Japanese; the download button still prepares it', async () => {
+  const log = [];
+  let foreign = true, created = 0;
+  const h = harness({ autoPrepare: true, send: async message => {
+    log.push(message);
+    if (message.action === 'create') return { success: true, data: { id: `auto-job-${++created}` } };
+    if (message.action === 'status') return { success: true, data: foreign && message.id === 'auto-job-1'
+      ? { state: 'cancelled', notJapanese: 'en', message: 'This video does not appear to be Japanese.' }
+      : { state: 'complete', cues: [{ start: 0, end: 2, text: 'はい。' }] } };
+    return autoSend()(message);
+  }, browserAudio: { download: async () => browserFile() } });
+  for (let i = 0; i < 40; i++) await flush();
+  assert.equal(log.find(message => message.action === 'create').auto, true, 'the helper is told Kage started this');
+  assert.equal(h.api.current({ currentTime: 1 }), null, 'no forced-Japanese lines are shown');
+  assert.match(h.status(), /does not appear to be Japanese/);
+  assert.equal(h.saved().job, null);
+  assert.deepEqual(h.saved().cues, []);
+  assert.equal(h.button('Download audio & prepare subtitles').disabled, false);
+
+  // Asking for it prepares the whole video without the language check.
+  await h.button('Prepare browser audio').click();
+  for (let i = 0; i < 40; i++) await flush();
+  const creates = log.filter(message => message.action === 'create');
+  assert.equal(creates.length, 2);
+  assert.equal(creates[1].auto, undefined);
+  assert.equal(h.api.current({ currentTime: 1 }).text, 'はい。');
+});
+
+test('lines shown before the language decision are removed when the helper stops the video', async () => {
+  let polls = 0;
+  const h = harness({ autoPrepare: true, send: async message => {
+    if (message.action === 'create') return { success: true, data: { id: 'auto-job-1' } };
+    if (message.action === 'status') return { success: true, data: ++polls === 1
+      ? { state: 'preparing', cues: [{ start: 0, end: 2, text: 'ハロー。' }] }
+      : { state: 'cancelled', notJapanese: 'en' } };
+    return autoSend()(message);
+  }, browserAudio: { download: async () => browserFile() } });
+  for (let i = 0; i < 40; i++) await flush();
+  assert.equal(h.api.current({ currentTime: 1 }).text, 'ハロー。');
+  const due = [...h.timers.values()]; h.timers.clear();
+  for (const tick of due) await tick();
+  for (let i = 0; i < 20; i++) await flush();
+  assert.equal(h.api.current({ currentTime: 1 }), null);
+  assert.match(h.status(), /does not appear to be Japanese/);
+  assert.equal(h.timers.size, 0, 'polling stops');
+});
+
+test('the Bilibili download button uses the browser connection first and the helper only as a fallback', async () => {
+  const log = [];
+  const h = harness({ send: autoSend(log), browserAudio: { download: async () => browserFile() } });
+  await flush();
+  await h.button('Download audio & prepare subtitles').click();
+  for (let i = 0; i < 30; i++) await flush();
+  assert.ok(log.some(message => message.action === 'create'), 'browser audio is uploaded');
+  assert.ok(!log.some(message => message.action === 'download'), 'the helper does not look the video up');
+
+  const fallbackLog = [];
+  const failing = harness({ send: async message => {
+    fallbackLog.push(message);
+    return { success: true, data: message.action === 'download' ? { id: 'download-job' }
+      : message.action === 'status' ? { state: 'downloading' } : message.action === 'recover' ? { job: null } : { ready: true } };
+  }, browserAudio: { download: async () => { throw new Error('Browser audio was not found for this video part.'); } } });
+  await flush();
+  await failing.button('Download audio & prepare subtitles').click();
+  for (let i = 0; i < 30; i++) await flush();
+  assert.ok(fallbackLog.some(message => message.action === 'download'));
 });

@@ -29,6 +29,9 @@ CHUNK_SECONDS = 60
 # word timing.
 FIRST_SECONDS = 10
 FOLLOW_IDLE_SECONDS = 120
+# Videos Kage starts on its own are checked for Japanese over this much audio.
+LANGUAGE_CHECK_SECONDS = 60
+LANGUAGE_WINDOW_SECONDS = 30
 CONTEXT_SECONDS = 2
 # Whisper treats this as transcription context, not a system instruction. It can
 # bias recognition toward conversation, but cannot separate simultaneous voices
@@ -213,6 +216,44 @@ def transcribe_window(samples, model, transcriber=None, word_timestamps=True):
     )
 
 
+def detect_language(samples, model, detector=None):
+    """Whisper's own guess at the spoken language in up to 30 s of audio.
+
+    Transcription is forced to Japanese, so by itself it cannot tell that a
+    video is in another language. Run straight after transcribing the same
+    audio, the encoder result is reused and this costs one decoder step.
+    """
+    if detector is None:
+        import mlx.core as mx
+        from mlx_whisper.audio import N_FRAMES, N_SAMPLES, log_mel_spectrogram, pad_or_trim
+        from mlx_whisper.transcribe import ModelHolder
+        install_encoder_cache()
+        whisper = ModelHolder.get_model(str(model), mx.float16)
+
+        def detector(audio):
+            mel = log_mel_spectrogram(audio, n_mels=whisper.dims.n_mels, padding=N_SAMPLES)
+            _, probabilities = whisper.detect_language(pad_or_trim(mel, N_FRAMES, axis=-2).astype(mx.float16))
+            return probabilities
+    probabilities = detector(samples[:LANGUAGE_WINDOW_SECONDS * SAMPLE_RATE])
+    language = max(probabilities, key=probabilities.get)
+    return {"language": str(language), "japanese": round(float(probabilities.get("ja", 0)), 4)}
+
+
+def language_probes(samples, offset, cues, model, detector=None):
+    """Check each 30 s stretch of this window that produced lines.
+
+    Stretches without lines (silence, instrumental music) say nothing about
+    the language, so they are skipped.
+    """
+    probes = []
+    size = LANGUAGE_WINDOW_SECONDS * SAMPLE_RATE
+    for index in range(0, len(samples), size):
+        start = offset + index / SAMPLE_RATE
+        if any(start <= cue["start"] < start + LANGUAGE_WINDOW_SECONDS for cue in cues):
+            probes.append(detect_language(samples[index:index + size], model, detector))
+    return probes
+
+
 def feed_growing_file(source, expected, sink):
     """Copy an upload that is still being written into FFmpeg, in order.
 
@@ -248,7 +289,7 @@ def warm(model):
     transcribe_window(np.zeros(SAMPLE_RATE, dtype=np.float32), model)
 
 
-def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None):
+def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None, check_language=False):
     global decoder
     setup_started = time.perf_counter()
     timings = {}
@@ -282,6 +323,7 @@ def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None):
                 '-c:a', 'pcm_s16le', '-t', str(MAX_DURATION + 1), '-f', 's16le', 'pipe:1']
     cues = []
     duration = 0
+    japanese_heard = False
     # A file avoids stderr pipe deadlocks. Decoder details (including signed URLs)
     # are never returned to the extension or written into durable job records.
     with tempfile.TemporaryFile() as errors:
@@ -324,6 +366,12 @@ def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None):
                 duration = window['end']
                 print(json.dumps({'type': 'chunk', 'cues': chunk_cues, 'processedThrough': duration, 'timings': timings,
                                   'duration': max(duration_hint or 0, duration, max((cue['end'] for cue in chunk_cues), default=0))}, ensure_ascii=False), flush=True)
+                # Checked after the lines are sent, so it never delays them.
+                if check_language and not japanese_heard and window['start'] < LANGUAGE_CHECK_SECONDS:
+                    with measure(timings, 'recognitionMs'):
+                        probes = language_probes(samples, window['offset'], chunk_cues, model)
+                    japanese_heard = any(probe['language'] == 'ja' for probe in probes)
+                    print(json.dumps({'type': 'language', 'probes': probes, 'processedThrough': duration}), flush=True)
             code = decoder.wait(timeout=30)
             if code:
                 raise RuntimeError('Audio download or decoding stopped. Retry this video or import a local file.')
@@ -353,6 +401,7 @@ def main():
     parser.add_argument("--output", type=Path)
     parser.add_argument("--follow-bytes", type=int)
     parser.add_argument("--standby", action="store_true")
+    parser.add_argument("--check-language", action="store_true")
     args = parser.parse_args()
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
@@ -374,12 +423,13 @@ def main():
             args.url = spec.get("url")
             args.output = Path(spec["output"])
             args.follow_bytes = spec.get("followBytes")
+            args.check_language = spec.get("checkLanguage") is True
         if (not args.input and not args.url) or not args.output:
             parser.error("--input or --url, and --output are required unless --check is used")
         if args.follow_bytes is not None and not (0 < args.follow_bytes <= 4 * 1024 ** 3):
             parser.error("--follow-bytes must be between 1 byte and 4 GiB")
         transcribe(args.input.resolve() if args.input else None, args.output.resolve(), model, ffmpeg, url=args.url,
-                   follow_bytes=args.follow_bytes)
+                   follow_bytes=args.follow_bytes, check_language=args.check_language)
     except Exception as error:
         print(str(error), file=sys.stderr, flush=True)
         raise SystemExit(1)
