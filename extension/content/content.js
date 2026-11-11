@@ -1,6 +1,7 @@
 let isEnabled = false;
 let autoTranslate = true;
 let chineseHidden = false;
+let coverSubtitleMode = 'separate';
 let currentSubtitleText = '';
 let subtitleContainer = null;
 let subtitleObserver = null;
@@ -72,6 +73,7 @@ function clearSubtitle() {
   removeSubtitleContainer();
 }
 function removeSubtitleContainer() {
+  globalThis.KageCover?.hold(null);
   dragEvents?.abort();
   subtitleResizeObserver?.disconnect();
   subtitleContainer?.remove();
@@ -113,7 +115,10 @@ function rememberSubtitlePosition(position) {
   } : null;
 }
 function positionSubtitles() {
-  if (!subtitlePosition || !subtitleContainer) return;
+  if (!subtitleContainer) return;
+  // With "on the cover" chosen and the cover up, the strip places the subtitle.
+  if (globalThis.KageCover?.hold(coverSubtitleMode === 'strip' ? subtitleContainer : null)) return;
+  if (!subtitlePosition) return;
   const bounds = subtitleBounds(subtitleContainer);
   if (bounds && subtitleAnchor) {
     const halfWidth = Math.min((subtitleContainer.offsetWidth || 0) / 2, bounds.width / 2);
@@ -180,6 +185,15 @@ function attachSubtitleDrag(container) {
     suppressClick = false;
   }, options);
 }
+function updateCoverToggle() {
+  const button = subtitleContainer?.querySelector('#kageCoverToggle');
+  if (!button) return;
+  const on = !!globalThis.KageCover?.on;
+  const label = on ? 'Remove the cover over embedded subtitles' : 'Cover subtitles embedded in the video';
+  button.title = label;
+  button.setAttribute('aria-label', label);
+  button.setAttribute('aria-pressed', String(on));
+}
 function updateChineseVisibility() {
   if (!subtitleContainer) return;
   subtitleContainer.classList.toggle('kage-hide-chinese', chineseHidden);
@@ -228,6 +242,10 @@ chrome.runtime.onMessage.addListener(message => {
 });
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
+  if (changes.coverSubtitleMode) {
+    coverSubtitleMode = changes.coverSubtitleMode.newValue === 'strip' ? 'strip' : 'separate';
+    positionSubtitles();
+  }
   if (changes.chineseHidden) {
     chineseHidden = changes.chineseHidden.newValue === true;
     updateChineseVisibility();
@@ -321,6 +339,10 @@ function sync() {
       for (const event of ['seeked', 'timeupdate', 'loadedmetadata', 'emptied']) video.addEventListener(event, sync, { signal: videoEvents.signal });
     }
   }
+  // The cover stays up between lines; embedded subtitles do not follow Kage's timing.
+  globalThis.KageCover?.update(isEnabled && video
+    ? document.fullscreenElement || video.closest('.watch-video--player-view, .html5-video-player, .bpx-player-container, .bilibili-player-video-wrap') || video.parentElement
+    : null);
   if (video?.seeking && !wasSeeking) resetBuffer();
   wasSeeking = !!video?.seeking;
   globalThis.KageImport?.observe(video);
@@ -468,7 +490,8 @@ function syncChineseFrame() {
 }
 
 async function init() {
-  const state = await chrome.storage.local.get(['enabled', 'autoTranslate', 'chineseHidden']);
+  const state = await chrome.storage.local.get(['enabled', 'autoTranslate', 'chineseHidden', 'coverSubtitleMode']);
+  coverSubtitleMode = state.coverSubtitleMode === 'strip' ? 'strip' : 'separate';
   autoTranslate = state.autoTranslate !== 'false';
   chineseHidden = state.chineseHidden === true;
   setEnabled(state.enabled !== false);
@@ -533,6 +556,7 @@ function renderParsedData(data) {
       </svg>
     </div>
     <button type="button" class="kage-chinese-toggle" id="kageChineseToggle"></button>
+    ${globalThis.KageCover ? `<button type="button" class="kage-cover-toggle" id="kageCoverToggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14h18"/><path d="M7 17h10"/></svg></button>` : ''}
     </div>
   `;
   html += `</div>`;
@@ -561,6 +585,17 @@ function renderParsedData(data) {
     updateChineseVisibility();
     chrome.storage.local.set({ chineseHidden }).catch(() => {});
   });
+  const coverToggle = subtitleContainer.querySelector('#kageCoverToggle');
+  if (coverToggle) {
+    updateCoverToggle();
+    for (const event of ['pointerdown', 'mousedown', 'keydown', 'keyup']) coverToggle.addEventListener(event, e => e.stopPropagation());
+    coverToggle.addEventListener('click', e => {
+      e.preventDefault(); e.stopPropagation();
+      globalThis.KageCover.toggle();
+      updateCoverToggle();
+      positionSubtitles();
+    });
+  }
   positionSubtitles();
   attachSubtitleDrag(subtitleContainer);
 }

@@ -1,74 +1,151 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Kage Shadowing Options</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kage settings</title>
   <style>
-    body { font-family: -apple-system, system-ui, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; color: #333; }
-    h1 { font-size: 20px; }
-    .field { margin-bottom: 16px; }
-    label { display: block; margin-bottom: 6px; font-weight: bold; }
-    input[type="text"], input[type="password"], select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-    button { padding: 10px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    #status { margin-top: 16px; color: green; font-weight: bold; }
+    :root { --bg: #0f0f10; --card: #181818; --edge: #2e2e2e; --field: #222; --ink: #fff; --muted: #a8a8a8; --faint: #808080; --accent: #0a84ff; --danger: #ff453a; color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    main { max-width: 640px; margin: 0 auto; padding: 40px 20px 112px; }
+    header { margin-bottom: 28px; }
+    h1 { margin: 0 0 6px; font-size: 26px; font-weight: 700; letter-spacing: -.4px; }
+    header p { margin: 0; color: var(--muted); }
+    section { margin-bottom: 16px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); }
+    section > h2 { margin: 0; padding: 16px 20px 0; font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--accent); }
+    .field { padding: 16px 20px; }
+    .field + .field { border-top: 1px solid var(--edge); }
+    .field > label, .row > label { display: block; font-size: 14px; font-weight: 500; }
+    .field > label { margin-bottom: 8px; }
+    .field p { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .tag { margin-left: 6px; font-size: 11px; font-weight: 500; color: var(--faint); }
+    input[type="text"], input[type="password"], select { display: block; width: 100%; height: 38px; padding: 0 12px; border: 1px solid #404040; border-radius: 6px; background: var(--field); color: var(--ink); font: inherit; transition: border-color .15s; }
+    input::placeholder { color: var(--faint); }
+    input[type="text"]:hover, input[type="password"]:hover, select:hover { border-color: #666; }
+    :is(input, select, button, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    /* A switch row: the label on the left, the switch on the right. */
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .row > label { flex: 1; cursor: pointer; }
+    input[type="checkbox"] { appearance: none; position: relative; flex-shrink: 0; width: 38px; height: 24px; margin: 0; border-radius: 99px; background: #404040; cursor: pointer; transition: background .15s; }
+    input[type="checkbox"]::before { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; }
+    input[type="checkbox"]:checked { background: var(--accent); }
+    input[type="checkbox"]:checked::before { transform: translateX(14px); }
+    button { height: 38px; padding: 0 18px; border: 0; border-radius: 6px; background: rgba(255, 255, 255, .1); color: var(--ink); font: inherit; font-weight: 500; cursor: pointer; transition: background .15s; }
+    button:hover:not(:disabled) { background: rgba(255, 255, 255, .2); }
+    button:disabled { opacity: .4; cursor: default; }
+    details > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; font-weight: 500; cursor: pointer; list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::after { content: ''; width: 7px; height: 7px; margin-right: 4px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); transition: transform .15s; }
+    details[open] > summary::after { transform: rotate(225deg); }
+    details > .field { padding-top: 0; }
+    details .field p:first-child { margin-top: 0; }
+    details button { margin-top: 12px; }
+    .savebar { position: fixed; left: 0; right: 0; bottom: 0; border-top: 1px solid var(--edge); background: rgba(15, 15, 16, .92); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+    .savebar > div { display: flex; align-items: center; justify-content: flex-end; gap: 16px; max-width: 640px; margin: 0 auto; padding: 14px 20px; }
+    #status { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); }
+    #status.error { color: var(--danger); }
+    #saveBtn { background: var(--accent); font-weight: 600; }
+    #saveBtn:hover { background: #007aff; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   </style>
 </head>
 <body>
-  <h1>Settings</h1>
-  <p>Subtitles and translations use your local Gemma model. Tutor explanations and questions use Groq (GPT OSS 120B) and require the API key below. Subtitle backup is optional and controlled separately.</p>
-  <div class="field">
-    <label for="apiEndpoint">Local API endpoint</label>
-    <input type="text" id="apiEndpoint" placeholder="http://127.0.0.1:11434/v1/chat/completions">
-  </div>
-  <div class="field">
-    <label for="apiModel">Local model name</label>
-    <input type="text" id="apiModel" placeholder="gemma2">
-  </div>
-  <div class="field">
-    <label for="apiKey">Local API key (optional)</label>
-    <input type="password" id="apiKey" placeholder="Leave blank for Ollama">
-  </div>
-  <div class="field">
-    <label><input type="checkbox" id="groqFallback"> Enable Groq subtitle backup when the local request fails</label>
-  </div>
-  <div class="field">
-    <label for="groqApiKey">Groq API key (required for tutor)</label>
-    <input type="password" id="groqApiKey" placeholder="Used for tutor answers and optional subtitle backup">
-  </div>
-  <div class="field">
-    <label for="groqConnection">Groq connection</label>
-    <select id="groqConnection">
-      <option value="auto">Automatic (recommended)</option>
-      <option value="browser">Browser connection</option>
-      <option value="helper">Local helper (for browser VPNs)</option>
-    </select>
-    <p>Automatic chooses a working connection while your browser VPN is on or off. If the browser is blocked, Kage tries your local helper and remembers the working route briefly. Your key stays saved in Kage; the helper forwards it per request without saving it.</p>
-  </div>
-  <div class="field">
-    <label for="autoTranslate">Auto-show Translation</label>
-    <select id="autoTranslate">
-      <option value="true">Yes</option>
-      <option value="false">No (word tooltips remain available)</option>
-    </select>
-  </div>
-  <div class="field">
-    <label><input type="checkbox" id="autoPrepareSubtitles"> Prepare subtitles as soon as a video opens</label>
-    <p>On Bilibili, YouTube, and Anime1.me, Kage starts downloading audio and transcribing when you open a video, so the first lines are ready before you press play. Only the tab you are viewing starts, and leaving the video stops work Kage started on its own. Turn off to prepare only when you choose Download audio &amp; prepare subtitles.</p>
-  </div>
-  <div class="field">
-    <label><input type="checkbox" id="detailedSubtitles"> Include AI word meanings (slower)</label>
-    <p>Furigana is always generated locally, even with this option off. Leave off for faster Traditional Chinese subtitles. Upcoming lines are translated ahead when a matching timed track is available. Pause briefly to give preloading a head start.</p>
-  </div>
-  <details class="field">
-    <summary>YouTube media access (advanced)</summary>
-    <p>Video preparation chooses its audio route automatically. Most YouTube playback sessions need no setting here. Optional media access is remembered by this browser and used automatically when available.</p>
-    <button type="button" id="youtubeDownloadsBtn" disabled>Checking access…</button>
-    <p id="youtubeDownloadsStatus" role="status" aria-live="polite"></p>
-  </details>
-  <button id="saveBtn">Save Settings</button>
-  <div id="status"></div>
-  <script src="options.js"></script>
-  <script src="youtube-downloads.js"></script>
+<main>
+  <header>
+    <h1>Settings</h1>
+    <p>Subtitles are translated by a model on this Mac. The tutor uses Groq and needs an API key.</p>
+  </header>
+
+  <section>
+    <h2>Tutor</h2>
+    <div class="field">
+      <label for="groqApiKey">Groq API key<span class="tag">Required for the tutor</span></label>
+      <input type="password" id="groqApiKey" placeholder="gsk_…" autocomplete="off">
+      <p>Tutor answers come from Groq (GPT OSS 120B). The key is saved in this browser only.</p>
+    </div>
+    <div class="field">
+      <label for="groqConnection">Connection to Groq</label>
+      <select id="groqConnection">
+        <option value="auto">Automatic (recommended)</option>
+        <option value="browser">Browser connection</option>
+        <option value="helper">Local helper (for browser VPNs)</option>
+      </select>
+      <p>Automatic picks a working route whether your browser VPN is on or off. If the browser is blocked, Kage goes through the local helper, which forwards your key per request without saving it.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Subtitles</h2>
+    <div class="field">
+      <div class="row">
+        <label for="autoPrepareSubtitles">Prepare subtitles as soon as a video opens</label>
+        <input type="checkbox" id="autoPrepareSubtitles">
+      </div>
+      <p>On Bilibili, YouTube, and Anime1.me, Kage starts on the audio when you open a video, so the first lines are ready before you press play. Only the tab you are viewing starts, and leaving the video stops it. Turn off to prepare only when you choose Download audio &amp; prepare subtitles.</p>
+    </div>
+    <div class="field">
+      <label for="autoTranslate">Show the Chinese translation</label>
+      <select id="autoTranslate">
+        <option value="true">Yes</option>
+        <option value="false">No (word tooltips remain available)</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="row">
+        <label for="detailedSubtitles">Include AI word meanings<span class="tag">Slower</span></label>
+        <input type="checkbox" id="detailedSubtitles">
+      </div>
+      <p>Furigana always comes from the dictionary on this device. Leave this off for faster Traditional Chinese subtitles.</p>
+    </div>
+    <div class="field">
+      <label for="coverSubtitleMode">Subtitle cover layout</label>
+      <select id="coverSubtitleMode">
+        <option value="separate">Separate: Kage's subtitle floats above the cover</option>
+        <option value="strip">On the cover: Kage's subtitle sits inside the cover</option>
+      </select>
+      <p>The cover hides subtitles embedded in the picture. Switch it on from the button under the eye when you hover Kage's subtitle. With On the cover, the strip is the subtitle's background and its grip moves both.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Local translation model</h2>
+    <div class="field">
+      <label for="apiEndpoint">API endpoint</label>
+      <input type="text" id="apiEndpoint" placeholder="http://127.0.0.1:11434/v1/chat/completions" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="apiModel">Model name</label>
+      <input type="text" id="apiModel" placeholder="gemma2" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="apiKey">API key<span class="tag">Optional</span></label>
+      <input type="password" id="apiKey" placeholder="Leave blank for Ollama" autocomplete="off">
+    </div>
+    <div class="field">
+      <div class="row">
+        <label for="groqFallback">Use Groq for subtitles when the local model fails</label>
+        <input type="checkbox" id="groqFallback">
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <details>
+      <summary>YouTube media access (advanced)</summary>
+      <div class="field">
+        <p>Video preparation chooses its audio route automatically. Most YouTube playback sessions need no setting here. Optional media access is remembered by this browser and used automatically when available.</p>
+        <button type="button" id="youtubeDownloadsBtn" disabled>Checking access…</button>
+        <p id="youtubeDownloadsStatus" role="status" aria-live="polite"></p>
+      </div>
+    </details>
+  </section>
+</main>
+<div class="savebar"><div>
+  <div id="status" role="status" aria-live="polite"></div>
+  <button id="saveBtn">Save settings</button>
+</div></div>
+<script src="options.js"></script>
+<script src="youtube-downloads.js"></script>
 </body>
 </html>

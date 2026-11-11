@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><title>Cover preview</title>
+<link rel="stylesheet" href="/content/content.css">
+<style>body{margin:0;background:#111}.player{position:relative;width:100%;aspect-ratio:16/9;margin:20px 0;overflow:hidden;background:linear-gradient(135deg,#2b6cb0,#d69e2e 55%,#c53030)}
+.scene{position:absolute;inset:0;background:repeating-linear-gradient(60deg,#ffffff22 0 40px,transparent 40px 90px)}
+.hardsub{position:absolute;left:0;right:0;bottom:9%;text-align:center;font:700 15px/1.2 sans-serif;color:#fff;text-shadow:0 0 4px #000,2px 2px 0 #000,-2px -2px 0 #000}
+.bar{position:absolute;left:0;right:0;bottom:0;height:36px;background:#000a;color:#fff;font:12px sans-serif;line-height:36px;padding-left:12px}</style>
+<div class="player" id="player"><div class="scene"></div><div class="hardsub">这是嵌在画面里的中文字幕</div><div class="bar" id="bar">player controls (clicks: <span id="clicks">0</span>)</div>
+<div class="kage-subtitle-container" style="bottom:22%"><div class="kage-pills-wrapper"><div class="kage-japanese-row"><div class="kage-pill kage-japanese-pill"><div class="kage-japanese">今日はいい天気ですね。</div></div></div><div class="kage-pill kage-chinese-pill"><div class="kage-translation">今天天氣真好呢。</div></div></div></div></div>
+<script>
+const store={};window.chrome={storage:{local:{get:async k=>({[k]:store[k]}),set:async v=>Object.assign(store,v)},onChanged:{addListener(){}}}};
+let n=0;document.getElementById('player').addEventListener('click',()=>{document.getElementById('clicks').textContent=++n;});
+</script>
+<script src="/content/cover.js"></script>
+<script>setTimeout(()=>{KageCover.update(document.getElementById('player'));KageCover.toggle();if(location.search.includes('strip'))KageCover.hold(document.querySelector('.kage-subtitle-container'));},50);</script>
