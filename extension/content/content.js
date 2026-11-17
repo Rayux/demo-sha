@@ -185,6 +185,23 @@ function attachSubtitleDrag(container) {
     suppressClick = false;
   }, options);
 }
+function updateSaveLine() {
+  const button = subtitleContainer?.querySelector('#kageSaveLine');
+  if (!button) return;
+  const saved = !!globalThis.KageSaved?.has(currentSubtitleText);
+  const label = saved ? 'Remove this line from saved lines' : 'Save this line to replay later';
+  button.title = label;
+  button.setAttribute('aria-label', label);
+  button.setAttribute('aria-pressed', String(saved));
+}
+// When this line starts and ends in the video, from the subtitle track when one is known.
+function currentCueSpan() {
+  const position = video?.currentTime || 0;
+  const cues = (globalThis.KageImport?.track(video) || prefetchTrack)?.[1];
+  const current = cues ? active(cues, position) : [];
+  return current.length ? { start: Math.min(...current.map(c => c.start)), end: Math.max(...current.map(c => c.end)) }
+    : { start: Math.max(0, position - 1), end: position + 5 };
+}
 function updateCoverToggle() {
   const button = subtitleContainer?.querySelector('#kageCoverToggle');
   if (!button) return;
@@ -336,6 +353,8 @@ function sync() {
     clearSubtitle();
     if (video) {
       video.addEventListener('seeking', sync, { signal: videoEvents.signal });
+      // The words clicked during the video are waiting in the Review tab.
+      video.addEventListener('ended', () => { if (isEnabled && globalThis.KageWords?.waiting()) globalThis.KageTutor?.openReview?.(); }, { signal: videoEvents.signal });
       for (const event of ['seeked', 'timeupdate', 'loadedmetadata', 'emptied']) video.addEventListener(event, sync, { signal: videoEvents.signal });
     }
   }
@@ -343,6 +362,8 @@ function sync() {
   globalThis.KageCover?.update(isEnabled && video
     ? document.fullscreenElement || video.closest('.watch-video--player-view, .html5-video-player, .bpx-player-container, .bilibili-player-video-wrap') || video.parentElement
     : null);
+  globalThis.KageSaved?.observe(isEnabled ? video : null);
+  globalThis.KageWords?.observe((globalThis.KageImport?.track(video) || prefetchTrack)?.[1] || null);
   if (video?.seeking && !wasSeeking) resetBuffer();
   wasSeeking = !!video?.seeking;
   globalThis.KageImport?.observe(video);
@@ -386,8 +407,31 @@ function renderCurrent() {
   const localChunks = globalThis.KageReadings?.chunks(currentSubtitleText);
   const data = { ...currentData, chunks: localChunks ? localChunks.map(chunk => {
     const aiChunk = currentData.chunks?.find(candidate => candidate.japanese === chunk.japanese);
-    return { ...chunk, furigana: chunk.furigana || aiChunk?.furigana || '', translation: aiChunk?.translation || '' };
+    const learning = !!chunk.word && !!globalThis.KageWords?.learning(chunk.base);
+    const known = !learning && !!chunk.word && !!globalThis.KageWords?.has(chunk.base);
+    // A known word needs no reading; a word being learned is highlighted.
+    return { ...chunk, furigana: known ? '' : chunk.furigana || aiChunk?.furigana || '', translation: aiChunk?.translation || '',
+      ...(known ? { known: true } : {}), ...(learning ? { learning: true } : {}) };
   }) : currentData.chunks };
+  // The line as heard in the audio picks among the readings the dictionary knows for each word.
+  if (localChunks && globalThis.KageHeard) {
+    const runs = globalThis.KageImport?.heard?.(video) || [];
+    if (runs.length) globalThis.KageHeard.apply(data.chunks, runs, word => globalThis.KageReadings?.alternatives?.(word) || []);
+  }
+  // Where the helper heard a different reading in the audio, it replaces the dictionary's.
+  const heard = localChunks ? globalThis.KageImport?.readings?.(video) || [] : [];
+  if (heard.length) {
+    let offset = 0;
+    for (const chunk of data.chunks) {
+      const start = offset, end = offset + chunk.japanese.length;
+      offset = end;
+      for (const fix of heard) {
+        const tail = fix.end < end ? chunk.japanese.slice(fix.end - start) : '';
+        if (fix.start === start && !chunk.known && /^[ぁ-ゖァ-ヶー]*$/.test(tail)) chunk.furigana = fix.reading + KageReadings.hiragana(tail);
+        else if (fix.start < start && fix.end > start) chunk.furigana = ''; // Covered by the reading on the word's first part.
+      }
+    }
+  }
   if (chinese.available) { data.sentence_translation = chinese.text; data.translation_status = chinese.pending ? '正在本機準備繁體中文字幕…' : ''; }
   data.reading_status = globalThis.KageReadings?.state === 'loading' ? '正在載入本機注音字典…'
     : globalThis.KageReadings?.state === 'error' ? '讀音字典載入失敗，請重新整理頁面。' : '';
@@ -408,6 +452,7 @@ async function processAndRenderSubtitle(text, target) {
   currentData = translationMemory.get(text) || { chunks: [{ japanese: text }], translation_status: needsTranslation ? '正在翻譯…可在字幕面板預先準備。' : '' };
   renderedSignature = '';
   renderCurrent();
+  globalThis.KageWords?.sighted(text);
   if (!needsTranslation || nativeChinese().available || translationMemory.has(text)) { clearDemand(); return; }
   try {
     const response = await chrome.runtime.sendMessage({ type: 'PROCESS_SUBTITLE', text, context, ...(globalThis.KageImport?.track(video) ? { localOnly: true } : {}) });
@@ -466,6 +511,9 @@ window.addEventListener('message', event => {
   } catch { /* Unsupported subtitle formats retain native DOM synchronization. */ }
 });
 window.postMessage({ type: 'KAGE_TRACKS_READY' }, location.origin);
+window.addEventListener('kage-words-change', () => { renderedSignature = ''; renderCurrent(); });
+window.addEventListener('kage-saved-change', updateSaveLine);
+window.addEventListener('kage-readings-change', () => { renderedSignature = ''; renderCurrent(); });
 window.addEventListener('kage-import-change', () => {
   translationVersion++;
   translationMemory.clear();
@@ -529,7 +577,8 @@ function renderParsedData(data) {
     // Simple heuristic: if it has kanji/katakana and is longer than 1 char, highlight it yellow like the screenshot
     const isHighlight = japanese.length > 1 && !/^[ぁ-ん]+$/.test(japanese);
 
-    html += `<span class="kage-chunk ${isHighlight ? 'highlight' : ''}">`;
+    const word = chunk.word && globalThis.KageWords ? ` kage-word${chunk.known ? ' kage-known' : chunk.learning ? ' kage-learning' : ''}" data-base="${escapeHTML(chunk.base)}" title="${chunk.learning ? 'You are learning this word. Click when you know it' : chunk.known ? 'Counted as known. Click if you need its reading' : 'Click if you don’t know this word'}` : '';
+    html += `<span class="kage-chunk ${isHighlight ? 'highlight' : ''}${word}">`;
     if (furigana) {
       html += `<ruby>${japanese}<rt>${furigana}</rt></ruby>`;
     } else {
@@ -556,6 +605,7 @@ function renderParsedData(data) {
       </svg>
     </div>
     <button type="button" class="kage-chinese-toggle" id="kageChineseToggle"></button>
+    ${globalThis.KageSaved ? `<button type="button" class="kage-cover-toggle" id="kageSaveLine"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1Z"/></svg></button>` : ''}
     ${globalThis.KageCover ? `<button type="button" class="kage-cover-toggle" id="kageCoverToggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14h18"/><path d="M7 17h10"/></svg></button>` : ''}
     </div>
   `;
@@ -585,6 +635,25 @@ function renderParsedData(data) {
     updateChineseVisibility();
     chrome.storage.local.set({ chineseHidden }).catch(() => {});
   });
+  for (const word of globalThis.KageWords ? subtitleContainer.querySelectorAll('.kage-word') : []) {
+    // The player must not treat marking a word as a click on the video.
+    for (const event of ['pointerdown', 'mousedown']) word.addEventListener(event, e => e.stopPropagation());
+    word.addEventListener('click', e => {
+      e.preventDefault(); e.stopPropagation();
+      globalThis.KageWords.toggle(word.dataset.base, { text: currentSubtitleText, translation: data.sentence_translation || '', ...currentCueSpan() });
+    });
+  }
+  const saveLine = subtitleContainer.querySelector('#kageSaveLine');
+  if (saveLine) {
+    updateSaveLine();
+    for (const event of ['pointerdown', 'mousedown', 'keydown', 'keyup']) saveLine.addEventListener(event, e => e.stopPropagation());
+    saveLine.addEventListener('click', e => {
+      e.preventDefault(); e.stopPropagation();
+      const span = currentCueSpan();
+      globalThis.KageSaved.toggle({ text: currentSubtitleText, translation: data.sentence_translation || '', ...span });
+      updateSaveLine();
+    });
+  }
   const coverToggle = subtitleContainer.querySelector('#kageCoverToggle');
   if (coverToggle) {
     updateCoverToggle();

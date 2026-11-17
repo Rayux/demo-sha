@@ -67,6 +67,10 @@ const ui = {
   settings: $("#settings"),
   settingsButton: $("#settings-button"),
   closeSettings: $("#close-settings"),
+  azureUsage: $("#azure-usage"),
+  azureUsageText: $("#azure-usage-text"),
+  azureUsageMeter: $("#azure-usage-meter"),
+  azureUsageNote: $("#azure-usage-note"),
   uiDesign: $("#ui-design"),
   continuous: $("#continuous-button"),
   continuousCheckbox: $("#continuous-play"),
@@ -488,6 +492,46 @@ function updateModelIndicator() {
 
   updateBadges(ui.modelBadge, ui.modelIndicator);
   updateBadges(ui.modelBadgeTopbar, ui.modelIndicatorTopbar);
+}
+
+function formatAudioTime(seconds) {
+  const minutes = Math.round(seconds / 60);
+  if (seconds > 0 && minutes < 1) return "under 1 min";
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  return minutes % 60 ? `${hours} h ${minutes % 60} min` : `${hours} h`;
+}
+
+// How much Azure pronunciation scoring this site has used this month, shown in Settings.
+async function loadAzureUsage() {
+  if (!state.modelInfo?.pronunciationAssessment) return ui.azureUsage.classList.add("hidden");
+  ui.azureUsage.classList.remove("hidden");
+  try {
+    const response = await fetch("./api/usage");
+    if (!response.ok) throw new Error("Usage API unavailable");
+    const usage = await response.json();
+    const allowance = formatAudioTime(usage.allowanceSeconds);
+    ui.azureUsageMeter.classList.toggle("hidden", !usage.tracked);
+    if (!usage.tracked) {
+      ui.azureUsageText.textContent = `Azure Speech is on. Free allowance: ${allowance} a month.`;
+      ui.azureUsageNote.textContent = "Usage is not being counted because the database is unavailable.";
+      return;
+    }
+    const percent = Math.min(100, Math.round((usage.secondsUsed / usage.allowanceSeconds) * 100));
+    const left = Math.max(0, usage.allowanceSeconds - usage.secondsUsed);
+    const used = formatAudioTime(usage.secondsUsed);
+    ui.azureUsageText.textContent = `${used[0].toUpperCase()}${used.slice(1)} of ${allowance} used this month, ${formatAudioTime(left)} left.`;
+    ui.azureUsageMeter.setAttribute("aria-valuenow", String(percent));
+    ui.azureUsageMeter.classList.toggle("amber", percent >= 80 && percent < 100);
+    ui.azureUsageMeter.classList.toggle("red", percent >= 100);
+    ui.azureUsageMeter.firstElementChild.style.width = `${percent}%`;
+    const refused = usage.refusedAt ? ` Azure turned a request away (busy or over quota) on ${new Date(usage.refusedAt).toLocaleDateString()}.` : "";
+    ui.azureUsageNote.textContent = `Counts recordings scored through this site only; resets on the 1st.${refused}`;
+  } catch {
+    ui.azureUsageMeter.classList.add("hidden");
+    ui.azureUsageText.textContent = "Usage could not be loaded.";
+    ui.azureUsageNote.textContent = "";
+  }
 }
 
 async function loadStatus() {
@@ -1237,6 +1281,41 @@ async function transcribe(blob, filename = "clip.wav") {
   return result;
 }
 
+// Word timings of the native clip, for the rhythm score. Kept per clip until its bounds change.
+// Recording starts this in the background so the timings are ready when the take is graded.
+function targetTimingWords(clip) {
+  const key = `${clip.start}-${clip.end}`;
+  if (clip.timing?.key === key) return clip.timing.words;
+  const words = (async () => {
+    const buffer = await getDecodedAudio();
+    return (await transcribe(encodeClipWav(buffer, clip.start, clip.end))).words || [];
+  })();
+  clip.timing = { key, words };
+  words.catch(() => { if (clip.timing?.words === words) clip.timing = null; });
+  return words;
+}
+
+// Azure scores the recording itself. It needs 16 kHz mono WAV of at most 30 seconds.
+async function assessAttempt(blob, reference) {
+  if (!state.modelInfo?.pronunciationAssessment) return { assessment: null, reason: "off" };
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass || !reference?.trim()) return { assessment: null, reason: "failed" };
+  let context;
+  try { context = new AudioContextClass({ sampleRate: 16000 }); }
+  catch { context = new AudioContextClass(); }
+  let buffer;
+  try { buffer = await context.decodeAudioData(await blob.arrayBuffer()); }
+  finally { context.close(); }
+  if (buffer.duration > 29.9) return { assessment: null, reason: "long" };
+  const form = new FormData();
+  form.append("file", encodeClipWav(buffer, 0, buffer.duration), "my-shadowing-attempt.wav");
+  form.append("reference", reference);
+  const response = await fetch("/api/assess-pronunciation", { method: "POST", body: form });
+  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || "Pronunciation assessment failed.");
+  const assessment = (await response.json()).assessment || null;
+  return { assessment, reason: assessment ? null : "silent" };
+}
+
 let autoAnalyzeTimer = null;
 
 async function analyzeSingleClip(index) {
@@ -1634,6 +1713,7 @@ async function startRecording() {
   const clip = currentClip();
   if (!clip) return toast("Make practice clips first.");
   if (state.recordPending || state.recorder?.state === "recording") return;
+  if (state.aiConfigured) targetTimingWords(clip).catch(() => {});
   cancelPracticePlayback();
   setSectionExpanded('deck-body', true);
   const request = state.recordRequest;
@@ -1729,12 +1809,13 @@ function levenshtein(first, second) {
 function renderEmptyFeedback() {
   ui.feedback.className = "feedback empty-feedback";
   ui.feedbackStatus.textContent = "Ready for your first take";
-  ui.feedback.innerHTML = `<div class="feedback-placeholder-metrics" aria-hidden="true"><div><span>Pronunciation</span><strong>—</strong></div><div><span>Rhythm</span><strong>—</strong></div><div><span>Intonation</span><strong>—</strong></div></div>
+  ui.feedback.innerHTML = `<div class="feedback-placeholder-metrics" aria-hidden="true"><div><span>Pronunciation</span><strong>—</strong></div><div><span>Completeness</span><strong>—</strong></div><div><span>Rhythm</span><strong>—</strong></div></div>
     <div class="feedback-invitation"><span class="feedback-spark" aria-hidden="true">${sparkleIcon}</span><p><strong>Small adjustments. Noticeable progress.</strong>Record a take to get personalised feedback and a clear next step.</p></div>`;
 }
 
 function applyMoveOnThreshold(evaluation) {
-  const values = Object.values(evaluation?.scores || {})
+  const { overall, ...cards } = evaluation?.scores || {};
+  const values = Object.values(cards)
     .filter((value) => typeof value === "number" && Number.isFinite(value));
   const average = values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
   return { ...evaluation, recommendation: average >= 70 ? "move_on" : "keep_practicing" };
@@ -1742,15 +1823,25 @@ function applyMoveOnThreshold(evaluation) {
 
 function showAdvancedFeedback(evalData, heard, target) {
   ui.feedback.className = "feedback";
-  ui.feedbackStatus.textContent = "Take reviewed";
+  // Say after every take whether Azure Speech actually scored it, and if not, why.
+  const azureUsed = Boolean(evalData.measured?.pronunciation);
+  const azureNote = azureUsed ? "" : `${{
+        off: "Azure Speech is not set up.",
+        long: "Azure Speech was skipped because this take is over 30 seconds.",
+        silent: "Azure Speech heard no Japanese in this take.",
+        failed: "Azure Speech could not be reached for this take.",
+        fallback: "The review service failed, so this take was compared on this device."
+      }[evalData.azureReason] || "Azure Speech was not used for this take."} Pronunciation is an estimate from the transcript.`;
+  ui.feedbackStatus.textContent = azureUsed ? "Take reviewed with Azure" : "Take reviewed without Azure";
   const scores = evalData.scores || {};
   const scoreValue = (value) => typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : null;
   const pron = scoreValue(scores.pronunciation);
   const rhythm = scoreValue(scores.rhythm);
-  const into = scoreValue(scores.intonation);
+  const completeness = scoreValue(scores.completeness);
 
   const clip = currentClip();
-  if (clip) {
+  // Provisional: the measured scores are shown while the coaching text is still being written.
+  if (clip && !evalData.provisional) {
     if (evalData.recommendation === "move_on") {
       clip.mastered = true;
       syncMastery(state.source?.name);
@@ -1764,15 +1855,18 @@ function showAdvancedFeedback(evalData, heard, target) {
   const cues = evalData.visualCues || [];
   const cuesHtml = cues.length ? `
     <div class="visual-cues-card">
-      <div class="cues-heading"><div class="cues-title">Word by word</div><div class="cue-legend"><span>● On track</span><span>● Practise</span><span>● Missed</span></div></div>
+      <div class="cues-heading"><div class="cues-title">Word by word${evalData.measured?.words ? " · Azure accuracy" : ""}</div><div class="cue-legend"><span>● On track</span><span>● Practise</span><span>● Missed</span></div></div>
       <div class="cues-wrap">
         ${cues.map((cue) => {
           const status = ["perfect", "warning", "missed"].includes(cue.status) ? cue.status : "warning";
           const note = cue.note ? `<span class="cue-tag" lang="zh-Hant">${escapeHtml(cue.note)}</span>` : "";
+          // Azure's accuracy for this word, when it scored the take.
+          const score = typeof cue.score === "number" ? `<span class="cue-tag" title="Azure accuracy, out of 100">${Math.round(cue.score)}</span>` : "";
           const furi = cue.furigana ? `<small>${escapeHtml(cue.furigana)}</small>` : "";
           return `<div class="cue-pill ${status}" title="${escapeHtml(cue.note || status)}">
             ${furi}
             <span class="cue-text" lang="ja">${escapeHtml(cue.text || "")}</span>
+            ${score}
             ${note}
           </div>`;
         }).join("")}
@@ -1791,23 +1885,33 @@ function showAdvancedFeedback(evalData, heard, target) {
 
   const bulletsHtml = `
     <div class="feedback-bullets">
-      ${recText ? `<div class="feedback-bullet" lang="zh-Hant"><h3><span aria-hidden="true">🎯</span> 練習建議</h3><p>${escapeHtml(recText)}</p></div>` : ""}
+      ${recText ? `<div class="feedback-bullet" lang="zh-Hant"><h3>練習建議</h3><p>${escapeHtml(recText)}</p></div>` : ""}
       ${evalData.rhythmFeedback ? `<div class="feedback-bullet" lang="zh-Hant"><h3><span aria-hidden="true">↔</span> 節奏與語速</h3><p>${escapeHtml(evalData.rhythmFeedback)}</p></div>` : ""}
-      ${evalData.intonationFeedback ? `<div class="feedback-bullet" lang="zh-Hant"><h3><span aria-hidden="true">↗</span> 語調與音高</h3><p>${escapeHtml(evalData.intonationFeedback)}</p></div>` : ""}
     </div>
   `;
 
-  const scoreCard = (label, value) => `<div class="score-card">
-    <span>${label}</span><strong class="${value === null ? 'unavailable' : getScoreClass(value)}">${value === null ? '—' : `${value}<small>/ 100</small>`}</strong>
-    ${value === null ? '<span class="score-unavailable">Not assessed</span>' : `<div class="score-meter ${getScoreClass(value)}" role="meter" aria-label="${label}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${value}"><i style="width:${value}%"></i></div>`}
+  // The server says which scores were measured from the audio; the rest are the model's estimate.
+  const sourceNote = (key) => !evalData.measured ? "" : `<span class="score-source">${evalData.measured[key] ? "Measured from your audio" : "Estimated from the transcript"}</span>`;
+  // Which service produced each number: Azure hears the recording; Groq supplies the word timings for
+  // rhythm, and the pronunciation estimate when Azure did not score the take.
+  const sourceTag = (key, value) => {
+    if (value === null || !evalData.measured) return "";
+    const source = key === "rhythm" ? "Groq" : evalData.measured[key] ? "Azure" : "Groq";
+    return `<em class="score-tag ${source.toLowerCase()}">${source}</em>`;
+  };
+  const scoreCard = (label, value, key) => `<div class="score-card">
+    <span class="score-head">${label}${sourceTag(key, value)}</span><strong class="${value === null ? 'unavailable' : getScoreClass(value)}">${value === null ? '—' : `${value}<small>/ 100</small>`}</strong>
+    ${value === null ? '<span class="score-unavailable">Not assessed</span>' : `<div class="score-meter ${getScoreClass(value)}" role="meter" aria-label="${label}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${value}"><i style="width:${value}%"></i></div>${sourceNote(key)}`}
   </div>`;
 
   ui.feedback.innerHTML = `
     <div class="feedback-grid-3">
-      ${scoreCard('Pronunciation', pron)}
-      ${scoreCard('Rhythm', rhythm)}
-      ${scoreCard('Intonation', into)}
+      ${scoreCard('Pronunciation', pron, 'pronunciation')}
+      ${scoreCard('Completeness', completeness, 'completeness')}
+      ${scoreCard('Rhythm', rhythm, 'rhythm')}
     </div>
+    ${azureNote ? `<p class="score-provenance off"><i aria-hidden="true"></i>${azureNote}</p>` : ""}
+    ${evalData.provisional ? `<div class="coaching-spotlight"><span class="coaching-icon" aria-hidden="true">${sparkleIcon}</span><div><p class="eyebrow">For your next take</p><p>Writing your coaching note…</p></div></div>` : ""}
     ${evalData.coachingTip ? `<div class="coaching-spotlight"><span class="coaching-icon" aria-hidden="true">${sparkleIcon}</span><div><p class="eyebrow">For your next take</p><p lang="zh-Hant">${escapeHtml(evalData.coachingTip)}</p></div></div>` : ""}
     ${cuesHtml}
     ${bulletsHtml}
@@ -1839,11 +1943,10 @@ function computeLocalFeedback(target, heard, targetDuration, recordedDuration) {
 
   const speedRatio = (recordedDuration / targetDuration).toFixed(2);
   return {
-    scores: { pronunciation: pronScore, rhythm: timingScore, intonation: null },
+    scores: { pronunciation: pronScore, completeness: null, rhythm: timingScore },
     recommendation: (pronScore + timingScore) / 2 >= 70 ? "move_on" : "keep_practicing",
     visualCues,
-    rhythmFeedback: durationDiff < -0.5 ? "語速有點太快，可以稍微放慢，讓每個音拍都清楚完整。" : "本機模式不評估整體長度，請專注於發音與語調即可。",
-    intonationFeedback: "仔細聽每個語句結尾的音高起伏。目前的本機文字比對無法判斷實際音高，因此不提供語調分數。",
+    rhythmFeedback: durationDiff < -0.5 ? "語速有點太快，可以稍微放慢，讓每個音拍都清楚完整。" : "本機模式不評估整體長度，請專注於發音即可。",
     coachingTip: "跟著原音的換氣點練習，特別留意長音與促音的完整長度，再錄一次比較看看。"
   };
 }
@@ -1859,36 +1962,63 @@ async function gradeAttempt() {
   ui.feedback.setAttribute("aria-busy", "true");
   ui.feedback.innerHTML = "<p>Listening to your recording and preparing feedback…</p>";
   try {
-    const result = await transcribe(state.attemptBlob, "my-shadowing-attempt.webm");
+    // The measurements are extras: if either fails, the take is still reviewed without it.
+    const quietly = (label, value = null) => (error) => { console.warn(`${label} unavailable:`, error); return value; };
+    const [result, targetWords, azure] = await Promise.all([
+      transcribe(state.attemptBlob, "my-shadowing-attempt.webm"),
+      // Rhythm is skipped rather than holding up the scores if the clip's timings are slow to arrive.
+      Promise.race([targetTimingWords(clip), new Promise((resolve) => setTimeout(resolve, 5000, null))]).catch(quietly("Rhythm timing")),
+      assessAttempt(state.attemptBlob, clip.japanese).catch(quietly("Pronunciation assessment", { assessment: null, reason: "failed" }))
+    ]);
     const heard = (result.text || "").trim();
     const targetDuration = Math.max(.1, clip.end - clip.start);
     const recordedDuration = Math.max(.1, Number.isFinite(ui.attemptAudio.duration) ? ui.attemptAudio.duration : state.attemptDuration || targetDuration);
 
     ui.grade.textContent = "Evaluating…";
+    const take = {
+      target: clip.japanese || heard,
+      heard,
+      targetDuration: Math.round(targetDuration * 10) / 10,
+      recordedDuration: Math.round(recordedDuration * 10) / 10,
+      targetWords: targetWords || [],
+      heardWords: result.words || [],
+      assessment: azure.assessment
+    };
+    const evaluate = async (extra = {}) => {
+      const response = await fetch("/api/evaluate-speech", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...take, ...extra }) });
+      if (!response.ok) throw new Error("Evaluation failed.");
+      return (await response.json()).evaluation;
+    };
+    const show = (evaluation, extra = {}) => showAdvancedFeedback({ ...applyMoveOnThreshold(evaluation), azureReason: azure.reason, ...extra }, heard, clip.japanese);
+
+    // The measured scores are ready now; show them while the coaching text is still being written.
+    const coaching = evaluate();
+    coaching.catch(() => {});
+    let measured = null;
+    try {
+      const quick = await evaluate({ scoresOnly: true });
+      if (quick.measured?.pronunciation || quick.measured?.rhythm) measured = quick;
+    } catch (quickErr) {
+      console.warn("Measured scores unavailable:", quickErr);
+    }
+    if (measured) show(measured, { provisional: true });
 
     try {
-      const evalRes = await fetch("/api/evaluate-speech", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          target: clip.japanese || heard,
-          heard,
-          targetDuration: Math.round(targetDuration * 10) / 10,
-          recordedDuration: Math.round(recordedDuration * 10) / 10
-        })
-      });
-      if (evalRes.ok) {
-        const { evaluation } = await evalRes.json();
-        showAdvancedFeedback(applyMoveOnThreshold(evaluation), heard, clip.japanese);
-        toast("Evaluation complete! Review your scores and visual cues below.");
-        return;
-      }
+      show(await coaching);
+      toast("Evaluation complete! Review your scores and visual cues below.");
+      return;
     } catch (evalErr) {
       console.warn("AI evaluation error, using local fallback:", evalErr);
     }
+    if (measured) {
+      // The coach failed, but what was measured still stands.
+      show(measured);
+      toast("Scores are ready. The coaching note could not be written.");
+      return;
+    }
 
     const fallback = computeLocalFeedback(clip.japanese, heard, targetDuration, recordedDuration);
-    showAdvancedFeedback(applyMoveOnThreshold(fallback), heard, clip.japanese);
+    showAdvancedFeedback({ ...applyMoveOnThreshold(fallback), azureReason: azure.reason || "fallback" }, heard, clip.japanese);
     toast("Speech comparison complete.");
   } catch (error) {
     ui.feedback.className = "feedback empty-feedback";
@@ -2172,7 +2302,10 @@ document.querySelectorAll("[data-collapse]").forEach((button) => {
     setSectionExpanded(button.dataset.collapse, expanded);
   });
 });
-ui.settingsButton.addEventListener("click", () => ui.settings.classList.toggle("hidden"));
+ui.settingsButton.addEventListener("click", () => {
+  ui.settings.classList.toggle("hidden");
+  if (!ui.settings.classList.contains("hidden")) loadAzureUsage();
+});
 ui.closeSettings.addEventListener("click", () => ui.settings.classList.add("hidden"));
 ui.jumpLength.addEventListener("change", () => { state.jumpLength = Number(ui.jumpLength.value); savePreferences(); updateJumpLabels(); });
 ui.reflectionDelay.addEventListener("change", () => localStorage.setItem("kage-reflection-delay", ui.reflectionDelay.value));

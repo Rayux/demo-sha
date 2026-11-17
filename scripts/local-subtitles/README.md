@@ -37,6 +37,8 @@ The helper listens only on `127.0.0.1:8766`. Manually uploaded video and audio a
 job directory on this Mac and deleted when transcription completes, fails, or is
 cancelled. Results persist for three days after processing finishes so closing and reopening the panel can recover them. Expired job directories are deleted automatically every minute while the helper runs, or at its next startup. Reads and translation retries reject expired results immediately. The extension also expires its saved Japanese/Chinese tracks after three days; opening the video or adjusting timing does not extend that deadline.
 Interrupted transcription retains ready sections but requires downloading/importing again for the complete video.
+
+The soundtrack of a fully transcribed video is kept beside its subtitles as a 128 kbps MP3 (`kept-audio.mp3`, audio only) and is deleted with them after three days. It exists so the panel's Audio tab can create condensed audio; a preparation that fails, is cancelled before its last line, or turns out not to be Japanese keeps no audio.
 Interrupted translation retains Japanese and completed Chinese lines; use **Retry Chinese translations**
 to resume missing lines. Refreshing or closing the browser tab after upload does not stop the job.
 Translation requests use a JSON schema to constrain response fields and subtitle IDs. Responses are still checked for missing, duplicate, or empty translations; numeric IDs are accepted when they match exactly. A malformed line does not stop later lines from translating, and gaps encountered during transcription receive a final pass with the full transcript context.
@@ -61,7 +63,7 @@ and uncertainty and does not invent speaker identities or inaudible dialogue.
 Limits: 4 GiB per file and across pending uploads/downloads, four pending jobs, six hours of
 audio per file, and one transcription at a time. Decoding accepts common local video
 and audio containers and disables network and playlist input. Silent media can
-successfully produce an empty subtitle list. An automatic job conservatively reserves the full media budget until it finishes. Video jobs share one queue; within a job, decoding/downloading, Whisper, and one Ollama batch overlap. Model weights stay loaded across sections within the Whisper process. Cancellation stops the process group and aborts in-flight translation before cleanup. Set `KAGE_PIPELINE_PARALLEL=0` when starting the helper to defer Chinese inference until transcription finishes on lower-memory machines.
+successfully produce an empty subtitle list. An automatic job conservatively reserves the full media budget until it finishes. Video jobs share one queue; within a job, Japanese lines come first and Chinese is translated alongside them; the optional furigana check against the audio (`KAGE_READING_CHECK=1`, off by default) runs after the last line. Model weights stay loaded across sections within the Whisper process. Cancellation stops the process group and aborts in-flight translation before cleanup. Set `KAGE_PIPELINE_PARALLEL=0` when starting the helper to hold Chinese until transcription and the furigana check finish, for lower-memory machines.
 
 ## Start automatically at login
 
@@ -89,6 +91,9 @@ token is generated each time the helper starts; all `/jobs` requests must send i
 | `GET /jobs/:id` | Current job; poll approximately once per second |
 | `POST /jobs/:id/prioritize` | JSON `{}` → selects Chinese translation priority for a started eligible job; queued jobs move ahead of waiting videos |
 | `DELETE /jobs/:id` | Cancels job and removes its media and transcript |
+| `GET /audio?url=PAGE` | Whether the newest preparation of that video page kept its soundtrack, plus the state of its condensed audio |
+| `POST /audio/condensed?url=PAGE` | JSON `{padding,skipSongs,title}` → starts cutting the soundtrack down to its spoken lines; poll `GET /audio` |
+| `GET /audio/file?url=PAGE` | The finished condensed MP3 as an attachment |
 
 Jobs contain `id`, `name`, `size`, `received`, `state`, `progress` (0–1), `message`,
 `createdAt`, and `updatedAt`. Download jobs also have a canonical `sourceUrl`. They start in `uploading` as an unstarted reservation; `/start` skips the upload check and queues the download. Only Bilibili BV pages with a positive part or a specific bangumi episode are accepted. The extension derives this URL from the sending tab, ignoring caller-supplied URLs. States are `uploading`, `queued`, `downloading`, `preparing`, `transcribing`,
@@ -105,6 +110,10 @@ lost upload response, read `received` before sending the next chunk.
 Local paths and model can be overridden with `KAGE_SUBTITLES_DIR`,
 `KAGE_SUBTITLES_PYTHON`, `KAGE_WHISPER_MODEL`, and `KAGE_FFMPEG`. The port can be
 overridden with `KAGE_SUBTITLES_PORT`, but the extension expects the default 8766.
+
+## Condensed audio
+
+Condensed audio is the video's soundtrack with everything between spoken lines removed, for listening practice away from the screen. Each subtitle line is kept with padding on both sides (1.5 seconds by default, 0–10), overlapping spans are joined, and the result is encoded as one MP3 by the bundled FFmpeg. Optionally the first and last 90 seconds are left out, where openings and endings are usually sung. Chrome saves the file to its Downloads folder; the helper never writes outside its own data directory.
 
 ## Checks
 

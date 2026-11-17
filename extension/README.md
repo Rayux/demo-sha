@@ -1,5 +1,29 @@
 # Kage browser extension
 
+## Condensed audio
+
+Version 1.9.0 adds an **Audio** tab to the study panel. After a YouTube, Bilibili or anime1.me video has been prepared from its sound, choose **Create condensed audio** to get an MP3 of the dialogue only: the music, action and silence between spoken lines are cut out. Set how much padding to keep around each line, optionally leave out the first and last 90 seconds (opening and ending songs), and Chrome saves the file to your Downloads folder.
+
+The local helper keeps each prepared video's soundtrack for the same 3 days as its subtitles, so a video prepared before this version must be prepared once more. Reload Kage at `chrome://extensions` (it now asks for the Downloads permission) and restart the helper with `npm run subtitles:autostart`.
+
+## Review without flashcards
+
+Version 1.8.2 has a **Review** tab to the Study panel.
+
+- **Words.** Click only the words you don't know. A clicked word is highlighted, keeps its furigana in every video, and waits in the Review tab with the line it came from. A word you pass 5 times without clicking counts as known: it is dimmed and loses its furigana (click it to get the reading back). Words are counted by dictionary form, so 食べた and 食べる are one word.
+- **Word review.** When a video ends, the Review tab opens if you clicked any words in it. Each word shows its line with **Replay**, which plays that moment from the video, and two choices: **Got it** (the word becomes known) or **Still learning** (it stays highlighted in future videos).
+- **Saved lines.** Hover Kage's subtitle and choose the bookmark to keep a line. The Review tab lists saved lines by video. In the video they came from, a line replays from the picture itself and **Play all** runs through them in order; a line from another video opens that video at the line. Up to 500 lines are kept.
+
+Both are stored in this browser only.
+
+## Furigana checked against the audio (off by default)
+
+This check is off by default: on a 24-minute episode it took about 5 to 7 minutes for few real corrections, so furigana comes from the dictionary alone. Start the helper with `KAGE_READING_CHECK=1` to turn it on; it then runs after the last Japanese line, never between sections. The rest of this section describes what it does when on.
+
+Furigana comes from a dictionary that only sees the text, so words with more than one reading can be wrong: 行った is いった in 一人で行った and おこなった in 会議を行った. For videos Kage prepares from audio, the helper now checks about fifty such words against the sound. After each section's lines appear, it asks Whisper which candidate reading matches what was said and corrects the furigana where the audio clearly favours a different one. Lines are never delayed by it; the check adds roughly 0.4 s per ambiguous word in the background.
+
+Version 1.8.3 extends this to every word. After a section's lines appear, the helper listens to each line with kanji once more and writes it in hiragana only, exactly as spoken. The extension lines that kana up with the line's kanji and uses it in two ways (version 1.8.4). For a word the dictionary knows, the audio picks which of its readings is shown (外 as そと, not ほか); a heard reading the dictionary does not list is treated as a mishearing and ignored. For a word the dictionary does not know, typically a name it can only read kanji by kanji such as 光雑, the furigana is exactly what was said (こうざく), shown as one piece. This costs about 0.9 s per line with kanji, in the background; lines themselves are not delayed, but later sections arrive at roughly 3 times playback speed instead of 8. It needs a restarted helper and applies only to subtitles made from audio (not Netflix or the player's own captions), and to videos prepared after the update.
+
 ## Instant first lines
 
 Kage starts preparing subtitles as soon as a Bilibili, YouTube, or Anime1.me video opens, so the first lines exist before you press play. The first 10 seconds are transcribed first (about 1.3 s after audio starts arriving on an M1 Pro), then the rest follows faster than playback while the download continues. Only the tab you are viewing starts; leaving the video stops work Kage started on its own, keeping lines already prepared. Anime1.me no longer needs a play click: Kage asks for the episode source the same way the player does. Turn this off under **Settings → Prepare subtitles as soon as a video opens**. Netflix uses its own Japanese subtitle track and needs no preparation. Reload Kage after updating.

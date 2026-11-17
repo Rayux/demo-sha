@@ -145,3 +145,48 @@ class FastTimestampRulesTests(unittest.TestCase):
                         actual = rules.apply(logits, tokens)
                         self.assertTrue(bool(mx.array_equal(expected, actual, equal_nan=True).item()),
                                         f'mismatch at sample_begin={sample_begin} length={length}')
+
+
+class HeardReadingTests(unittest.TestCase):
+    def test_only_words_whose_reading_depends_on_speech_are_checked(self):
+        from readings import ambiguous
+        self.assertEqual([(s, e) for s, e, _ in ambiguous('一人で行ったの？')], [(3, 5)])
+        self.assertEqual(ambiguous('その方法は夕方に味方が決めた。'), [], '方 inside another word is left alone')
+        self.assertEqual([r[2][:2] for r in ambiguous('その方はどなたですか。')], [['かた', 'ほう']])
+        self.assertEqual(ambiguous('学校へ行く。'), [], 'a word with one reading is never checked')
+        self.assertEqual(len(ambiguous('私と私と私と私と私と私と私と私')), 6, 'a bounded number per line')
+
+    def test_the_reading_that_matches_the_audio_is_reported_with_its_neighbours(self):
+        from readings import check_cue
+        cue = {'start': 12.0, 'end': 14.5, 'text': '一人で行ったの？'}
+        heard = check_cue(cue, lambda text: -1.0 if 'いった' in text else -9.0)
+        self.assertEqual(heard, [{'from': 12.0, 'to': 14.5, 'surface': '行っ', 'reading': 'いっ', 'before': '人で', 'after': 'たの'}])
+        # When the audio does not clearly favour one reading, the dictionary's stays.
+        self.assertEqual(check_cue(cue, lambda text: -5.0 if 'いった' in text else -5.5), [])
+
+    def test_each_flagged_line_is_scored_against_its_own_stretch_of_audio(self):
+        from worker import SAMPLE_RATE, heard_readings
+        slices = []
+
+        class FakeListener:
+            def encode(self, samples):
+                slices.append(len(samples))
+                return len(samples)
+
+            def kana(self, features):
+                return 'がっこうへ いく。' if features == int(2.4 * SAMPLE_RATE) else 'からいらーめんがすき' if features == int(3.4 * SAMPLE_RATE) else 'あ' * 500
+
+            def scorer(self, features):
+                return lambda text: -1.0 if 'からい' in text else -8.0
+        samples = [0.0] * (60 * SAMPLE_RATE)
+        cues = [{'id': '0', 'start': 100.0, 'end': 102.0, 'text': '学校へ行く。'},
+                {'id': '1', 'start': 110.0, 'end': 113.0, 'text': '辛いラーメンが好き。'},
+                {'id': '2', 'start': 120.0, 'end': 121.0, 'text': 'そうだね。'},
+                {'id': '3', 'start': 130.0, 'end': 132.5, 'text': '今だ。'}]
+        readings, lines = heard_readings(cues, samples, 98.0, Path('/model'), FakeListener())
+        self.assertEqual([(item['surface'], item['reading']) for item in readings], [('辛', 'から')])
+        self.assertEqual(lines, [{'from': 100.0, 'to': 102.0, 'text': '学校へ行く。', 'kana': 'がっこうへいく'},
+                                 {'from': 110.0, 'to': 113.0, 'text': '辛いラーメンが好き。', 'kana': 'からいらーめんがすき'}],
+                         'kana for each line with kanji; a runaway repetition is dropped')
+        self.assertEqual(slices, [int(2.4 * SAMPLE_RATE), int(3.4 * SAMPLE_RATE), int(2.9 * SAMPLE_RATE)],
+                         'lines without kanji are not listened to again')

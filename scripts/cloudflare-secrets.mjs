@@ -11,6 +11,11 @@ const names = ['GROQ_API_KEY', 'FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', '
 const secrets = Object.fromEntries(names.map(name => [name, process.env[name] || local[name]]));
 const missing = names.filter(name => !secrets[name]?.trim());
 if (missing.length) throw new Error(`Missing required values in .env: ${missing.join(', ')}`);
+// Pronunciation assessment is optional: upload its settings only when present.
+for (const name of ['AZURE_SPEECH_KEY', 'AZURE_SPEECH_REGION', 'AZURE_SPEECH_ENDPOINT']) {
+  const value = process.env[name] || local[name];
+  if (value?.trim()) { secrets[name] = value; names.push(name); }
+}
 if (process.argv.includes('--dry-run')) {
   console.log(`Ready to upload these secret names (values hidden): ${names.join(', ')}`);
 } else {

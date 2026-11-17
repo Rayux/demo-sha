@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Kage Shadowing Extension",
-  "version": "1.7.32",
+  "version": "1.9.0",
   "description": "Japanese shadowing extension for Netflix, YouTube, Bilibili, and Anime1.me with real-time AI translations.",
   "permissions": [
     "storage",
-    "alarms"
+    "alarms",
+    "downloads"
   ],
   "host_permissions": [
     "https://api.groq.com/*",
@@ -71,9 +72,13 @@
         "vendor/kuromoji/kuromoji.js",
         "content/subtitles.js",
         "content/readings.js",
+        "content/heard.js",
         "content/prepare.js",
         "content/browser-audio.js",
         "content/imported.js",
+        "content/audio.js",
+        "content/words.js",
+        "content/saved.js",
         "content/tutor.js",
         "content/cover.js",
         "content/content.js"

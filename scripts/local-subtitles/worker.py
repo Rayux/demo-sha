@@ -8,6 +8,7 @@ import argparse
 import json
 import math
 import os
+import re
 from pathlib import Path
 import signal
 import subprocess
@@ -15,6 +16,7 @@ import sys
 import tempfile
 import time
 from contextlib import contextmanager
+from readings import ambiguous, check_cue
 from streaming import pcm_windows, prefetch_one
 
 os.environ["HF_HUB_OFFLINE"] = "1"
@@ -38,6 +40,9 @@ CONTEXT_SECONDS = 2
 # or identify speakers. Keep it short to reduce the chance of prompt-like captions.
 CONVERSATION_CONTEXT = "日本語の会話、複数の話者、相づち、発話の重なり"
 decoder = None
+KANA_TOKEN = re.compile(r'^[ぁ-ゖー]+$')
+HEARD_KANA = re.compile(r'[ぁ-ゖー]+')
+HAS_KANJI = re.compile(r'[\u3400-\u9fff々〆]')
 
 
 @contextmanager
@@ -254,6 +259,95 @@ def language_probes(samples, offset, cues, model, detector=None):
     return probes
 
 
+class Listener:
+    """Listens to one line again, after its text is already on screen.
+
+    The line's audio is encoded once. From that, Whisper writes the line in
+    hiragana only (what was actually said), and scores candidate readings of
+    ambiguous words. Whole 30 s windows are encoded: shorter inputs are quick
+    but make Whisper repeat or drop words.
+    """
+
+    def __init__(self, model):
+        import mlx.core as mx
+        import numpy as np
+        from mlx_whisper.decoding import DecodingOptions, DecodingTask
+        from mlx_whisper.tokenizer import get_tokenizer
+        from mlx_whisper.transcribe import ModelHolder
+        self.mx = mx
+        self.whisper = ModelHolder.get_model(str(model), mx.float16)
+        self.tokenizer = get_tokenizer(self.whisper.is_multilingual, num_languages=self.whisper.num_languages,
+                                       language="ja", task="transcribe")
+        self.prefix = list(self.tokenizer.sot_sequence_including_notimestamps)
+        # Only hiragana may be written, so kanji cannot hide how a word was read.
+        blocked = np.zeros(self.whisper.dims.n_vocab, dtype=np.float32)
+        blocked[[token for token in range(self.tokenizer.eot) if not KANA_TOKEN.match(self.tokenizer.decode([token]))]] = -np.inf
+        mask = mx.array(blocked)
+
+        class OnlyKana:
+            def apply(self, logits, tokens):
+                return logits + mask
+        self.task = DecodingTask(self.whisper, DecodingOptions(language="ja", task="transcribe", temperature=0.0,
+                                                               without_timestamps=True, sample_len=160))
+        self.task.logit_filters.append(OnlyKana())
+
+    def encode(self, samples):
+        from mlx_whisper.audio import N_FRAMES, N_SAMPLES, log_mel_spectrogram, pad_or_trim
+        mel = log_mel_spectrogram(samples, n_mels=self.whisper.dims.n_mels, padding=N_SAMPLES)
+        return self.whisper.encoder(pad_or_trim(mel, N_FRAMES, axis=-2).astype(self.mx.float16)[None])
+
+    def kana(self, features):
+        return self.task.run(features)[0].text
+
+    def scorer(self, features):
+        """How well a piece of text matches this audio, as Whisper's log-probability."""
+        mx = self.mx
+
+        def score(text):
+            tokens = self.prefix + self.tokenizer.encode(text) + [self.tokenizer.eot]
+            logits = self.whisper.logits(mx.array([tokens]), features)[0].astype(mx.float32)
+            logprobs = logits - mx.logsumexp(logits, axis=-1, keepdims=True)
+            picked = logprobs[mx.arange(len(self.prefix) - 1, len(tokens) - 1), mx.array(tokens[len(self.prefix):])]
+            return float(picked.sum().item())
+        return score
+
+
+_listener = None
+
+
+def listener_for(model):
+    global _listener
+    if _listener is None:
+        _listener = Listener(model)
+    return _listener
+
+
+def heard_readings(cues, samples, offset, model, listener=None):
+    """What the audio says about this section's readings.
+
+    Returns (readings, lines): corrections for words on the ambiguous list,
+    confirmed by scoring, and every line with kanji written in kana as heard.
+    """
+    readings, lines = [], []
+    for cue in cues:
+        text = cue["text"]
+        if not HAS_KANJI.search(text) or cue["end"] - cue["start"] > 28:
+            continue
+        first = max(0, int((cue["start"] - offset - 0.2) * SAMPLE_RATE))
+        last = min(len(samples), int((cue["end"] - offset + 0.2) * SAMPLE_RATE))
+        if last - first < SAMPLE_RATE // 5:
+            continue
+        listener = listener or listener_for(model)
+        features = listener.encode(samples[first:last])
+        kana = "".join(HEARD_KANA.findall(listener.kana(features)))
+        # A runaway repetition is far longer than any real reading of the line.
+        if kana and len(kana) <= 4 * len(text) + 8:
+            lines.append({"from": cue["start"], "to": cue["end"], "text": text, "kana": kana})
+        if ambiguous(text):
+            readings += check_cue(cue, listener.scorer(features))
+    return readings, lines
+
+
 def feed_growing_file(source, expected, sink):
     """Copy an upload that is still being written into FFmpeg, in order.
 
@@ -289,7 +383,9 @@ def warm(model):
     transcribe_window(np.zeros(SAMPLE_RATE, dtype=np.float32), model)
 
 
-def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None, check_language=False):
+def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None, check_language=False, keep_audio=None):
+    # Off unless asked for: listening again for furigana adds minutes per episode for few real corrections.
+    check_readings = os.environ.get('KAGE_READING_CHECK') == '1'
     global decoder
     setup_started = time.perf_counter()
     timings = {}
@@ -321,9 +417,17 @@ def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None, check
                 '-copyts', '-start_at_zero', '-i', input_path, '-map', '0:a:0', '-vn', '-sn', '-dn',
                 '-af', 'aresample=async=1:first_pts=0', '-ac', '1', '-ar', str(SAMPLE_RATE),
                 '-c:a', 'pcm_s16le', '-t', str(MAX_DURATION + 1), '-f', 's16le', 'pipe:1']
+    if keep_audio:
+        # The same pass also saves the soundtrack at listening quality, so the
+        # helper can later cut condensed audio from it without the video.
+        command += ['-map', '0:a:0', '-vn', '-sn', '-dn', '-map_metadata', '-1', '-c:a', 'libmp3lame', '-b:a', '128k',
+                    '-t', str(MAX_DURATION + 1), '-f', 'mp3', str(keep_audio)]
     cues = []
     duration = 0
     japanese_heard = False
+    # Audio of sections that have kanji, kept on disk until every line is out.
+    spool = tempfile.TemporaryFile() if check_readings else None
+    sections = []
     # A file avoids stderr pipe deadlocks. Decoder details (including signed URLs)
     # are never returned to the extension or written into durable job records.
     with tempfile.TemporaryFile() as errors:
@@ -366,6 +470,14 @@ def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None, check
                 duration = window['end']
                 print(json.dumps({'type': 'chunk', 'cues': chunk_cues, 'processedThrough': duration, 'timings': timings,
                                   'duration': max(duration_hint or 0, duration, max((cue['end'] for cue in chunk_cues), default=0))}, ensure_ascii=False), flush=True)
+                # Furigana is checked only after the whole video has its lines.
+                if spool and any(HAS_KANJI.search(cue['text']) for cue in chunk_cues):
+                    try:
+                        spool.seek(0, 2)
+                        sections.append((spool.tell(), len(window['raw']), window['offset'], chunk_cues))
+                        spool.write(window['raw'])
+                    except OSError:
+                        spool = None  # A full disk costs the furigana check, never the subtitles.
                 # Checked after the lines are sent, so it never delays them.
                 if check_language and not japanese_heard and window['start'] < LANGUAGE_CHECK_SECONDS:
                     with measure(timings, 'recognitionMs'):
@@ -380,8 +492,24 @@ def transcribe(source, target, model, ffmpeg, url=None, follow_bytes=None, check
             if duration_hint and duration < duration_hint - 2:
                 raise RuntimeError('The audio ended before the video finished. Retry the download.')
             target.write_text(json.dumps({'duration': duration, 'cues': cues}, ensure_ascii=False), encoding='utf-8')
+            # Every line is on screen with dictionary furigana; now listen again for what was said.
+            if spool and sections:
+                print(json.dumps({'type': 'transcribed', 'sections': len(sections)}), flush=True)
+                for position, size, offset, section_cues in sections:
+                    try:
+                        spool.seek(position)
+                        samples = np.frombuffer(spool.read(size), dtype='<i2').astype(np.float32) / 32768.0
+                        readings, lines = heard_readings(section_cues, samples, offset, model)
+                    except Exception:
+                        continue  # A failed check must never cost the subtitles themselves.
+                    if readings:
+                        print(json.dumps({'type': 'readings', 'readings': readings}, ensure_ascii=False), flush=True)
+                    if lines:
+                        print(json.dumps({'type': 'kana', 'lines': lines}, ensure_ascii=False), flush=True)
             progress(1, 'Japanese subtitles are ready.')
         finally:
+            if spool:
+                spool.close()
             if decoder.poll() is None:
                 decoder.kill()
             decoder.wait()
@@ -402,6 +530,7 @@ def main():
     parser.add_argument("--follow-bytes", type=int)
     parser.add_argument("--standby", action="store_true")
     parser.add_argument("--check-language", action="store_true")
+    parser.add_argument("--keep-audio", type=Path)
     args = parser.parse_args()
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
@@ -424,12 +553,14 @@ def main():
             args.output = Path(spec["output"])
             args.follow_bytes = spec.get("followBytes")
             args.check_language = spec.get("checkLanguage") is True
+            args.keep_audio = Path(spec["keepAudio"]) if spec.get("keepAudio") else None
         if (not args.input and not args.url) or not args.output:
             parser.error("--input or --url, and --output are required unless --check is used")
         if args.follow_bytes is not None and not (0 < args.follow_bytes <= 4 * 1024 ** 3):
             parser.error("--follow-bytes must be between 1 byte and 4 GiB")
         transcribe(args.input.resolve() if args.input else None, args.output.resolve(), model, ffmpeg, url=args.url,
-                   follow_bytes=args.follow_bytes, check_language=args.check_language)
+                   follow_bytes=args.follow_bytes, check_language=args.check_language,
+                   keep_audio=args.keep_audio.resolve() if args.keep_audio else None)
     except Exception as error:
         print(str(error), file=sys.stderr, flush=True)
         raise SystemExit(1)

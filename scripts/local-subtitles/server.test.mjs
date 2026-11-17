@@ -654,7 +654,7 @@ test('restart retains partial progressive subtitles without treating them as a c
   assert.equal((await second.call(`/jobs/${id}/start`,{method:'POST',json:{translation}})).value.state,'error');
 });
 
-test('serial fallback still publishes sections and defers Chinese until transcription finishes', async t => {
+test('serial fallback still publishes sections and defers Chinese until transcription and the furigana check finish', async t => {
   const client = await start(t,{worker:streamingFixture,parallelStages:false,fetchImpl:async (_url,init)=>{
     const events = await fs.readFile(path.join(client.dataDir,'first-chunk'),'utf8');
     assert.equal(events,'ready');
@@ -1190,4 +1190,12 @@ test('the same video prepares fully when the user asks for it, and Japanese or m
   const music = await waitJob(client, await autoJob(client, 'https://www.bilibili.com/video/BVmusic'));
   assert.equal(music.state, 'complete');
   assert.equal(music.cues.length, 2);
+});
+test('readings heard in the audio are saved with the job, and malformed ones are dropped', async t => {
+  const client = await start(t, { worker: streamingFixture, fetchImpl: async (_url, init) => translatedResponse(requestedItems(init)) });
+  assert.equal(client.health.capabilities.heardReadings, true);
+  const job = await waitJob(client, await autoJob(client, 'https://www.bilibili.com/video/BVreadings', false));
+  assert.equal(job.state, 'complete');
+  assert.deepEqual(job.readings, [{ from: 0.2, to: 1.8, surface: '行っ', reading: 'いっ', before: 'で', after: 'たの' }]);
+  assert.deepEqual(job.kana, [{ from: 0.2, to: 1.8, text: '一人で行ったの', kana: 'ひとりでいったの' }]);
 });

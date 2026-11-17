@@ -10,6 +10,8 @@ emit({type:'metadata',duration:120,mediaMode:'audio'});
 const probes=source.includes('foreign') ? [{language:'en',japanese:0.01}] : source.includes('music') ? [] : [{language:'ja',japanese:0.98}];
 emit({type:'chunk',duration:120,processedThrough:60,cues: source.includes('silent') ? [] : [first],timings:{sourceSetupMs:5,audioWaitMs:10,recognitionMs:20}});
 if (args.includes('--check-language')) emit({type:'language',probes,processedThrough:60});
+if (source.includes('readings')) emit({type:'kana',lines:[{from:0.2,to:1.8,text:'一人で行ったの',kana:'ひとりでいったの'},{from:0.2,to:1.8,text:'x',kana:'KANJI漢字'}]});
+if (source.includes('readings')) emit({type:'readings',readings:[{from:0.2,to:1.8,surface:'行っ',reading:'いっ',before:'で',after:'たの'},{from:0.2,to:1.8,surface:'x',reading:'<b>',before:'',after:''}]});
 await fs.writeFile(path.join(model,'first-chunk'), 'ready');
 if (source.includes('slow')) await new Promise(resolve=>setTimeout(resolve,30000));
 // The fixture waits until translation has started, proving stages overlap.
@@ -24,4 +26,5 @@ await new Promise(resolve=>setTimeout(resolve,150));
 if(source.includes('fail')) { console.error('Audio download stopped before completion.'); process.exit(1); }
 emit({type:'chunk',duration:120,processedThrough:120,cues:[second],timings:{sourceSetupMs:5,audioWaitMs:15,recognitionMs:40}});
 emit({type:'timings',timings:{sourceSetupMs:5,audioWaitMs:19,recognitionMs:45}});
+emit({type:'transcribed',sections:1});
 await fs.writeFile(output,JSON.stringify({duration:120,cues:source.includes('silent') ? [second] : [first,second]}));

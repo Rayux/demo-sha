@@ -9,7 +9,7 @@ window.fixtureCalls=[];
 window.chrome={runtime:{connect:window.fixtureTutorConnect,getURL:path=>location.origin+'/'+path,onMessage:{addListener(){}},sendMessage:async message=>{fixtureCalls.push(message);if(message.type==='ASK_AI'){await new Promise(r=>setTimeout(r,250));return {success:true,answer:'「ですね」用來表達感受，也帶有向對方確認的語氣。\n\n這句話的意思是「今天天氣真好呢」。適合用在輕鬆的日常對話中。'};}if(message.type==='PROCESS_SUBTITLE')return {success:true,data:{sentence_translation:'把身體交給本大爺就行了。',chunks:[{japanese:message.text}]}};return {success:true};}},storage:{local:{get:async()=>modelState},onChanged:{addListener(fn){settingHandlers.push(fn)}}}};
 Object.defineProperty(document.querySelector('video'),'readyState',{value:4});Object.defineProperty(document.querySelector('video'),'currentTime',{value:1,writable:true});
 </script>
-<script src="/vendor/kuromoji/kuromoji.js"></script><script src="/content/subtitles.js"></script><script src="/content/readings.js"></script><script src="/content/prepare.js"></script><script src="/content/tutor.js?v=1.7.2"></script><script src="/content/content.js"></script>
+<script src="/vendor/kuromoji/kuromoji.js"></script><script src="/content/subtitles.js"></script><script src="/content/readings.js"></script><script src="/content/prepare.js"></script><script src="/content/words.js"></script><script src="/content/saved.js"></script><script src="/content/tutor.js?v=1.7.2"></script><script src="/content/content.js"></script>
 <script>
 (async()=>{await KageReadings.ready; await new Promise(r=>setTimeout(r,100));const v=document.querySelector('video');const source=document.querySelector('.player-timedtext-text-container');
 // Preview runs on localhost; install its native-caption selector without modifying production code.

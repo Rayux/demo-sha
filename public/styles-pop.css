@@ -300,6 +300,7 @@ svg { display: block; }
 .score-meter { height: 5px; border-radius: 4px; overflow: hidden; background: #d9dfcf; color: var(--success); margin-top: 20px; }
 .score-meter i { display: block; height: 100%; background: currentColor; }
 .score-card .score-unavailable { display: block; margin-top: 12px; font-size: 9px; }
+.score-card .score-source { display: block; margin-top: 10px; font-size: 9px; color: var(--text-muted); }
 .coaching-spotlight { display: flex; gap: 16px; background: var(--accent-muted); padding: 20px; border-left: 3px solid var(--blue); margin-bottom: 20px; }
 .coaching-icon { color: var(--blue); padding-top: 2px; }
 .coaching-spotlight .eyebrow { color: var(--blue); margin-bottom: 8px; }
@@ -694,3 +695,20 @@ svg { display: block; }
 .library-filter select { width: 100%; max-width: 440px; min-width: 0; min-height: 42px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--ink); font-size: 13px; text-overflow: ellipsis; }
 .setting-row.library-default-setting { display: grid; gap: 8px; }
 .setting-row.library-default-setting select { width: 100%; max-width: 100%; min-width: 0; text-overflow: ellipsis; }
+
+/* Azure allowance in Settings */
+.settings .usage-line { margin: 10px 0 8px; font-size: 12px; color: var(--text-primary); }
+.usage-meter { height: 5px; border-radius: 4px; overflow: hidden; background: #d9dfcf; color: var(--success); margin-bottom: 8px; }
+.usage-meter i { display: block; width: 0; height: 100%; background: currentColor; }
+.usage-meter.amber { color: var(--warning); }
+.usage-meter.red { color: var(--danger); }
+
+/* Whether Azure scored this take */
+.score-provenance { display: flex; align-items: baseline; gap: 8px; margin: -8px 0 20px; font-size: 11px; line-height: 1.6; color: var(--text-secondary); }
+.score-provenance i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+.score-provenance.off i { background: var(--warning); }
+
+/* Which service produced a score */
+.score-card .score-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.score-card .score-tag { flex: none; padding: 2px 6px; border: 1px solid currentColor; border-radius: 3px; font-style: normal; font-size: 9px; line-height: 1.4; letter-spacing: .06em; text-transform: uppercase; color: var(--text-secondary); }
+.score-card .score-tag.azure { color: var(--blue); }

@@ -1386,3 +1386,20 @@ test('the Bilibili download button uses the browser connection first and the hel
   for (let i = 0; i < 30; i++) await flush();
   assert.ok(fallbackLog.some(message => message.action === 'download'));
 });
+
+test('a reading heard in the audio is located in the line on screen, even after the helper split the line', async () => {
+  const cues = [{ start: 10, end: 12, text: '一人で行ったの？' }, { start: 20, end: 22, text: '会議を行った。行った行った。' }];
+  const readings = [
+    { from: 10, to: 12, surface: '行っ', reading: 'いっ', before: '人で', after: 'たの' },
+    { from: 20, to: 22, surface: '行っ', reading: 'おこなっ', before: '議を', after: 'た。' },
+    { from: 20, to: 22, surface: '行っ', reading: 'いっ', before: 'XX', after: 'YY' },
+    { from: 500, to: 502, surface: '行っ', reading: 'いっ', before: '人で', after: 'たの' }];
+  const events = [];
+  const h = harness({ documents: [track({ cues, readings })] });
+  await flush();
+  assert.deepEqual(JSON.parse(JSON.stringify(h.api.readings({ currentTime: 11 }))), [{ start: 3, end: 5, reading: 'いっ' }]);
+  // The second line has the word three times: only the one with matching neighbours is corrected.
+  assert.deepEqual(JSON.parse(JSON.stringify(h.api.readings({ currentTime: 21 }))), [{ start: 3, end: 5, reading: 'おこなっ' }]);
+  assert.deepEqual(JSON.parse(JSON.stringify(h.api.readings({ currentTime: 15 }))), [], 'no line on screen');
+  assert.deepEqual(h.saved().readings.length, 4, 'kept with the saved subtitles');
+});
