@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kage">
+<meta name="theme-color" content="#0f1319">
+<title>Kage</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="#/">Kage</a>
+  <a class="back" id="back" href="#/" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span id="backLabel">Search</span>
+  </a>
+</header>
+
+<main id="pair" class="page narrow" hidden>
+  <h1>Connect to your Mac</h1>
+  <p class="muted">Enter the 6-digit pairing code. On your Mac, open <b>http://127.0.0.1:8780</b> to see it.</p>
+  <form id="pairForm">
+    <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000000" aria-label="Pairing code" required>
+    <button class="primary" type="submit">Connect</button>
+  </form>
+  <p class="error" id="pairError" role="alert"></p>
+</main>
+
+<main id="home" class="page narrow" hidden>
+  <section id="mac" class="card" hidden>
+    <h2>Open Kage on your iPad or phone</h2>
+    <ol>
+      <li>On the device, open one of these addresses in any browser:
+        <ul id="addresses" class="addresses"></ul>
+      </li>
+      <li>Enter this pairing code once: <b class="code" id="macCode"></b></li>
+    </ol>
+    <p class="muted" id="awayHint"></p>
+  </section>
+
+  <h1>Find an anime</h1>
+  <form id="openForm">
+    <input id="query" type="search" enterkeyhint="search" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Search by name, or paste an episode link" aria-label="Search anime or paste an episode link">
+    <button class="primary" type="submit">Search</button>
+  </form>
+  <p class="error" id="openError" role="alert"></p>
+
+  <h2 id="listTitle">Latest episodes</h2>
+  <p class="muted" id="listStatus">Loading…</p>
+  <ul id="results" class="list"></ul>
+</main>
+
+<main id="series" class="page narrow" hidden>
+  <h1 id="seriesTitle"></h1>
+  <p class="muted" id="seriesStatus"></p>
+  <ul id="seriesEpisodes" class="list"></ul>
+</main>
+
+<main id="watch" class="watch" hidden>
+  <div class="stage" id="stage">
+    <div class="frame" id="frame">
+      <video id="video" playsinline webkit-playsinline preload="metadata"></video>
+      <div id="cover" class="cover" hidden>
+        <div class="cover-glass"></div>
+        <div id="coverSize" class="cover-size" role="separator" aria-label="Drag to change the height of the cover"></div>
+      </div>
+      <div class="hud" id="hud">
+        <input id="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the video">
+        <div class="hud-row">
+          <button id="play" type="button" aria-label="Play">
+            <svg class="when-paused" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg>
+            <svg class="when-playing" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>
+          </button>
+          <button id="prev" type="button" aria-label="Previous line">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6l-8 6 8 6zM7 6v12"/></svg>
+          </button>
+          <button id="replay" type="button" aria-label="Replay this line">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v5h5"/></svg>
+          </button>
+          <button id="next" type="button" aria-label="Next line">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l8 6-8 6zM17 6v12"/></svg>
+          </button>
+          <span id="time" class="time">0:00 / 0:00</span>
+          <span class="grow"></span>
+          <button id="coverToggle" type="button" class="hud-toggle" aria-pressed="false" aria-label="Cover the subtitles in the picture">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14h18M7 17h10"/></svg>
+          </button>
+          <button id="full" type="button" aria-label="Full screen">
+            <svg class="when-small" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+            <svg class="when-full" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="line" class="line">
+      <div id="japanese" class="japanese" lang="ja"></div>
+      <div id="chinese" class="chinese" lang="zh-Hant"></div>
+    </div>
+  </div>
+
+  <div class="side">
+    <h1 id="title" class="title"></h1>
+    <p id="status" class="status" role="status"></p>
+    <div class="controls">
+      <button id="furigana" type="button" class="toggle" aria-pressed="true">Furigana</button>
+      <button id="translation" type="button" class="toggle" aria-pressed="true">Chinese</button>
+      <button id="again" type="button" hidden>Prepare again</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button id="tabLines" type="button" role="tab" aria-selected="true">Lines</button>
+      <button id="tabEpisodes" type="button" role="tab" aria-selected="false">Episodes</button>
+    </div>
+    <ol id="lines" class="lines"></ol>
+    <ul id="episodes" class="list" hidden></ul>
+  </div>
+</main>
+
+<script>window.chrome = { runtime: { getURL: path => '/kage/' + path } };</script>
+<script src="/kage/vendor/kuromoji/kuromoji.js"></script>
+<script src="/kage/content/readings.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
