@@ -36,15 +36,35 @@
   };
 
   // ── Furigana, from the same dictionary as the extension ──
+  // The dictionary reads whole words (狙っ → ねらっ). Readings go over the kanji
+  // only, so the kana around them are not written twice: 狙[ねら]っ, 取[と]り扱[あつか]い.
+  const KANJI = /[㐀-鿿々〆ヶ]/;
+  const hira = value => value.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  function rubyParts(word, reading) {
+    const runs = word.match(/[㐀-鿿々〆ヶ]+|[^㐀-鿿々〆ヶ]+/g) || [word];
+    if (runs.length === 1) return [{ text: word, reading }];
+    const pattern = runs.map(run => KANJI.test(run) ? '(.+?)' : hira(run).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('');
+    const found = hira(reading).match(new RegExp(`^${pattern}$`));
+    if (!found) return [{ text: word, reading }];
+    let group = 1;
+    return runs.map(run => KANJI.test(run) ? { text: run, reading: found[group++] } : { text: run });
+  }
   function japanese(target, line) {
     target.textContent = '';
     const chunks = window.KageReadings?.chunks(line);
     if (!chunks) { target.textContent = line; return; }
     for (const chunk of chunks) {
       if (!chunk.furigana) { target.append(chunk.japanese); continue; }
-      const ruby = document.createElement('ruby');
-      ruby.append(chunk.japanese, text('rt', chunk.furigana));
-      target.append(ruby);
+      for (const part of rubyParts(chunk.japanese, chunk.furigana)) {
+        if (!part.reading) { target.append(part.text); continue; }
+        // Not <ruby>: Safari spreads the kanji apart when the reading is wider (研 究).
+        // Here the kanji stay together and get room on both sides instead.
+        const word = text('span', part.text, 'rb');
+        word.append(text('span', part.reading, 'rt'));
+        const extra = (part.reading.length * 0.52 - part.text.length) / 2;
+        if (extra > 0) word.style.setProperty('--room', `${extra.toFixed(2)}em`);
+        target.append(word);
+      }
     }
   }
   window.KageReadings?.ready.then(ok => { if (ok && current) { renderLines(); current.index = -2; tick(); } });
@@ -169,7 +189,7 @@
     show('watch', { href: '#/', label: 'Search' });
     const mine = current = { post, title: '', category: '', cues: [], version: '', timer: 0, index: -2 };
     $('title').textContent = '';
-    $('japanese').textContent = ''; $('chinese').textContent = '';
+    $('japanese').textContent = ''; $('chinese').textContent = ''; $('line').classList.add('empty');
     $('episodes').textContent = '';
     $('again').hidden = true;
     renderLines();
@@ -257,6 +277,8 @@
       const middle = (low + high) >> 1;
       if (cues[middle].start <= time) { found = middle; low = middle + 1; } else high = middle - 1;
     }
+    // A line also shows from just before it starts: jumping to a line lands a moment early.
+    if (found + 1 < cues.length && cues[found + 1].start - time <= 0.15) return found + 1;
     return found >= 0 && time < cues[found].end + 0.25 ? found : -1;
   }
   // The latest line that has started, for the previous / replay / next buttons.
@@ -275,6 +297,8 @@
     const cue = current.cues[index];
     japanese($('japanese'), cue?.text || '');
     $('chinese').textContent = cue?.translation || '';
+    // A class, not CSS :has(:empty): Safari does not always notice the text arriving.
+    $('line').classList.toggle('empty', !cue);
     if ($('line').classList.contains('placed')) placeLine();
     const list = $('lines');
     list.querySelector('.current')?.classList.remove('current');
@@ -314,7 +338,7 @@
   function wake() {
     stage.classList.remove('idle');
     clearTimeout(idleTimer);
-    if (!video.paused) idleTimer = setTimeout(() => { if (!video.paused && !seeking) stage.classList.add('idle'); }, 3000);
+    if (!video.paused) idleTimer = setTimeout(() => { if (!video.paused && !seeking && !$('cover').classList.contains('editing')) stage.classList.add('idle'); }, 3000);
   }
   function showTime() {
     const length = Number.isFinite(video.duration) ? video.duration : 0;
@@ -392,9 +416,10 @@
   }
   function layoutCover() {
     cover.hidden = !coverState.on;
+    if (!coverState.on) cover.classList.remove('editing');
     $('coverToggle').setAttribute('aria-pressed', String(coverState.on));
     if (!coverState.on) return;
-    coverState.height = clamp(Number(coverState.height) || 0.17, 0.05, 1);
+    coverState.height = clamp(Number(coverState.height) || 0.17, 0.04, 1);
     coverState.top = clamp(Number(coverState.top) || 0, 0, 1 - coverState.height);
     const box = picture();
     Object.assign(cover.style, { left: `${box.left}px`, width: `${box.width}px`,
@@ -406,17 +431,35 @@
     onStart: () => { coverFrom = { ...coverState }; },
     onMove: (dx, dy) => { coverState.top = coverFrom.top + dy / picture().height; layoutCover(); },
     onEnd: () => save('kage-cover', coverState),
-    onTap: () => tapPicture()
+    onTap: () => editCover(!cover.classList.contains('editing'))
   });
-  draggable($('coverSize'), { // The bottom edge stays put while the top edge follows the finger.
+  function editCover(on) {
+    cover.classList.toggle('editing', on);
+    if (on) { stage.classList.remove('idle'); clearTimeout(idleTimer); } else wake();
+  }
+  // A touch anywhere else finishes adjusting.
+  document.addEventListener('pointerdown', event => { if (!cover.contains(event.target)) editCover(false); }, true);
+  // Each grip moves its own edge; the other edge stays put.
+  draggable($('coverTop'), {
     onStart: () => { coverFrom = { ...coverState }; },
     onMove: (dx, dy) => {
       const bottom = coverFrom.top + coverFrom.height;
-      const top = clamp(coverFrom.top + dy / picture().height, 0, bottom - 0.05);
+      const top = clamp(coverFrom.top + dy / picture().height, 0, bottom - 0.04);
       coverState.top = top; coverState.height = bottom - top;
       layoutCover();
     },
-    onEnd: () => save('kage-cover', coverState)
+    onEnd: () => save('kage-cover', coverState),
+    onTap: () => wake()
+  });
+  draggable($('coverBottom'), {
+    onStart: () => { coverFrom = { ...coverState }; },
+    onMove: (dx, dy) => {
+      coverState.top = coverFrom.top;
+      coverState.height = clamp(coverFrom.height + dy / picture().height, 0.04, 1 - coverFrom.top);
+      layoutCover();
+    },
+    onEnd: () => save('kage-cover', coverState),
+    onTap: () => wake()
   });
   new ResizeObserver(() => { layoutCover(); placeLine(); }).observe(frame);
   video.addEventListener('loadedmetadata', () => { layoutCover(); placeLine(); });
@@ -462,6 +505,10 @@
   // iPhone the page fills the browser window instead.
   const phoneSideways = window.matchMedia('(orientation: landscape) and (max-height: 519px)');
   const nativeFull = () => document.fullscreenElement || document.webkitFullscreenElement;
+  // On iPad and iPhone, Safari's own full screen can lift a playing video above
+  // everything else on the page, hiding the line and the controls. There the page
+  // fills the window instead; added to the Home Screen, Kage has no browser bars at all.
+  const appleTouch = /iPad|iPhone|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
   let fullByRotation = false;
   function setFull(on, byRotation = false) {
     document.body.classList.toggle('full', on);
@@ -469,7 +516,7 @@
     $('full').setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen');
     placeLine();
     try {
-      if (on && !byRotation && !nativeFull()) {
+      if (on && !byRotation && !appleTouch && !nativeFull()) {
         const request = stage.requestFullscreen || stage.webkitRequestFullscreen;
         const result = request?.call(stage);
         result?.catch?.(() => {});

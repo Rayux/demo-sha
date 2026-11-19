@@ -77,16 +77,28 @@ video { display: block; width: 100%; max-height: 46vh; aspect-ratio: 16 / 9; bac
 .stage.idle .hud { opacity: 0; pointer-events: none; }
 .hud .hud-toggle[aria-pressed="true"] { color: #7db9ff; }
 
-/* Hides subtitles that are part of the picture. Drag it to move; drag its top edge to resize. */
+/* Hides subtitles that are part of the picture. Drag it to move; tap it to show grips for its top and bottom edges. */
 .cover { position: absolute; z-index: 1; touch-action: none; cursor: grab; }
 .cover-glass {
   position: absolute; inset: 0; background: rgba(12, 12, 12, .55); -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px);
   -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
 }
-.cover-size { position: absolute; left: 50%; top: -14px; width: 96px; height: 28px; transform: translateX(-50%); cursor: ns-resize; touch-action: none; }
-.cover-size::after { content: ''; position: absolute; left: 50%; top: 12px; width: 44px; height: 4px; margin-left: -22px; border-radius: 2px; background: rgba(255, 255, 255, .7); transition: opacity .2s; }
-.stage.idle .cover-size::after { opacity: 0; }
+/* Grips on the top and bottom edges: drag one to make the cover taller or shorter. */
+.cover-grip { position: absolute; left: 50%; width: 120px; height: 44px; margin-left: -60px; cursor: ns-resize; touch-action: none; z-index: 1; }
+.cover-grip.top { top: -22px; }
+.cover-grip.bottom { bottom: -22px; }
+.cover-grip::after {
+  content: ''; position: absolute; left: 50%; top: 19px; width: 64px; height: 6px; margin-left: -32px; border-radius: 3px;
+  background: #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .45), 0 1px 4px rgba(0, 0, 0, .5); transition: opacity .2s;
+}
+/* Tapping the cover selects it: it rises above the controls and shows its grips. */
+.cover:not(.editing) .cover-grip, .cover:not(.editing) .cover-done { display: none; }
+.cover.editing { z-index: 5; outline: 2px solid var(--accent); outline-offset: -1px; }
+.cover-done {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none;
+  padding: 3px 12px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap;
+}
 .dragging, .dragging * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
 .hud-row { display: flex; align-items: center; gap: 2px; }
 .hud button { background: none; border: 0; min-width: 44px; padding: 0 8px; color: #fff; }
@@ -99,8 +111,14 @@ video { display: block; width: 100%; max-height: 46vh; aspect-ratio: 16 / 9; bac
 
 .line { background: #0b0e13; padding: 10px 14px 12px; text-align: center; min-height: 104px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
 .japanese { font-size: clamp(20px, 5.4vw, 30px); line-height: 2; font-weight: 500; }
-.japanese rt { font-size: .5em; color: var(--reading); font-weight: 400; user-select: none; -webkit-user-select: none; }
-.no-furigana rt { display: none; }
+/* Furigana: the reading sits centred above its kanji; a long reading widens the gap around the word, never inside it. */
+.rb { position: relative; display: inline-block; line-height: 1.15; margin: 0 var(--room, 0); text-indent: 0; }
+.rt {
+  position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); white-space: nowrap;
+  font-size: .5em; line-height: 1.2; color: var(--reading); font-weight: 400; user-select: none; -webkit-user-select: none; pointer-events: none;
+}
+.no-furigana .rt { display: none; }
+.no-furigana .rb { margin: 0; }
 .no-furigana .japanese, .no-furigana .lines .ja { line-height: 1.6; }
 .chinese { font-size: clamp(15px, 4vw, 20px); color: #cfd6df; }
 .no-translation .chinese, .no-translation .lines .zh { display: none; }
@@ -118,7 +136,7 @@ video { display: block; width: 100%; max-height: 46vh; aspect-ratio: 16 / 9; bac
 .lines li { padding: 10px 8px; border-radius: 8px; cursor: pointer; border-left: 3px solid transparent; }
 .lines li.current { background: var(--panel); border-left-color: var(--accent); }
 .lines .ja { font-size: 18px; line-height: 1.9; }
-.lines .ja rt { font-size: .55em; color: var(--reading); }
+.lines .ja .rt { font-size: .55em; }
 .lines .zh { font-size: 14px; color: var(--muted); }
 .lines .empty { color: var(--muted); cursor: default; padding: 20px 8px; }
 
@@ -148,7 +166,7 @@ body.full .line { pointer-events: auto; touch-action: none; cursor: grab; }
 /* Dragged somewhere by hand: stay exactly there. */
 body.full .line.placed, body.full .stage.idle .line.placed { bottom: auto; transition: none; }
 body.full .stage.idle .line { bottom: max(7%, calc(20px + env(safe-area-inset-bottom))); }
-body.full .line:has(.japanese:empty) { display: none; }
+body.full .line.empty { display: none; }
 body.full .japanese { font-size: clamp(22px, 3.4vw, 40px); line-height: 1.9; }
 body.full .chinese { font-size: clamp(15px, 2.1vw, 24px); color: #eef1f5; }
 /* Held upright, the picture is a band across the middle: the line sits just under it. */

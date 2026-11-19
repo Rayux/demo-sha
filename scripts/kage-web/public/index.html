@@ -65,7 +65,9 @@
       <video id="video" playsinline webkit-playsinline preload="metadata"></video>
       <div id="cover" class="cover" hidden>
         <div class="cover-glass"></div>
-        <div id="coverSize" class="cover-size" role="separator" aria-label="Drag to change the height of the cover"></div>
+        <div id="coverTop" class="cover-grip top" role="separator" aria-label="Drag to move the top edge of the cover"></div>
+        <div id="coverBottom" class="cover-grip bottom" role="separator" aria-label="Drag to move the bottom edge of the cover"></div>
+        <span class="cover-done">Done</span>
       </div>
       <div class="hud" id="hud">
         <input id="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the video">
@@ -95,7 +97,7 @@
         </div>
       </div>
     </div>
-    <div id="line" class="line">
+    <div id="line" class="line empty">
       <div id="japanese" class="japanese" lang="ja"></div>
       <div id="chinese" class="chinese" lang="zh-Hant"></div>
     </div>
