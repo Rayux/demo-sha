@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "kage-web", "runtimeExecutable": "node", "runtimeArgs": ["scripts/kage-web/server.mjs"], "port": 8780 }
+  ]
+}

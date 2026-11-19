@@ -1,5 +1,5 @@
 import media from '../.cloudflare/media.json' with { type: 'json' };
-import { AI_ROUTES, aiStatus, handleAI } from './ai.mjs';
+import { AI_ROUTES, aiStatus, usageStatus, handleAI } from './ai.mjs';
 import { json, HttpError, readJSON } from './http.mjs';
 import { hasFirestore, getDocument, setDocument, progressFieldPath } from './firestore.mjs';
 import { serveMedia } from './media.mjs';
@@ -64,7 +64,7 @@ async function progress(request, env, url) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     try {
       if (url.pathname.startsWith('/api/')) {
@@ -72,8 +72,9 @@ export default {
         const origin = request.headers.get('origin');
         if (request.method === 'POST' && origin && origin !== url.origin) return json({ error: 'Forbidden' }, 403);
         if (request.method === 'GET' && url.pathname === '/api/status') return json(aiStatus(env));
+        if (request.method === 'GET' && url.pathname === '/api/usage') return json(await usageStatus(env));
         if (request.method === 'GET' && url.pathname === '/api/library') return json({ files: media.files });
-        if (request.method === 'POST' && AI_ROUTES.has(url.pathname)) return handleAI(request, env);
+        if (request.method === 'POST' && AI_ROUTES.has(url.pathname)) return handleAI(request, env, ctx);
         if (['GET', 'POST'].includes(request.method)) {
           if (url.pathname === '/api/transcript') return await transcript(request, env, url);
           if (url.pathname === '/api/progress') return await progress(request, env, url);

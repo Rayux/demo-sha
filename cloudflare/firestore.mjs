@@ -86,6 +86,25 @@ export async function setDocument(env, collection, id, data, mask = []) {
   await documentRequest(env, collection, id, { method: 'PATCH', body: JSON.stringify({ fields: encodeValue(data).mapValue.fields }) }, mask);
 }
 
+/** Atomically add to numeric fields, creating the document when it does not exist yet. */
+export async function incrementField(env, collection, id, amounts) {
+  const root = `projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+  const token = await accessToken(env);
+  const response = await fetch(`https://firestore.googleapis.com/v1/${root.split('/').map(encodeURIComponent).join('/')}:commit`, {
+    method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ writes: [{
+      // An empty mask leaves every other field alone, like a merge.
+      update: { name: `${root}/${collection}/${id}`, fields: {} }, updateMask: { fieldPaths: [] },
+      updateTransforms: Object.entries(amounts).map(([fieldPath, amount]) => ({ fieldPath, increment: encodeValue(amount) }))
+    }] }),
+    signal: AbortSignal.timeout(15000)
+  });
+  if (!response.ok) {
+    if (response.status === 401) cachedToken = null;
+    throw new HttpError(503, 'Database request failed. Try again later.');
+  }
+}
+
 export function progressFieldPath(key) {
   return 'mastered.`' + key.replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`';
 }

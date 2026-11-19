@@ -4,7 +4,8 @@ import { readFile } from 'node:fs/promises';
 import { createHash, generateKeyPairSync, verify } from 'node:crypto';
 import worker from './worker.mjs';
 import { serveMedia } from './media.mjs';
-import { handleAI } from './ai.mjs';
+import { handleAI, aiStatus } from './ai.mjs';
+import { measureRhythm, cleanAssessment, wordCues } from './scoring.mjs';
 import { encodeValue, decodeValue, setDocument, progressFieldPath } from './firestore.mjs';
 import manifest from '../.cloudflare/media.json' with { type: 'json' };
 
@@ -189,4 +190,157 @@ test('missing AI credentials, quota limits and oversized bodies return useful er
   assert.doesNotMatch(await limited.text(), /private upstream detail/);
   const large = request('/api/chat', { method: 'POST', headers: { 'Content-Length': '9999999' }, body: '{}' });
   assert.equal((await handleAI(large, { GROQ_API_KEY: 'test' })).status, 413);
+});
+
+const spoken = (text, start, step, pauseAfter = -1, pause = 0) => Array.from(text).map((word, index) => {
+  const offset = start + index * step + (pauseAfter >= 0 && index > pauseAfter ? pause : 0);
+  return { word, start: offset, end: offset + step };
+});
+
+test('rhythm is scored from word timings, ignoring leading silence', () => {
+  const native = spoken('きょうはいいてんきですね', 0, 0.2);
+  const same = measureRhythm(native, spoken('キョウはいいてんきですね', 1.5, 0.2));
+  assert.equal(same.score, 100);
+  assert.equal(same.tempoRatio, 1);
+  assert.equal(same.extraPause, null);
+
+  const hesitant = measureRhythm(native, spoken('きょうはいいてんきですね', 0, 0.2, 3, 0.8));
+  assert.ok(hesitant.score < same.score);
+  assert.deepEqual(hesitant.extraPause, { after: 'きょうは', seconds: 0.8 });
+
+  const slow = measureRhythm(native, spoken('きょうはいいてんきですね', 0, 0.4));
+  assert.equal(slow.tempoRatio, 2);
+  assert.ok(slow.score < 80);
+
+  assert.equal(measureRhythm(native, spoken('ぜんぜんちがう', 0, 0.2)), null);
+  assert.equal(measureRhythm(native, []), null);
+  assert.equal(measureRhythm(undefined, [{ word: 'あ', start: 'x' }]), null);
+});
+
+test('pronunciation assessment sends the recording to Azure and keeps only scores', async (t) => {
+  const env = { AZURE_SPEECH_KEY: 'azure-key', AZURE_SPEECH_REGION: 'japaneast' };
+  assert.equal(aiStatus(env).pronunciationAssessment, true);
+  assert.equal(aiStatus({ AZURE_SPEECH_KEY: 'k', AZURE_SPEECH_REGION: 'evil.example/' }).pronunciationAssessment, false);
+  const upload = () => {
+    const form = new FormData();
+    form.append('file', new Blob(['RIFFaudio'], { type: 'audio/wav' }), 'take.wav');
+    form.append('reference', '今日はいい天気');
+    return request('/api/assess-pronunciation', { method: 'POST', body: form });
+  };
+  assert.equal((await handleAI(upload(), { GROQ_API_KEY: 'test' })).status, 503);
+
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    assert.equal(url, 'https://japaneast.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=ja-JP&format=detailed');
+    assert.equal(options.headers['Ocp-Apim-Subscription-Key'], 'azure-key');
+    const params = JSON.parse(Buffer.from(options.headers['Pronunciation-Assessment'], 'base64').toString('utf8'));
+    assert.equal(params.ReferenceText, '今日はいい天気');
+    assert.equal(params.EnableProsodyAssessment, undefined);
+    assert.equal(new TextDecoder().decode(options.body), 'RIFFaudio');
+    return Response.json({ RecognitionStatus: 'Success', DisplayText: 'private transcript', NBest: [{
+      AccuracyScore: 81.4, FluencyScore: 90, CompletenessScore: 100, PronScore: 84.6,
+      Words: [{ Word: '今日', AccuracyScore: 95, ErrorType: 'None' }, { Word: '天気', AccuracyScore: 41, ErrorType: 'Mispronunciation' }]
+    }] });
+  });
+  const result = await (await handleAI(upload(), env)).json();
+  assert.deepEqual(result.assessment, { overall: 85, accuracy: 81, fluency: 90, completeness: 100, words: [
+    { word: '今日', accuracy: 95, error: 'None' }, { word: '天気', accuracy: 41, error: 'Mispronunciation' }] });
+
+  t.mock.method(globalThis, 'fetch', async () => Response.json({ RecognitionStatus: 'NoMatch' }));
+  assert.equal((await (await handleAI(upload(), env)).json()).assessment, null);
+  t.mock.method(globalThis, 'fetch', async () => new Response('private upstream detail', { status: 401 }));
+  const failed = await handleAI(upload(), env);
+  assert.equal(failed.status, 502);
+  assert.doesNotMatch(await failed.text(), /private upstream detail/);
+  assert.equal(cleanAssessment({ overall: 'high', words: 'x' }), null);
+});
+
+test('measured scores replace the model guesses and are given to it as facts', async (t) => {
+  const native = spoken('きょうはいいてんきですね', 0, 0.2);
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    const [system, user] = JSON.parse(options.body).messages.map((message) => message.content);
+    assert.match(system, /taken from the learner's audio/);
+    assert.match(system, /Never state or guess why a word sounded wrong/);
+    assert.match(user, /Measured pronunciation \(Azure, 0-100\): overall 62/);
+    assert.match(user, /天気=Mispronunciation/);
+    assert.match(user, /Measured rhythm \(0-100\): 100/);
+    return Response.json({ choices: [{ message: { content: '{"scores":{"pronunciation":95,"rhythm":40,"overall":72},"coachingTip":"加油","visualCues":[{"text":"天気","furigana":"てんき","status":"perfect","note":"促音が弱い"}]}' } }] });
+  });
+  const { evaluation } = await (await handleAI(post('/api/evaluate-speech', {
+    target: '今日はいい天気ですね', heard: '今日はいい天気ですね', targetDuration: 2.4, recordedDuration: 3,
+    targetWords: native, heardWords: spoken('きょうはいいてんきですね', 0.5, 0.2),
+    assessment: { overall: 62, accuracy: 60, completeness: 80, words: [{ word: '天気', accuracy: 41, error: 'Mispronunciation' }] }
+  }), { GROQ_API_KEY: 'test' })).json();
+  assert.deepEqual(evaluation.scores, { pronunciation: 60, completeness: 80, rhythm: 100, overall: 80 });
+  assert.deepEqual(evaluation.measured, { pronunciation: true, completeness: true, rhythm: true, words: true });
+  assert.equal(evaluation.recommendation, 'move_on');
+  assert.equal(evaluation.coachingTip, '加油');
+  // The model said "perfect" and invented a cause; Azure's number decides instead.
+  assert.deepEqual(evaluation.visualCues, [{ text: '天気', furigana: 'てんき', status: 'missed', note: '差距較大，重聽原音再跟讀', score: 41 }]);
+  assert.deepEqual(wordCues([
+    { word: '今日', accuracy: 95, error: 'None' }, { word: 'は', accuracy: 72, error: 'None' }, { word: 'えっと', accuracy: 80, error: 'Insertion' },
+    { word: 'いい', accuracy: 0, error: 'Omission' }, { word: '天気', accuracy: 88, error: 'Mispronunciation' }
+  ], [{ text: '今日', furigana: 'きょう' }, { text: '天気', furigana: 'てんき' }, 'junk']).map((cue) => [cue.text, cue.furigana, cue.status, cue.score]), [
+    ['今日', 'きょう', 'perfect', 95], ['は', '', 'warning', 72], ['いい', '', 'missed', null], ['天気', 'てんき', 'warning', 88]]);
+
+  // The page asks for the measured scores first; that answer must not wait for the language model.
+  t.mock.method(globalThis, 'fetch', async () => { throw new Error('scoresOnly must not call any service'); });
+  const quick = (await (await handleAI(post('/api/evaluate-speech', { scoresOnly: true, targetWords: native, heardWords: native,
+    assessment: { accuracy: 90, completeness: 100, words: [{ word: '天気', accuracy: 90, error: 'None' }] } }), { GROQ_API_KEY: 'test' })).json()).evaluation;
+  assert.deepEqual(quick.scores, { pronunciation: 90, completeness: 100, rhythm: 100, overall: 97 });
+  assert.deepEqual(quick.visualCues, [{ text: '天気', furigana: '', status: 'perfect', note: '', score: 90 }]);
+
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    assert.equal(JSON.parse(options.body).reasoning_effort, 'low');
+    assert.doesNotMatch(JSON.parse(options.body).messages[0].content, /taken from the learner's audio|"intonation"|intonationFeedback/);
+    return Response.json({ choices: [{ message: { content: '{"scores":{"pronunciation":50,"rhythm":50,"intonation":50},"rhythmFeedback":"guess"}' } }] });
+  });
+  const plain = (await (await handleAI(post('/api/evaluate-speech', { target: 'はい', heard: 'はい' }), { GROQ_API_KEY: 'test' })).json()).evaluation;
+  assert.deepEqual(plain.measured, { pronunciation: false, completeness: false, rhythm: false, words: false });
+  assert.deepEqual(plain.scores, { pronunciation: 50, completeness: null, rhythm: null, overall: 50 });
+  assert.equal(plain.rhythmFeedback, undefined);
+  assert.equal(plain.recommendation, 'keep_practicing');
+});
+
+test('Azure usage is counted per month and reported for Settings', async (t) => {
+  const azure = { AZURE_SPEECH_KEY: 'azure-key', AZURE_SPEECH_REGION: 'japaneast' };
+  const month = new Date().toISOString().slice(0, 7);
+  assert.deepEqual(await (await worker.fetch(request('/api/usage'), {})).json(),
+    { configured: false, tracked: false, month, secondsUsed: 0, requests: 0, allowanceSeconds: 18000, refusedAt: null });
+  const untracked = await (await worker.fetch(request('/api/usage'), { ...azure, AZURE_SPEECH_MONTHLY_HOURS: '2' })).json();
+  assert.equal(untracked.configured, true);
+  assert.equal(untracked.tracked, false);
+  assert.equal(untracked.allowanceSeconds, 7200);
+
+  const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const env = { ...azure, FIREBASE_PROJECT_ID: 'usage-project', FIREBASE_CLIENT_EMAIL: 'usage@example.invalid', FIREBASE_PRIVATE_KEY: privateKey.export({ type: 'pkcs8', format: 'pem' }) };
+  const document = `projects/usage-project/databases/(default)/documents/usage/azure-speech-${month}`;
+  const writes = [];
+  let azureStatus = 200;
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    url = String(url);
+    if (url === 'https://oauth2.googleapis.com/token') return Response.json({ access_token: 'test-token', expires_in: 3600 });
+    if (url.includes('stt.speech.microsoft.com')) return azureStatus === 200 ? Response.json({ RecognitionStatus: 'NoMatch' }) : new Response('', { status: azureStatus });
+    assert.equal(options.headers.Authorization, 'Bearer test-token');
+    if (url.endsWith(':commit')) { writes.push(...JSON.parse(options.body).writes); return Response.json({}); }
+    if (options.method === 'PATCH') { writes.push({ patch: JSON.parse(options.body), mask: new URL(url).searchParams.getAll('updateMask.fieldPaths') }); return Response.json({}); }
+    assert.equal(url, `https://firestore.googleapis.com/v1/${document}`);
+    return Response.json({ fields: { seconds: { doubleValue: 754.6 }, requests: { integerValue: '12' }, refusedAt: { stringValue: '2026-11-03T10:00:00.000Z' } } });
+  });
+  const upload = () => {
+    const form = new FormData();
+    form.append('file', new Blob([new Uint8Array(44 + 32000 * 3)], { type: 'audio/wav' }), 'take.wav');
+    form.append('reference', 'はい');
+    return request('/api/assess-pronunciation', { method: 'POST', body: form });
+  };
+  assert.equal((await handleAI(upload(), env)).status, 200);
+  assert.deepEqual(writes, [{ update: { name: document, fields: {} }, updateMask: { fieldPaths: [] }, updateTransforms: [
+    { fieldPath: 'seconds', increment: { integerValue: '3' } }, { fieldPath: 'requests', increment: { integerValue: '1' } }] }]);
+
+  azureStatus = 429;
+  assert.equal((await handleAI(upload(), env)).status, 429);
+  assert.equal(writes.length, 2);
+  assert.deepEqual(writes[1].mask, ['refusedAt']);
+
+  const usage = await (await worker.fetch(request('/api/usage'), env)).json();
+  assert.deepEqual(usage, { configured: true, tracked: true, month, secondsUsed: 755, requests: 12, allowanceSeconds: 18000, refusedAt: '2026-11-03T10:00:00.000Z' });
 });

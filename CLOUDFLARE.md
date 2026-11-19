@@ -32,6 +32,9 @@ the existing `.env` and uploads only these four values as encrypted Worker secre
 - `FIREBASE_CLIENT_EMAIL`
 - `FIREBASE_PRIVATE_KEY`
 
+If `.env` also sets `AZURE_SPEECH_KEY` and `AZURE_SPEECH_REGION` (optional, for
+measured pronunciation scores), those are uploaded too.
+
 It sends values directly to Wrangler through stdin; it does not print them or
 create a secrets export file. Preview the **names only**, without uploading:
 

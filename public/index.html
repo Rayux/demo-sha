@@ -387,7 +387,7 @@
             </div>
             <div id="feedback-body">
               <div id="feedback" class="feedback empty-feedback" aria-live="polite">
-                <div class="feedback-placeholder-metrics" aria-hidden="true"><div><span>Pronunciation</span><strong>—</strong></div><div><span>Rhythm</span><strong>—</strong></div><div><span>Intonation</span><strong>—</strong></div></div>
+                <div class="feedback-placeholder-metrics" aria-hidden="true"><div><span>Pronunciation</span><strong>—</strong></div><div><span>Completeness</span><strong>—</strong></div><div><span>Rhythm</span><strong>—</strong></div></div>
                 <div class="feedback-invitation"><span class="feedback-spark" aria-hidden="true"><svg class="ui-icon" fill="currentColor"><use href="#icon-sparkle"/></svg></span><p><strong>Small adjustments. Noticeable progress.</strong>Record a take to get personalised feedback and a clear next step.</p></div>
               </div>
             </div>
@@ -489,6 +489,14 @@
       <label class="setting-row">Reflection pause <select id="reflection-delay"><option value="0">Off</option><option value="3000" selected>3 seconds</option><option value="4000">4 seconds</option></select></label>
       <label class="setting-row">Record after playback <input id="auto-record" type="checkbox" checked></label>
       <label class="setting-row">Keep playing clips <input id="continuous-play" type="checkbox"></label>
+
+      <!-- Azure pronunciation scoring allowance used by this site -->
+      <div id="azure-usage" class="settings-group hidden">
+        <span class="eyebrow">PRONUNCIATION SCORING</span>
+        <p id="azure-usage-text" class="usage-line">Checking this month's usage…</p>
+        <div id="azure-usage-meter" class="usage-meter" role="meter" aria-label="Azure Speech allowance used this month" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
+        <p id="azure-usage-note" class="settings-note"></p>
+      </div>
 
       <!-- Friends Access Lock Settings -->
       <div class="settings-group">

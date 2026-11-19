@@ -1,4 +1,6 @@
 import { tutorPrompts, evaluationPrompts, comparisonPrompts } from "./cloudflare/prompts.mjs";
+import { recordAzureUsage, recordAzureRefusal, azureUsage, wavSeconds } from "./cloudflare/usage.mjs";
+import { assessPronunciation, pronunciationConfigured, measureAttempt, applyMeasuredScores, MAX_ASSESSMENT_BYTES } from "./cloudflare/scoring.mjs";
 import { createServer } from "node:http";
 import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
 import { createReadStream, existsSync } from "node:fs";
@@ -273,15 +275,38 @@ async function evaluateSpeech(req, res) {
 
   try {
     const body = JSON.parse((await readBody(req, 512 * 1024)).toString("utf8"));
-    const { system: systemPrompt, input: userPrompt } = evaluationPrompts(body);
+    const measured = measureAttempt(body);
+    // The measured scores need no language model, so the page asks for them first and shows them at once.
+    if (body.scoresOnly) return json(res, 200, { evaluation: applyMeasuredScores({}, measured), provider: "measured" });
+    const { system: systemPrompt, input: userPrompt } = evaluationPrompts(body, measured);
 
     const reply = await hybridChat(systemPrompt, userPrompt, true);
-    const evaluation = JSON.parse(extractJSON(reply.content));
+    const evaluation = applyMeasuredScores(JSON.parse(extractJSON(reply.content)), measured);
 
     json(res, 200, { evaluation, modelUsed: reply.modelUsed, provider: reply.provider });
   } catch (error) {
     console.error("Speech evaluation error:", error);
     json(res, 500, { error: error.message || "Speech evaluation failed." });
+  }
+}
+
+// Azure hears the recording itself, so this route does not need Groq.
+async function assessRecording(req, res) {
+  if (!pronunciationConfigured(process.env)) return json(res, 503, { error: "Pronunciation assessment is not configured. Add AZURE_SPEECH_KEY and AZURE_SPEECH_REGION to .env." });
+  try {
+    const contentType = req.headers["content-type"] || "";
+    if (!contentType.includes("multipart/form-data")) throw new Error("Expected an audio file upload.");
+    const body = await readBody(req, MAX_ASSESSMENT_BYTES + 64 * 1024);
+    const form = await new Request("http://localhost/upload", { method: "POST", headers: { "Content-Type": contentType }, body }).formData();
+    const file = form.get("file");
+    if (!file || typeof file.arrayBuffer !== "function") throw new Error("No recording was included in the request.");
+    const audio = await file.arrayBuffer();
+    const assessment = await assessPronunciation(process.env, audio, form.get("reference"));
+    recordAzureUsage(process.env, wavSeconds(audio.byteLength)); // Not awaited: counting must not delay the score.
+    json(res, 200, { assessment, provider: "azure" });
+  } catch (error) {
+    if (error.status === 429) recordAzureRefusal(process.env);
+    json(res, error.status || 500, { error: error.message || "Pronunciation assessment failed." });
   }
 }
 
@@ -336,9 +361,11 @@ const server = createServer(async (req, res) => {
       primaryModel: groqChatModel,
       groqWhisper: groqModel,
       groqChatModel,
-      activeProvider: "groq"
+      activeProvider: "groq",
+      pronunciationAssessment: pronunciationConfigured(process.env)
     });
   }
+  if (req.method === "GET" && url.pathname === "/api/usage") return json(res, 200, await azureUsage(process.env, pronunciationConfigured(process.env)));
   if (req.method === "GET" && url.pathname === "/api/library") return listLibrary(res);
   if (req.method === "GET" && url.pathname === "/api/transcript") return getTranscript(req, res, url.searchParams);
   if (req.method === "POST" && url.pathname === "/api/transcript") return saveTranscript(req, res);
@@ -349,6 +376,7 @@ const server = createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/api/explain") return askModel(req, res, "explain");
   if (req.method === "POST" && url.pathname === "/api/chat") return askModel(req, res, "chat");
   if (req.method === "POST" && url.pathname === "/api/evaluate-speech") return evaluateSpeech(req, res);
+  if (req.method === "POST" && url.pathname === "/api/assess-pronunciation") return assessRecording(req, res);
   if (req.method === "GET" && url.pathname.startsWith("/audio/")) return serveFile(req, res, AUDIO, url.pathname.slice("/audio".length));
   if (req.method === "GET" && url.pathname.startsWith("/transcripts/")) return serveFile(req, res, TRANSCRIPTS, url.pathname.slice("/transcripts".length));
   if (req.method === "GET") return serveFile(req, res, PUBLIC, url.pathname === "/" ? "/index.html" : url.pathname);

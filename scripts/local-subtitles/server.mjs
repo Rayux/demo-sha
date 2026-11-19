@@ -11,6 +11,8 @@ import { translateCues, validateTranslationConfig, DEFAULT_BATCH_SIZE } from './
 import { downloadBilibili } from './bilibili.mjs';
 import { videoURL, downloadableVideoURL, videoName, videoPlatform } from './video-source.mjs';
 import { createGroqRelay } from './groq-relay.mjs';
+import { condense, dialogueIntervals, audioFilename, headerFilename, DEFAULT_PADDING, MAX_PADDING } from './condensed.mjs';
+import { createReadStream } from 'node:fs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
@@ -171,6 +173,8 @@ export async function createSubtitleService(options = {}) {
     paused.clear();
     requestTranslationDrain();
   }
+  // Chinese is translated while Japanese lines are still arriving; the worker checks furigana after the last line.
+  // KAGE_PIPELINE_PARALLEL=0 holds Chinese until the worker has finished.
   const parallelStages = options.parallelStages ?? process.env.KAGE_PIPELINE_PARALLEL !== '0';
   const translationBatchSize = Number(options.translationBatchSize ?? process.env.KAGE_TRANSLATION_BATCH_SIZE ?? DEFAULT_BATCH_SIZE);
   if (!Number.isInteger(translationBatchSize) || translationBatchSize < 1 || translationBatchSize > 12) throw new Error('Translation batch size must be between 1 and 12.');
@@ -198,6 +202,45 @@ export async function createSubtitleService(options = {}) {
   const jobDir = id => path.join(jobsDir, id);
   const mediaPath = id => path.join(jobDir(id), 'input.media');
   const resultPath = id => path.join(jobDir(id), 'result.json');
+  // The soundtrack stays with the subtitles (and expires with them) so
+  // condensed audio can be cut from it after the video itself is deleted.
+  const keptAudioPath = id => path.join(jobDir(id), 'kept-audio.mp3');
+  const condensedPath = id => path.join(jobDir(id), 'condensed.mp3');
+  const exports = new Map(); // job id -> the condensed audio being made or ready
+  let ffmpegCommand = options.ffmpeg || (process.env.KAGE_FFMPEG ? [process.env.KAGE_FFMPEG] : null);
+  async function findFfmpeg() {
+    if (ffmpegCommand) return ffmpegCommand;
+    const located = await new Promise((resolve, reject) => {
+      let output = '';
+      const child = spawn(python, ['-c', 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())'], { stdio: ['ignore', 'pipe', 'ignore'] });
+      child.stdout.on('data', bytes => { output += bytes.toString('utf8'); });
+      child.once('error', reject);
+      child.once('close', code => code === 0 && output.trim() ? resolve(output.trim()) : reject(new Error('FFmpeg is missing. Run npm run subtitles:setup.')));
+    });
+    ffmpegCommand = [located];
+    return ffmpegCommand;
+  }
+  // Audio that stops partway cannot be matched to a complete set of lines.
+  async function dropPartialAudio(job) {
+    if (job.transcriptionComplete === true && !job.notJapanese && Array.isArray(job.cues)) return;
+    exports.get(job.id)?.controller.abort();
+    exports.delete(job.id);
+    await Promise.all([keptAudioPath(job.id), condensedPath(job.id)].map(name => fs.rm(name, { force: true })));
+  }
+  const exportSnapshot = entry => entry ? { state: entry.state, progress: entry.progress, padding: entry.padding, skipSongs: entry.skipSongs,
+    ...(entry.state === 'ready' ? { filename: entry.filename, bytes: entry.bytes, seconds: entry.seconds, clips: entry.clips } : {}),
+    ...(entry.message ? { message: entry.message } : {}) } : null;
+  // The newest preparation of a video page, and whether its soundtrack was kept.
+  async function audioFor(pageUrl) {
+    const matches = [...jobs.values()].filter(job => (job.pageUrl || job.sourceUrl) === pageUrl && !expired(job));
+    matches.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const job = matches[0];
+    const lines = Array.isArray(job?.cues) ? job.cues.length : 0;
+    if (!job || !lines) return { job, available: false, reason: 'unprepared' };
+    if (job.transcriptionComplete !== true) return { job, available: false, reason: TERMINAL.has(job.state) ? 'incomplete' : 'preparing' };
+    const kept = await fs.stat(keptAudioPath(job.id)).then(stat => stat.size > 0, () => false);
+    return { job, available: kept, ...(kept ? {} : { reason: 'no_audio' }) };
+  }
   const queuePosition = job => job.state === 'queued'
     ? queue.filter(id => jobs.get(id)?.state === 'queued').indexOf(job.id) + 1 : 0;
   const deadline = job => Number(job.expiresAt) || (Date.parse(job.updatedAt) || now()) + RETENTION_MS;
@@ -226,6 +269,8 @@ export async function createSubtitleService(options = {}) {
   async function removeExpired(job) {
     if (!expired(job) || running.has(job.id) || uploadLocks.has(job.id) || saves.has(job.id)) return;
     jobs.delete(job.id);
+    exports.get(job.id)?.controller.abort();
+    exports.delete(job.id);
     try { await fs.rm(jobDir(job.id), { recursive: true, force: true }); }
     catch (error) { jobs.set(job.id, job); throw error; }
   }
@@ -259,6 +304,7 @@ export async function createSubtitleService(options = {}) {
     // Wait for the writer to exit before removing partial downloads and decoder output.
     if (operation) await operation.done;
     await cleanAudio(job.id);
+    await dropPartialAudio(job);
   }
   function stopChild(child) {
     if (!child || child.exitCode !== null || child.signalCode !== null) return;
@@ -290,6 +336,8 @@ export async function createSubtitleService(options = {}) {
         await save(job);
       }
       await cleanAudio(job.id);
+      await dropPartialAudio(job);
+      await fs.rm(condensedPath(job.id), { force: true }); // Made again on request.
       jobs.set(job.id, job);
     } catch {
       // A process may have exited between directory creation and the first status write.
@@ -355,11 +403,11 @@ export async function createSubtitleService(options = {}) {
     return new Promise((resolve, reject) => {
       const follow = job.streaming && !remote ? job.size : null;
       const spec = { ...(remote ? { url: job.sourceUrl } : { input: mediaPath(job.id) }), output: resultPath(job.id), ...(follow ? { followBytes: follow } : {}),
-        ...(job.auto ? { checkLanguage: true } : {}) };
+        ...(job.auto ? { checkLanguage: true } : {}), keepAudio: keptAudioPath(job.id) };
       let child = takeStandby();
       if (child) child.stdin.end(JSON.stringify(spec) + '\n');
       else child = spawn(python, [worker, ...(remote ? ['--url', job.sourceUrl] : ['--input', mediaPath(job.id)]),
-        ...(follow ? ['--follow-bytes', String(follow)] : []), ...(job.auto ? ['--check-language'] : []), '--output', resultPath(job.id), '--model', modelDir],
+        ...(follow ? ['--follow-bytes', String(follow)] : []), ...(job.auto ? ['--check-language'] : []), '--keep-audio', keptAudioPath(job.id), '--output', resultPath(job.id), '--model', modelDir],
         { env: workerEnv(), detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
       // Keep a warm worker for the next video whenever another one can run.
       if (running.size < VIDEO_CONCURRENCY) warmStandby();
@@ -430,6 +478,33 @@ export async function createSubtitleService(options = {}) {
                 }
                 await save(job);
                 if (job.languageConfirmed) onChunk();
+              } else if (event.type === 'transcribed') {
+                // The whole video has its Japanese lines; the worker now checks furigana against the audio.
+                job.message = 'All Japanese lines are ready. Checking furigana against the audio…';
+                await save(job);
+              } else if (event.type === 'readings') {
+                // Furigana the audio supports where the dictionary's guess differs.
+                const heard = (Array.isArray(event.readings) ? event.readings : []).slice(0, 200)
+                  .filter(item => item && Number.isFinite(item.from) && Number.isFinite(item.to) && item.to > item.from
+                    && typeof item.surface === 'string' && item.surface && item.surface.length <= 8
+                    && typeof item.reading === 'string' && /^[\u3041-\u309f]{1,16}$/.test(item.reading)
+                    && typeof item.before === 'string' && item.before.length <= 4 && typeof item.after === 'string' && item.after.length <= 4)
+                  .map(({ from, to, surface, reading, before, after }) => ({ from, to, surface, reading, before, after }));
+                if (heard.length) {
+                  job.readings = [...(job.readings || []), ...heard].slice(0, 5000);
+                  await save(job);
+                }
+              } else if (event.type === 'kana') {
+                // Each line as heard, in kana; the extension checks its furigana against this.
+                const lines = (Array.isArray(event.lines) ? event.lines : []).slice(0, 400)
+                  .filter(item => item && Number.isFinite(item.from) && Number.isFinite(item.to) && item.to > item.from
+                    && typeof item.text === 'string' && item.text && item.text.length <= 4000
+                    && typeof item.kana === 'string' && /^[\u3041-\u309fー]{1,2000}$/.test(item.kana))
+                  .map(({ from, to, text, kana }) => ({ from, to, text, kana }));
+                if (lines.length) {
+                  job.kana = [...(job.kana || []), ...lines].slice(0, 20000);
+                  await save(job);
+                }
               } else if (event.type === 'timings') {
                 await save(job);
               } else if (event.type === 'progress' && job.state !== 'preparing') {
@@ -568,11 +643,11 @@ export async function createSubtitleService(options = {}) {
       },
     };
     let outcome;
-    let translationTask = null, translationFailure = null;
+    let translationTask = null, translationFailure = null, transcribing = false;
     const failedIds = new Set();
     const pendingChinese = () => job.translation && job.cues?.some(cue => !cue.translation?.trim() && !failedIds.has(cue.id));
     function startTranslation() {
-      if (!parallelStages || translationTask || translationFailure || !pendingChinese() || operation.controller.signal.aborted) return;
+      if ((!parallelStages && transcribing) || translationTask || translationFailure || !pendingChinese() || operation.controller.signal.aborted) return;
       // Nothing is translated until a video Kage started on its own is known to be Japanese.
       if (job.auto && !job.languageConfirmed) return;
       // Whisper can run for both videos; Ollama batches share a single slot.
@@ -619,8 +694,10 @@ export async function createSubtitleService(options = {}) {
       operation.startTranslation = startTranslation;
       if (!Array.isArray(job.cues)) {
         operation.workerStarted = performance.now();
+        transcribing = true;
         try { Object.assign(job, await transcribe(job, operation, startTranslation)); }
         finally {
+          transcribing = false;
           addTime(job, 'workerWallMs', performance.now() - operation.workerStarted);
           delete operation.workerStarted;
         }
@@ -640,6 +717,9 @@ export async function createSubtitleService(options = {}) {
       });
       operation.controller.signal.throwIfAborted();
       if (job.translation) { job.state = 'translating'; updateTranslationProgress(job); await save(job); }
+      // Chinese comes last: every line and its furigana check are done by now. One
+      // malformed line must not stop the rest, so the gaps are left for the final pass.
+      if (!parallelStages) startTranslation();
       // A final chunk can arrive as the previous translation drain finishes.
       if (translationTask) await translationTask;
       if (translationFailure) throw translationFailure;
@@ -669,7 +749,7 @@ export async function createSubtitleService(options = {}) {
       }
       if (job.notJapanese && job.state !== 'cancelled' && !closing) {
         // Lines forced into Japanese from another language are not worth keeping.
-        delete job.cues;
+        delete job.cues; delete job.readings; delete job.kana;
         delete job.translationTotal; delete job.translationCompleted;
         outcome = { state: 'cancelled', progress: 0,
           message: 'This video does not appear to be Japanese, so Kage stopped preparing it. Choose Download audio & prepare subtitles to prepare it anyway.' };
@@ -682,6 +762,7 @@ export async function createSubtitleService(options = {}) {
         await cleanAudio(job.id);
         // Do not advertise completion/failure or release the media budget before cleanup.
         if (outcome && job.state !== 'cancelled' && !closing) Object.assign(job, outcome);
+        await dropPartialAudio(job);
         addTime(job, 'processingMs', performance.now() - operation.started);
         operation.started = performance.now(); // Snapshot only the final write's remaining time.
         await save(job);
@@ -721,7 +802,7 @@ export async function createSubtitleService(options = {}) {
         // The extension checks health when a video page opens: load Whisper now
         // so it is warm before the first audio bytes arrive.
         if (running.size < VIDEO_CONCURRENCY) warmStandby();
-        return reply(200, { ok: true, ready, model: MODEL, token, capabilities: { groqRelay: true, streamingUploads: true, translation: true, translationPriority: true, bilibiliDownload: true, youtubeDownload: true, anime1Pages: true, progressiveSubtitles: true, languageCheck: true, audioOnly: true, jobQueue: true, recovery: true }, processing: { sectionSeconds: 60, parallelStages, concurrency: VIDEO_CONCURRENCY, translationConcurrency: 1, translationBatchSize }, status: ready ? 'ready' : 'setup_required',
+        return reply(200, { ok: true, ready, model: MODEL, token, capabilities: { groqRelay: true, streamingUploads: true, translation: true, translationPriority: true, bilibiliDownload: true, youtubeDownload: true, anime1Pages: true, progressiveSubtitles: true, languageCheck: true, heardReadings: true, audioOnly: true, condensedAudio: true, jobQueue: true, recovery: true }, processing: { sectionSeconds: 60, parallelStages, concurrency: VIDEO_CONCURRENCY, translationConcurrency: 1, translationBatchSize }, status: ready ? 'ready' : 'setup_required',
           ...(!ready ? { error: readinessError } : {}) });
       }
       if (!safeEqual(req.headers['x-kage-token'], token)) fail(401, 'Local service token is missing or expired. Reconnect and retry.');
@@ -736,6 +817,47 @@ export async function createSubtitleService(options = {}) {
         matches.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
         const job = matches[0];
         return reply(200, { job: job ? { ...job, timings: timingSnapshot(job), queuePosition: queuePosition(job), ...prioritySnapshot(job) } : null });
+      }
+      if (url.pathname === '/audio' || url.pathname === '/audio/condensed' || url.pathname === '/audio/file') {
+        let pageUrl;
+        try { pageUrl = videoURL(url.searchParams.get('url')); } catch (error) { fail(400, error.message); }
+        const { job, available, reason } = await audioFor(pageUrl);
+        const status = () => ({ available, ...(reason ? { reason } : {}), ...(job ? { name: job.name, lines: job.cues?.length || 0, duration: job.duration || 0 } : {}),
+          defaults: { padding: DEFAULT_PADDING, maxPadding: MAX_PADDING }, export: exportSnapshot(exports.get(job?.id)) });
+        if (url.pathname === '/audio' && req.method === 'GET') return reply(200, status());
+        if (url.pathname === '/audio/condensed' && req.method === 'POST') {
+          const spec = await jsonBody(req);
+          if (!spec || typeof spec !== 'object' || Array.isArray(spec)) fail(400, 'Invalid condensed audio settings.');
+          const padding = spec.padding === undefined ? DEFAULT_PADDING : spec.padding;
+          if (!Number.isFinite(padding) || padding < 0 || padding > MAX_PADDING) fail(400, `Use a padding between 0 and ${MAX_PADDING} seconds.`);
+          if (spec.title !== undefined && (typeof spec.title !== 'string' || spec.title.length > 512)) fail(400, 'Invalid audio title.');
+          if (!available) fail(409, reason === 'preparing' ? 'Wait until every Japanese line of this video is ready.'
+            : reason === 'no_audio' ? 'This video was prepared before audio was kept. Prepare it again to create condensed audio.'
+            : 'Prepare subtitles for this whole video first.');
+          if (exports.get(job.id)?.state === 'working') return reply(202, status());
+          const skipSongs = spec.skipSongs === true;
+          const intervals = dialogueIntervals(job.cues, job.duration, { padding, skipSongs });
+          if (!intervals.length) fail(409, skipSongs ? 'No spoken lines remain after leaving out the first and last 90 seconds.' : 'No spoken lines were found to keep.');
+          const entry = { state: 'working', progress: 0, padding, skipSongs, controller: new AbortController(),
+            filename: audioFilename(spec.title || job.name) };
+          exports.set(job.id, entry);
+          void findFfmpeg().then(ffmpeg => condense({ ffmpeg, source: keptAudioPath(job.id), target: condensedPath(job.id), intervals,
+            title: entry.filename.replace(/\.mp3$/, ''),
+            signal: entry.controller.signal, onProgress: value => { entry.progress = value; } }))
+            .then(result => Object.assign(entry, { state: 'ready', progress: 1 }, result),
+              error => Object.assign(entry, { state: 'error', message: String(error.message || error).slice(-300) }));
+          return reply(202, status());
+        }
+        if (url.pathname === '/audio/file' && req.method === 'GET') {
+          const entry = exports.get(job?.id);
+          if (entry?.state !== 'ready') fail(404, 'Create the condensed audio first.');
+          const stat = await fs.stat(condensedPath(job.id)).catch(() => fail(404, 'Create the condensed audio again.'));
+          res.writeHead(200, { 'Content-Type': 'audio/mpeg', 'Content-Length': stat.size,
+            'Content-Disposition': `attachment; filename="condensed.mp3"; filename*=UTF-8''${headerFilename(entry.filename)}` });
+          createReadStream(condensedPath(job.id)).on('error', () => res.destroy()).pipe(res);
+          return;
+        }
+        fail(405, 'Method not allowed.');
       }
       if (url.pathname === '/jobs' && req.method === 'GET') {
         const active = [...jobs.values()].filter(job => !TERMINAL.has(job.state));
@@ -922,6 +1044,7 @@ export async function createSubtitleService(options = {}) {
       clearInterval(sweep);
       clearTimeout(standbyTimer);
       if (standby) { stopChild(standby); standby = null; }
+      for (const entry of exports.values()) entry.controller.abort();
       const operations = [...running.values()];
       for (const operation of operations) { operation.controller.abort(); stopChild(operation.child); }
       for (const job of jobs.values()) if (!TERMINAL.has(job.state)) {

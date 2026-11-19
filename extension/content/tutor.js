@@ -162,6 +162,7 @@
     }
     for (const view of root.querySelectorAll('[role="tabpanel"]')) view.hidden = view.dataset.view !== name;
     if (panelOpen && name === 'tutor') { if (!pinned) capture(); explainCurrent(); }
+    if (panelOpen && name === 'audio') globalThis.KageAudio?.refresh();
   }
   function renderPinnedJapanese() {
     const text = pinned?.text || 'Play a Japanese subtitle to begin.';
@@ -343,6 +344,8 @@
           <nav class="kage-tabs" role="tablist" aria-label="Study tools">
             <button id="kageTutorTab" type="button" role="tab" aria-selected="true" aria-controls="kageTutorView" data-tab="tutor">${icon('<path d="M8 10h8M8 14h5M5 3h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9l-6 3V5a2 2 0 0 1 2-2Z"/>')}Tutor</button>
             <button id="kageSubtitleTab" type="button" role="tab" aria-selected="false" aria-controls="kageSubtitleView" tabindex="-1" data-tab="subtitles">${icon('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 10h4m3 0h3M7 14h2m3 0h5"/>')}Subtitles</button>
+            <button id="kageReviewTab" type="button" role="tab" aria-selected="false" aria-controls="kageReviewView" tabindex="-1" data-tab="review">${icon('<path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1Z"/>')}Review</button>
+            <button id="kageAudioTab" type="button" role="tab" aria-selected="false" aria-controls="kageAudioView" tabindex="-1" data-tab="audio">${icon('<path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v6H5a1 1 0 0 1-1-1zm16 0h-3v6h2a1 1 0 0 0 1-1z"/>')}Audio</button>
           </nav>
           <section id="kageTutorView" class="kage-tutor-view" role="tabpanel" aria-labelledby="kageTutorTab" data-view="tutor">
             <section class="kage-context-card" aria-label="Selected sentence"><div class="kage-card-top"><span class="kage-eyebrow">Selected sentence</span><button type="button" class="kage-text-button" id="kageUseCurrent">${icon('<path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/>')}Use current line</button></div><p class="kage-context-jp" id="kageChatContext" lang="ja"></p><p class="kage-context-zh" lang="zh-Hant"></p><div class="kage-context-meta"><span class="kage-context-source"></span><span class="kage-context-pinned">Pinned for study</span></div></section>
@@ -357,6 +360,13 @@
             <section class="kage-reading-card"><span class="kage-eyebrow">Readings</span><h3>Offline furigana</h3><p>Japanese readings come from a bundled dictionary on your device. They stay visible when translations change. Readings are inferred from the Japanese text, not the audio; names and ambiguous kanji can be incorrect.</p><span id="kageDictionaryStatus" role="status">Loading local dictionary…</span></section>
             <div class="kage-prepare-slot"></div>
           </section>
+          <section id="kageReviewView" role="tabpanel" aria-labelledby="kageReviewTab" data-view="review" hidden>
+            <div class="kage-review-slot"></div>
+          </section>
+          <section id="kageAudioView" role="tabpanel" aria-labelledby="kageAudioTab" data-view="audio" hidden>
+            <div class="kage-view-heading"><h3>Audio</h3><p>Take this video’s dialogue with you.</p></div>
+            <div class="kage-audio-slot"></div>
+          </section>
           <footer class="kage-panel-footer"><span id="kageModelStatus">Groq · GPT OSS 120B</span><button type="button" class="kage-text-button" id="kageSettings">Settings ${icon('<path d="m9 5 7 7-7 7"/>')}</button></footer>
         </aside>`;
       document.body.appendChild(root);
@@ -366,6 +376,9 @@
       contextJP = root.querySelector('.kage-context-jp'); contextZH = root.querySelector('.kage-context-zh'); contextSource = root.querySelector('.kage-context-source');
       capture(); this.sourceStatus(sourceMessage); renderSubtitleError();
       globalThis.KageImport?.mount(root.querySelector('.kage-import-slot'));
+      globalThis.KageWords?.mount(root.querySelector('.kage-review-slot'));
+      globalThis.KageSaved?.mount(root.querySelector('.kage-review-slot'));
+      globalThis.KageAudio?.mount(root.querySelector('.kage-audio-slot'));
       enableLauncherDrag();
       root.querySelector('.kage-chat-close').addEventListener('click', () => show(false));
       root.querySelector('#kageUseCurrent').addEventListener('click', () => {
@@ -376,7 +389,9 @@
         tab.addEventListener('click', () => selectTab(tab.dataset.tab));
         tab.addEventListener('keydown', event => {
           if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-          const name = tab.dataset.tab === 'tutor' ? 'subtitles' : 'tutor'; selectTab(name); root.querySelector(`[data-tab="${name}"]`).focus();
+          const names = ['tutor', 'subtitles', 'review', 'audio'];
+          const name = names[(names.indexOf(tab.dataset.tab) + (event.key === 'ArrowRight' ? 1 : names.length - 1)) % names.length];
+          selectTab(name); root.querySelector(`[data-tab="${name}"]`).focus();
         });
       });
       root.querySelectorAll('[data-prompt]').forEach(button => {
@@ -417,6 +432,12 @@
     clearCurrent() { live = null; },
     openSubtitles() {
       show(true); selectTab('subtitles');
+    },
+    openReview() {
+      show(true); selectTab('review');
+    },
+    openAudio() {
+      show(true); selectTab('audio');
     },
     downloadState(available, busy) {
       if (!downloadLauncher) return;

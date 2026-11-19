@@ -95,6 +95,27 @@
         if (!status.capabilities?.recovery) return { job: null };
         return authenticated(`/recover?url=${encodeURIComponent(pageURL())}`, 'GET');
       }
+      if (['audio', 'condense', 'saveAudio'].includes(action)) {
+        const status = await health();
+        if (!status.capabilities?.condensedAudio) throw new Error('The running helper needs this update to create audio files. Restart it with npm run subtitles:autostart (or npm run subtitles:start) once processing is idle.');
+        const query = `?url=${encodeURIComponent(pageURL())}`;
+        if (action === 'audio') return authenticated('/audio' + query, 'GET');
+        if (action === 'condense') {
+          if (!Number.isFinite(message.padding) || message.padding < 0 || message.padding > 10) throw new Error('Use a padding between 0 and 10 seconds.');
+          return authenticated('/audio/condensed' + query, 'POST', { padding: message.padding, skipSongs: message.skipSongs === true,
+            ...(typeof message.title === 'string' && message.title.trim() ? { title: message.title.trim().slice(0, 200) } : {}) });
+        }
+        // Chrome saves the file itself, so it lands in the Downloads folder like any other download.
+        if (!chrome.downloads?.download) throw new Error('Reload Kage in chrome://extensions to allow it to save audio files.');
+        // Name the file here: Chrome can drop part of a name it reads from the response.
+        const made = (await authenticated('/audio' + query, 'GET')).export;
+        if (made?.state !== 'ready') throw new Error('Create the condensed audio first.');
+        const download = { url: BASE + '/audio/file' + query, headers: [{ name: 'X-Kage-Token', value: token }], saveAs: false };
+        let id;
+        try { id = await chrome.downloads.download({ ...download, filename: made.filename }); }
+        catch { id = await chrome.downloads.download(download); } // A name Chrome refuses still downloads under the helper's name.
+        return { downloadId: id, filename: made.filename };
+      }
       if (action === 'download') {
         // Bind the download to the sending tab, never an arbitrary URL in a message.
         const sourceUrl = pageURL();

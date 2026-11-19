@@ -1,0 +1,180 @@
+:root {
+  --bg: #0f1319; --panel: #171c24; --raised: #1f2630; --border: #2b3340;
+  --text: #f2f4f7; --muted: #9aa4b2; --accent: #0a84ff; --reading: #e5d6b4; --error: #ff8a80;
+  --ratio: 1.7778; /* Picture width / height; set from the video once it loads. */
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--text); display: flex; flex-direction: column;
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', 'PingFang TC', 'Segoe UI', sans-serif;
+  -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent;
+}
+h1 { font-size: 22px; margin: 0 0 12px; font-weight: 650; }
+h2 { font-size: 16px; margin: 28px 0 8px; font-weight: 600; }
+.muted { color: var(--muted); margin: 0 0 12px; }
+.error { color: var(--error); margin: 8px 0 0; min-height: 1.5em; }
+svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+.bar {
+  display: flex; align-items: center; gap: 16px; flex: none;
+  padding: calc(8px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 8px calc(16px + env(safe-area-inset-left));
+  border-bottom: 1px solid var(--border);
+}
+.brand { color: var(--text); text-decoration: none; font-weight: 700; letter-spacing: .02em; }
+.back { display: inline-flex; align-items: center; gap: 2px; color: var(--accent); text-decoration: none; min-height: 32px; }
+
+.page { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 24px calc(16px + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
+.narrow > * { max-width: 640px; margin-left: auto; margin-right: auto; }
+
+form { display: flex; gap: 8px; }
+input:not([type="range"]) {
+  flex: 1; min-width: 0; height: 48px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--panel); color: var(--text); font: inherit; -webkit-appearance: none; appearance: none;
+}
+input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#code { font-size: 24px; letter-spacing: .3em; text-align: center; font-variant-numeric: tabular-nums; }
+button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 14px;
+  border-radius: 10px; border: 1px solid var(--border); background: var(--raised); color: var(--text); font: inherit; cursor: pointer;
+  touch-action: manipulation;
+}
+button:active { background: var(--border); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; padding: 0 20px; }
+.toggle[aria-pressed="true"] { border-color: var(--accent); color: #7db9ff; }
+.toggle[aria-pressed="false"] { color: var(--muted); }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 28px; }
+.card h2 { margin-top: 0; }
+.card ol { margin: 0 0 8px; padding-left: 20px; }
+.card li { margin: 6px 0; }
+.addresses { list-style: none; padding: 0; margin: 6px 0; }
+.addresses li { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; }
+.addresses span { font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: var(--muted); font-size: 13px; margin-left: 8px; }
+.code { font-size: 22px; letter-spacing: .15em; font-variant-numeric: tabular-nums; }
+
+.list { list-style: none; margin-top: 0; margin-bottom: 0; padding: 0; }
+.list li + li { border-top: 1px solid var(--border); }
+.list a { display: block; padding: 12px 4px; min-height: 48px; color: var(--text); text-decoration: none; }
+.list a small { display: block; color: var(--muted); font-size: 13px; }
+.list [aria-current="true"] { color: #7db9ff; }
+
+/* ── Watching ── */
+.watch { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.stage { position: relative; flex: none; background: #000; display: flex; flex-direction: column; }
+.frame { position: relative; display: flex; justify-content: center; background: #000; }
+video { display: block; width: 100%; max-height: 46vh; aspect-ratio: 16 / 9; background: #000; }
+
+/* Kage's own player controls: the browser's full-screen button would hide the subtitles. */
+.hud {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 28px calc(10px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));
+  background: linear-gradient(to top, rgba(0, 0, 0, .78), rgba(0, 0, 0, 0)); transition: opacity .2s;
+}
+.hud { z-index: 3; }
+.stage.idle .hud { opacity: 0; pointer-events: none; }
+.hud .hud-toggle[aria-pressed="true"] { color: #7db9ff; }
+
+/* Hides subtitles that are part of the picture. Drag it to move; tap it to show grips for its top and bottom edges. */
+.cover { position: absolute; z-index: 1; touch-action: none; cursor: grab; }
+.cover-glass {
+  position: absolute; inset: 0; background: rgba(12, 12, 12, .55); -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+/* Grips on the top and bottom edges: drag one to make the cover taller or shorter. */
+.cover-grip { position: absolute; left: 50%; width: 120px; height: 44px; margin-left: -60px; cursor: ns-resize; touch-action: none; z-index: 1; }
+.cover-grip.top { top: -22px; }
+.cover-grip.bottom { bottom: -22px; }
+.cover-grip::after {
+  content: ''; position: absolute; left: 50%; top: 19px; width: 64px; height: 6px; margin-left: -32px; border-radius: 3px;
+  background: #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .45), 0 1px 4px rgba(0, 0, 0, .5); transition: opacity .2s;
+}
+/* Tapping the cover selects it: it rises above the controls and shows its grips. */
+.cover:not(.editing) .cover-grip, .cover:not(.editing) .cover-done { display: none; }
+.cover.editing { z-index: 5; outline: 2px solid var(--accent); outline-offset: -1px; }
+.cover-done {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none;
+  padding: 3px 12px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.dragging, .dragging * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+.hud-row { display: flex; align-items: center; gap: 2px; }
+.hud button { background: none; border: 0; min-width: 44px; padding: 0 8px; color: #fff; }
+.hud button:active { background: rgba(255, 255, 255, .15); }
+.time { font-size: 13px; font-variant-numeric: tabular-nums; color: #e6e9ee; margin-left: 6px; white-space: nowrap; }
+.grow { flex: 1; }
+#seek { display: block; width: 100%; height: 24px; margin: 0; accent-color: var(--accent); cursor: pointer; touch-action: none; }
+.when-playing, .playing .when-paused, .when-full, .full .when-small { display: none; }
+.playing .when-playing, .full .when-full { display: block; }
+
+.line { background: #0b0e13; padding: 10px 14px 12px; text-align: center; min-height: 104px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.japanese { font-size: clamp(20px, 5.4vw, 30px); line-height: 2; font-weight: 500; }
+/* Furigana: the reading sits centred above its kanji; a long reading widens the gap around the word, never inside it. */
+.rb { position: relative; display: inline-block; line-height: 1.15; margin: 0 var(--room, 0); text-indent: 0; }
+.rt {
+  position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); white-space: nowrap;
+  font-size: .5em; line-height: 1.2; color: var(--reading); font-weight: 400; user-select: none; -webkit-user-select: none; pointer-events: none;
+}
+.no-furigana .rt { display: none; }
+.no-furigana .rb { margin: 0; }
+.no-furigana .japanese, .no-furigana .lines .ja { line-height: 1.6; }
+.chinese { font-size: clamp(15px, 4vw, 20px); color: #cfd6df; }
+.no-translation .chinese, .no-translation .lines .zh { display: none; }
+
+.side { flex: 1; min-height: 0; display: flex; flex-direction: column;
+  padding: 10px calc(14px + env(safe-area-inset-right)) 0 calc(14px + env(safe-area-inset-left)); }
+.title { font-size: 16px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status { color: var(--muted); font-size: 13px; margin: 2px 0 8px; min-height: 1.5em; }
+.status.bad { color: var(--error); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.tabs { display: flex; gap: 20px; margin-top: 12px; border-bottom: 1px solid var(--border); }
+.tabs button { background: none; border: 0; border-radius: 0; padding: 0 2px; color: var(--muted); border-bottom: 2px solid transparent; }
+.tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+.lines, #episodes { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; margin: 0; padding: 0 0 calc(16px + env(safe-area-inset-bottom)); list-style: none; }
+.lines li { padding: 10px 8px; border-radius: 8px; cursor: pointer; border-left: 3px solid transparent; }
+.lines li.current { background: var(--panel); border-left-color: var(--accent); }
+.lines .ja { font-size: 18px; line-height: 1.9; }
+.lines .ja .rt { font-size: .55em; }
+.lines .zh { font-size: 14px; color: var(--muted); }
+.lines .empty { color: var(--muted); cursor: default; padding: 20px 8px; }
+
+/* iPad and wide screens: video on the left, lines on the right. */
+@media (min-width: 900px) and (min-height: 520px) {
+  .watch { flex-direction: row; }
+  .stage { flex: 1.7; min-width: 0; justify-content: center; }
+  video { max-height: calc(100vh - 220px); }
+  .line { min-height: 150px; }
+  .japanese { font-size: clamp(26px, 2.6vw, 38px); }
+  .chinese { font-size: clamp(18px, 1.7vw, 24px); }
+  .side { flex: 1; min-width: 320px; max-width: 460px; border-left: 1px solid var(--border); padding-top: 14px; }
+}
+
+/* ── Full screen: the picture fills the screen and the line floats on it. ── */
+body.full .bar, body.full .side { display: none; }
+body.full .stage { position: fixed; inset: 0; z-index: 10; height: 100vh; height: 100dvh; }
+body.full .frame { flex: 1; min-height: 0; align-items: center; }
+body.full video { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; object-fit: contain; }
+body.full .line {
+  position: absolute; left: 50%; transform: translateX(-50%); z-index: 2; width: max-content; max-width: min(92%, 1100px); min-height: 0;
+  background: rgba(15, 19, 25, .55); border-radius: 10px; padding: 4px 16px 8px;
+  bottom: calc(96px + env(safe-area-inset-bottom)); transition: bottom .2s;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .8);
+}
+body.full .line { pointer-events: auto; touch-action: none; cursor: grab; }
+/* Dragged somewhere by hand: stay exactly there. */
+body.full .line.placed, body.full .stage.idle .line.placed { bottom: auto; transition: none; }
+body.full .stage.idle .line { bottom: max(7%, calc(20px + env(safe-area-inset-bottom))); }
+body.full .line.empty { display: none; }
+body.full .japanese { font-size: clamp(22px, 3.4vw, 40px); line-height: 1.9; }
+body.full .chinese { font-size: clamp(15px, 2.1vw, 24px); color: #eef1f5; }
+/* Held upright, the picture is a band across the middle: the line sits just under it. */
+@media (orientation: portrait) {
+  body.full .line, body.full .stage.idle .line {
+    bottom: auto; top: calc(50% + (100vw / var(--ratio)) / 2 + 12px); background: none; max-width: 96%;
+  }
+  body.full .japanese { font-size: clamp(22px, 5.6vw, 40px); }
+  body.full .chinese { font-size: clamp(16px, 4.2vw, 26px); }
+}
+:fullscreen { background: #000; }

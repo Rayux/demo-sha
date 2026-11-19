@@ -109,6 +109,88 @@
     if (!reply?.success) throw new Error(reply?.error || 'The local subtitle helper did not respond.');
     return reply.data;
   }
+  // Readings the helper heard in the audio, where they differ from the dictionary's guess.
+  function normalizeReadings(list) {
+    return (Array.isArray(list) ? list : []).slice(0, 5000).filter(item => item && Number.isFinite(item.from) && Number.isFinite(item.to)
+      && typeof item.surface === 'string' && item.surface && typeof item.reading === 'string' && /^[\u3041-\u309f]{1,16}$/.test(item.reading))
+      .map(item => ({ from: item.from, to: item.to, surface: item.surface, reading: item.reading,
+        before: typeof item.before === 'string' ? item.before : '', after: typeof item.after === 'string' ? item.after : '' }));
+  }
+  // Each prepared line written in kana as it was heard.
+  function normalizeKana(list) {
+    return (Array.isArray(list) ? list : []).slice(0, 20000).filter(item => item && Number.isFinite(item.from) && Number.isFinite(item.to)
+      && typeof item.text === 'string' && item.text && typeof item.kana === 'string' && /^[\u3041-\u309fー]+$/.test(item.kana))
+      .map(item => ({ from: item.from, to: item.to, text: item.text, kana: item.kana }));
+  }
+  function applyKana(list) {
+    if (!documentState || !Array.isArray(list)) return;
+    const next = normalizeKana(list);
+    if (next.length === (documentState.kana || []).length) return; // The helper only ever adds lines.
+    documentState.kana = next;
+    heardMemo = null;
+    window.dispatchEvent(new CustomEvent('kage-readings-change'));
+  }
+  // Heard readings for the kanji of the line on screen, as character ranges of its text.
+  let heardMemo = null;
+  function heardRuns(currentVideo) {
+    const track = getTrack(currentVideo);
+    const lines = documentState?.kana;
+    if (!track || !lines?.length || !globalThis.KageHeard) return [];
+    const time = Number(currentVideo?.currentTime);
+    const cues = track[1].filter(cue => cue.start <= time && time < cue.end);
+    if (!cues.length) return [];
+    const key = `${track[0]}:${cues.map(cue => cue.id).join(',')}`;
+    if (heardMemo?.key === key) return heardMemo.runs;
+    const offset = documentState.offset;
+    const runs = [];
+    let position = 0;
+    for (const cue of cues) {
+      const from = cue.start - offset, to = cue.end - offset;
+      // The helper may have split a long line; its kana belongs to the whole original line.
+      const line = lines.find(item => item.to > from - 0.3 && item.from < to + 0.3 && item.text.includes(cue.text));
+      if (line) {
+        const shift = line.text.indexOf(cue.text);
+        for (const run of globalThis.KageHeard.align(line.text, line.kana)) {
+          if (run.start >= shift && run.end <= shift + cue.text.length) runs.push({ start: run.start - shift + position, end: run.end - shift + position, reading: run.reading });
+        }
+      }
+      position += cue.text.length + 1; // Lines on screen together are joined with a space.
+    }
+    heardMemo = { key, runs };
+    return runs;
+  }
+  function applyReadings(list) {
+    if (!documentState || !Array.isArray(list)) return;
+    const next = normalizeReadings(list);
+    if (JSON.stringify(next) === JSON.stringify(documentState.readings || [])) return;
+    documentState.readings = next;
+    window.dispatchEvent(new CustomEvent('kage-readings-change'));
+  }
+  // The corrections that apply to the line on screen, as character ranges of its text.
+  function readingSpans(currentVideo) {
+    const track = getTrack(currentVideo);
+    const fixes = documentState?.readings;
+    if (!track || !fixes?.length) return [];
+    const time = Number(currentVideo?.currentTime);
+    const cues = track[1].filter(cue => cue.start <= time && time < cue.end);
+    if (!cues.length) return [];
+    const text = cues.map(cue => cue.text).join(' ');
+    const offset = documentState.offset;
+    const from = Math.min(...cues.map(cue => cue.start)) - offset, to = Math.max(...cues.map(cue => cue.end)) - offset;
+    const spans = [];
+    for (const fix of fixes) {
+      if (fix.to < from - 0.5 || fix.from > to + 0.5) continue;
+      // Prefer the word with its neighbours; a lone occurrence is also unmistakable.
+      let index = text.indexOf(fix.before + fix.surface + fix.after);
+      if (index >= 0) index += fix.before.length;
+      else {
+        index = text.indexOf(fix.surface);
+        if (index < 0 || text.indexOf(fix.surface, index + 1) >= 0) continue;
+      }
+      spans.push({ start: index, end: index + fix.surface.length, reading: fix.reading });
+    }
+    return spans;
+  }
   function normalizeCues(cues) {
     if (!Array.isArray(cues) || cues.length > 30000) throw new Error('The subtitle track is too large or invalid.');
     const result = cues.map((cue, index) => ({
@@ -139,6 +221,8 @@
       revision: Number(saved.revision) || 1, updatedAt: Number(saved.updatedAt) || Date.now(),
       expiresAt: expiresAt(saved),
       timings: normalizeTimings(saved.timings),
+      readings: normalizeReadings(saved.readings),
+      kana: normalizeKana(saved.kana),
       job: saved.job && typeof saved.job.id === 'string' ? { ...saved.job } : null
     };
   }
@@ -214,6 +298,7 @@
       }
       if (status.notJapanese) { await stopForLanguage(key, generation); return; }
       if (status.sourceUrl) documentState.sourceUrl = status.sourceUrl;
+      applyReadings(status.readings); applyKana(status.kana);
       if (status.timings) documentState.timings = normalizeTimings(status.timings);
       // Use the helper's deadline even when the tab was closed at completion.
       documentState.expiresAt = Number(status.expiresAt) || Date.now() + RETENTION_MS;
@@ -502,6 +587,7 @@
       ownedDocument = documentState;
       delete documentState.sourceUrl;
       documentState.job = { id: jobId, name, size: download ? 0 : file.size, received: 0, state: 'uploading', progress: 0 };
+      documentState.readings = []; documentState.kana = []; heardMemo = null;
       documentState.timings = null;
       documentState.expiresAt = Date.now() + RETENTION_MS;
       await saveCurrent();
@@ -523,6 +609,7 @@
             }
             if (status?.streaming === false) { clearInterval(live); live = null; return; }
             if (!transferring() || documentState?.job?.id !== jobId || !Array.isArray(status?.cues) || !status.cues.length) return;
+            applyReadings(status.readings); applyKana(status.kana);
             const cues = normalizeCues(status.cues);
             if (!cues.length || JSON.stringify(cues) === JSON.stringify(documentState.cues)) return;
             documentState.cues = cues; documentState.revision++;
@@ -975,7 +1062,7 @@
     observe(video); render();
   }
   globalThis.KageImport = {
-    mount, observe, current, chinese, track: getTrack,
+    mount, observe, current, chinese, track: getTrack, readings: readingSpans, heard: heardRuns,
     download: downloadCurrent,
     captionSource(kind) { if (isYouTube()) { youtubeCaptionKind = kind; render(); } },
     get hasTrack() { return !!documentState?.cues.length; },

@@ -232,6 +232,16 @@ notes, contextual chat, and attempt transcription, copy `.env.example` to `.env`
 set `GROQ_API_KEY`, and restart. Only the short clip or recording you analyze is
 sent to Groq; the API key is never sent to the browser.
 
+Scoring a take: the rhythm score is measured by comparing your word timings with
+the native clip's. The pronunciation score is measured from your recording only
+if you also set `AZURE_SPEECH_KEY` and `AZURE_SPEECH_REGION` (an Azure Speech
+resource); your recording is then sent to Azure as well. Without those it is an
+estimate from the transcript and the completeness score is not shown; each take
+says whether Azure scored it. Intonation is not scored, because nothing here
+listens to pitch.
+Settings shows how much Azure audio the site has used this month (counted by
+the site itself and stored in Firebase).
+
 Current boundaries:
 
 - The clip scan uses pauses as the primary boundary and falls back to short
